@@ -12,14 +12,37 @@ const files = new Map([
   ['/app.js', ['app.js', 'application/javascript; charset=utf-8']],
   ['/examples.json', ['examples.json', 'application/json; charset=utf-8']]
 ]);
-function createServer() {
+
+function normalizePrefix(value) {
+  if (!value) return '';
+  const raw = String(value).trim();
+  if (!raw) return '';
+  const prefixed = raw.startsWith('/') ? raw : `/${raw}`;
+  return prefixed.replace(/\/+$/, '');
+}
+
+function createServer({ prefix = normalizePrefix(process.env.APP_PREFIX) } = {}) {
   return http.createServer(async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'no-referrer');
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'");
     if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405, { Allow: 'GET, HEAD' }); res.end('Method not allowed'); return; }
-    const route = req.url.split('?')[0];
+    let route = req.url.split('?')[0];
+    if (prefix) {
+      if (route === prefix) {
+        const query = req.url.slice(route.length);
+        res.writeHead(308, { Location: `${prefix}/${query}` });
+        res.end();
+        return;
+      }
+      if (!route.startsWith(`${prefix}/`)) {
+        res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+        res.end('Not found');
+        return;
+      }
+      route = route.slice(prefix.length);
+    }
     const file = files.get(route);
     if (!file) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); res.end('Not found'); return; }
     try {
@@ -29,7 +52,7 @@ function createServer() {
     } catch { res.writeHead(500); res.end('Could not read application asset.'); }
   });
 }
-module.exports = { createServer };
+module.exports = { createServer, normalizePrefix };
 if (require.main === module) {
   const args = process.argv.slice(2);
   const hostIndex = args.indexOf('--host');
@@ -40,7 +63,8 @@ if (require.main === module) {
   server.on('error', error => { console.error(`Could not start Zoairk: ${error.message}`); process.exitCode = 1; });
   server.listen(port, host, () => {
     const actualPort = server.address().port;
-    console.log(`Zoairk review: http://localhost:${actualPort}`);
+    const prefix = normalizePrefix(process.env.APP_PREFIX);
+    console.log(`Zoairk review: http://localhost:${actualPort}${prefix}/`);
     if (host === '0.0.0.0') {
       for (const list of Object.values(os.networkInterfaces())) for (const net of list || []) if (net.family === 'IPv4' && !net.internal) console.log(`Same Wi-Fi / LAN: http://${net.address}:${actualPort}`);
       console.log('Only static app assets are served. Reviews stay in each browser.');

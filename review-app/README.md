@@ -14,6 +14,14 @@ npm start
 
 Open http://localhost:3000. No dependency install is required to run the app. To use a phone on the same Wi-Fi, run `npm run start:lan` and open the printed LAN URL on the phone. Allow private-network access if Windows Firewall asks. School/guest Wi-Fi may block connections between devices; use a shared hotspot or host these static files on an HTTPS site in that case. A phone cannot reach this PC through its own `localhost`.
 
+To serve the app under a path prefix rather than at the site root, set `APP_PREFIX`. A reverse proxy such as `cloudflared` forwards the full request path without stripping it, so the app has to serve its own prefix:
+
+```sh
+APP_PREFIX=/needle-training PORT=3000 npm start
+```
+
+That serves `/needle-training/` and redirects the bare `/needle-training` to the trailing slash, so the page's relative asset paths resolve. Leave `APP_PREFIX` unset to serve from the root, which is the default.
+
 ### Review and export
 
 1. Choose **Import examples**, drag a file onto the empty screen, or try **Load sample**.
