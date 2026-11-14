@@ -1,0 +1,23 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T15:18:35.100472+00:00",
+  "count": 50,
+  "variation_focus": "Mausoleum, flooded catacomb and necromancers ritual workshop.50 player-to-DM inputs15do15check20mixed. Include1\u20134 actions, nontrivial but clear Before/After reversals and pronoun antecedents. Use varied sentence syntax including I will, let me, using a tool as explicit committed cues. Feasibility questions remain questions. No assumed outcomes or speech.",
+  "status": "pending_review_at_generation",
+  "max_tokens": 55000,
+  "batch_path": "data/review/44-examples.json",
+  "sha256": "12d9d8f418fcf185db946dc6f15d1064bf2b1d23e5537902d6c5d7261c6e7a21",
+  "rules_sha256": "b21957a060b68db5ab47e133b807b46ed9e801b0cccdeac633ae330be29c1fe1",
+  "feedback_session_sha256": "8774dd198b610e4257f49e4f751d5156213efd23914aebdc300a83a10d6f7b16",
+  "feedback_reviewed_count": 1149,
+  "usage": {
+    "prompt_tokens": 43422,
+    "completion_tokens": 29642,
+    "total_tokens": 73064,
+    "prompt_tokens_details": {
+      "cached_tokens": 3456
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}

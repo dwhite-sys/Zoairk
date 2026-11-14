@@ -1,0 +1,23 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T15:18:43.586390+00:00",
+  "count": 50,
+  "variation_focus": "Mountain pass rescue, alpine rope traverse and ruined stone aqueduct.50 fantasy actions15do15check20mixed. Avoid noun-swap chores; choose varied verbs and combinations. Use clear physical preconditions, literal markers/cues, true self instruments and explicit tools. Some opening With/Using phrases and nested temporal clauses but no ambiguity or simultaneous actions.",
+  "status": "pending_review_at_generation",
+  "max_tokens": 55000,
+  "batch_path": "data/review/45-examples.json",
+  "sha256": "4251053972d85212dbc6d6a7377cb55b0748faa2a94455178459296da481470b",
+  "rules_sha256": "b21957a060b68db5ab47e133b807b46ed9e801b0cccdeac633ae330be29c1fe1",
+  "feedback_session_sha256": "8774dd198b610e4257f49e4f751d5156213efd23914aebdc300a83a10d6f7b16",
+  "feedback_reviewed_count": 1149,
+  "usage": {
+    "prompt_tokens": 43757,
+    "completion_tokens": 33130,
+    "total_tokens": 76887,
+    "prompt_tokens_details": {
+      "cached_tokens": 3456
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}
