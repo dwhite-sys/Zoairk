@@ -9,12 +9,12 @@
 - Quotation marks identify speech; players need not name a recipient. Exact recipient behavior needs team agreement.
 - Blank/whitespace-only input and gibberish do nothing: no turn, world-state, or NPC-memory changes; await valid input.
 - AI proposes actions and narration; the state machine validates actions and owns world truth. Persist NPC memory and object/NPC state.
-- Done: seed dataset (10 examples, 25 calls), tool schema, formatted example, README, and original example; structural checks passed.
-- Missing: engine, app, trained model, model evaluation, and unit/integration/end-to-end tests.
-- Run now: no application exists. README training commands require Python and Cactus; neither was found on PATH during inspection.
-- Test now: parse tools.json and both dataset/example JSON files; check required call arguments and example consistency. No test runner exists yet.
-- Next: agree demo scenario, model/provider and interface; build one complete flow, persist it, test it, then rehearse.
-- Once implemented, replace the run/test notes above with verified exact commands.
+- Immediate scope: responsive browser app to import examples.json, manually approve/deny, and export Needle/classifier datasets. Reasoning is first-class output, visible alongside calls and preserved in both exports.
+- Done: seed dataset (10 examples, 25 calls); static review app, local persistence, undo, duplicate checks, session transfer, and dataset downloads.
+- Missing: game engine, trained models, model evaluation, automatic generation/review, and background training. These are outside the current webapp request.
+- Run: npm start, then http://localhost:3000; npm run start:lan prints phone-accessible URLs for the same network. Node 18+; no runtime dependencies or Python needed for review.
+- Test: npm test; npm ci then npm run test:e2e (installed Edge). Tests cover logic, HTTP integration, desktop/mobile browser flows, errors, repeated imports, persistence, reasoning, and exports.
+- Next: use the review app to curate examples; separately agree model training and game-engine work. Browser state is per device; import/export sessions for transfer.
 - Event rules: Devpost https://ihack-2026.devpost.com; web access failed during setup, so additional restrictions remain unverified.
 
 ## Working rules
@@ -28,4 +28,4 @@
 - Report broken or skipped work before reporting what works.
 - After each step, explain in a few sentences what was built, why, and one concept the team can explain to a judge.
 - On "demo check", run the full demo like a judge, fix failures, and supply a five-line demo script.
-- Finish setup and present a short plan; wait for the team's "go" before implementation.
+- The team authorized the review webapp directly. Keep this scope; ask before adding automatic training or game features.
