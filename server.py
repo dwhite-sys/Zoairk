@@ -29,7 +29,7 @@ WEB_DIR = os.path.join(ROOT, "web")
 class StubGame:
     """Stand-in used until engine/game.py exists, or when ZOAIRK_STUB=1."""
 
-    def intro(self):
+    def intro(self, player="You"):
         return [
             {"type": "switch_scene", "scene": "stub", "description": "A placeholder room."},
             {"type": "message", "role": "system", "text": "Engine not loaded: running the stub game."},
@@ -63,8 +63,10 @@ QUEUE: asyncio.Queue | None = None
 
 async def broadcast(messages):
     for ws in list(PLAYERS):
+        # A scene change belongs only to the player who moved; everyone else keeps their own room.
+        mine = [m for m in messages if not (m.get("type") == "switch_scene" and m.get("player") not in (None, PLAYERS[ws]))]
         try:
-            await send_all(ws, messages)
+            await send_all(ws, mine)
         except websockets.ConnectionClosed:
             PLAYERS.pop(ws, None)
 
@@ -100,7 +102,7 @@ async def play(ws):
     loop = asyncio.get_running_loop()
     name = player_name(ws)
     PLAYERS[ws] = name
-    await send_all(ws, await loop.run_in_executor(None, GAME.intro))
+    await send_all(ws, await loop.run_in_executor(None, functools.partial(GAME.intro, name)))
     await broadcast([{"type": "message", "role": "system", "text": f"{name} joined."}])
     try:
         async for raw in ws:

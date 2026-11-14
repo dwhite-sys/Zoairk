@@ -21,6 +21,12 @@ def _msg(role: str, text: str, **extra) -> dict:
 class Game:
     def __init__(self, world_path: str = "worlds/demo.json"):
         self.world = World(world_path)
+        self.start = self.world.current.name
+        self.locations: dict[str, str] = {}      # player -> scene name (each player moves on their own)
+
+    def _enter(self, player: str) -> None:
+        """Point the shared world at this player's own scene before handling their input."""
+        self.world.current = self.world.scenes[self.locations.setdefault(player, self.start)]
 
     def describe(self) -> str:
         """Scene text plus every object whose state changed, so persistence is visible."""
@@ -36,7 +42,8 @@ class Game:
         s = self.world.current
         return {"type": "switch_scene", "scene": s.name, "description": self.describe()}
 
-    def intro(self) -> list[dict]:
+    def intro(self, player: str = "The player") -> list[dict]:
+        self._enter(player)
         return [self._scene(), _msg("narrator", self.describe())]
 
     def handle(self, text: str, player: str = "The player") -> list[dict]:
@@ -45,6 +52,7 @@ class Game:
         text = (text or "").strip()
         if not text:
             return []                                   # blank input: no turn, nothing changes
+        self._enter(player)
         w = self.world
         if LOOK.match(text):
             return [_msg("narrator", self.describe())]
@@ -53,6 +61,7 @@ class Game:
             direction = SHORT.get(m.group(1).lower(), m.group(1).lower())
             if not w.move(direction):
                 return [_msg("system", "You can't go that way.")]
+            self.locations[player] = w.current.name
             w.turn += 1
             w.save()
             return [self._scene(), _msg("narrator", self.describe())]
@@ -64,7 +73,8 @@ class Game:
             for n in npcs:
                 n.remember(w.turn, "speech", event_text)
             spoken = " ".join(re.findall(r"[\"“]([^\"”]+)[\"”]", text)) or text
-            out = [_msg("narrator", f'You say, "{spoken.strip().rstrip(",")}"')]
+            said = spoken.strip().rstrip(",")
+            out = [_msg("narrator", f'You say, "{said}"' if player == "The player" else f'{player} says, "{said}"')]
         else:
             actions = parser.parse(text, w)
             if not actions:                              # gibberish / nothing resolvable: no turn
