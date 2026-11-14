@@ -1,0 +1,23 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:41:53.229666+00:00",
+  "count": 50,
+  "variation_focus": "Final 50 of this 200-candidate adaptive run. Around 15 do-only, 15 check-only, 20 mixed. Adventuring scenes in flooded crypt, bandit hideout, ravine crossing, abandoned signal tower, collapsed mine, treasure chamber and camp. Use distinctive action combinations and varied natural sentence syntax, with simple through 4-action complexity. For mixed queries distribute among short do-then-question, question-first with explicit before-check preparations, two hypothetical actions after a commitment, and independent committed follow-ups. Precise references, full annotation contract, no prior-query duplicates, no dependence on hypothetical access.",
+  "status": "pending_review_at_generation",
+  "max_tokens": 55000,
+  "batch_path": "data/review/33-examples.json",
+  "sha256": "f86060cdfcded71a8b7f96df5a97914cfda8258155d60f05ad5a64ab1b41c1d6",
+  "rules_sha256": "efbab2b64421ea763e8980a59a16e570e4420f715b4da1892ca2868c8da9f037",
+  "feedback_session_sha256": "0bf05dea533465e242589a9ab06866220752718a57b4a12a151b62ac4423c1de",
+  "feedback_reviewed_count": 650,
+  "usage": {
+    "prompt_tokens": 26782,
+    "completion_tokens": 22655,
+    "total_tokens": 49437,
+    "prompt_tokens_details": {
+      "cached_tokens": 2304
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}
