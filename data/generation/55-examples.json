@@ -1,0 +1,25 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T15:39:03.268486+00:00",
+  "count": 100,
+  "variation_focus": "Desert caravan ambush aftermath, ancient sandstone tomb, oasis cistern and buried statue hall.30do30check40mixed; vary 1-5 actions and grammar. Explicit parts/materials/source/destination preserved; natural player declarations and hypothetical plans. Avoid near-duplicate sentences.",
+  "status": "pending_review_at_generation",
+  "requested_count": 100,
+  "count_deviation": null,
+  "max_tokens": 65536,
+  "batch_path": "data/review/55-examples.json",
+  "sha256": "3085087d3764456d6e420623d5b33c1b17d7b86b0ac52612ab6ca873703b0d86",
+  "rules_sha256": "fbe36f69a4bd38c752fd93a1100bedb629db2d9a850ac89ccef4a7abc53842a8",
+  "feedback_session_sha256": "2659014464f35ef3c66c41fed4e1263da3e44f29bd8298c6324f2c83b06fd370",
+  "feedback_reviewed_count": 1699,
+  "usage": {
+    "prompt_tokens": 61125,
+    "completion_tokens": 43906,
+    "total_tokens": 105031,
+    "prompt_tokens_details": {
+      "cached_tokens": 3840
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}

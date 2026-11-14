@@ -1,0 +1,28 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "requested_count": 100,
+  "response_count": 100,
+  "count": 99,
+  "excluded_exact_duplicates": [
+    {
+      "response_index": 16,
+      "query": "Could I test the observatory railing with my hand?"
+    }
+  ],
+  "recovery": "Original complete response initially rejected for duplicate; all unique candidates recovered unchanged before semantic review. No semantic filtering.",
+  "raw_response_sha256": "4db18b4ecdd1ee63cefa462504229be200952964349a736708a2a82d4666a0bb",
+  "rules_sha256": "fbe36f69a4bd38c752fd93a1100bedb629db2d9a850ac89ccef4a7abc53842a8",
+  "feedback_reviewed_count": 1699,
+  "batch_path": "data/review/54-examples.json",
+  "sha256": "2ef3b0ab97b9efe805d6cbbeda42b53562ddcf278b337eddfb24612b1585f988",
+  "status": "pending_review_at_generation",
+  "recovered_at": "2026-11-14T15:38:39.246252+00:00",
+  "usage": {
+    "prompt_tokens": 60799,
+    "completion_tokens": 39130,
+    "total_tokens": 99929,
+    "prompt_tokens_details": {
+      "cached_tokens": 3840
+    }
+  }
+}

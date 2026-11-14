@@ -1,0 +1,28 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "requested_count": 100,
+  "response_count": 100,
+  "count": 99,
+  "excluded_exact_duplicates": [
+    {
+      "response_index": 4,
+      "query": "Using the iron bar, I lever the fallen aqueduct slab off the channel, then I roll the slab onto the bank."
+    }
+  ],
+  "recovery": "Original complete response initially rejected for duplicate; all unique candidates recovered unchanged before semantic review. No semantic filtering.",
+  "raw_response_sha256": "0006c3a4a50924f3d8f0a547a187fc626b5aabab1debb45488614ac988e6d0cc",
+  "rules_sha256": "fbe36f69a4bd38c752fd93a1100bedb629db2d9a850ac89ccef4a7abc53842a8",
+  "feedback_reviewed_count": 1699,
+  "batch_path": "data/review/53-examples.json",
+  "sha256": "ee90c013e5c371fa59fcc7a01173aa0fc420d5ca4279c67804fecc9e3bd98753",
+  "status": "pending_review_at_generation",
+  "recovered_at": "2026-11-14T15:38:05.163485+00:00",
+  "usage": {
+    "prompt_tokens": 61199,
+    "completion_tokens": 43429,
+    "total_tokens": 104628,
+    "prompt_tokens_details": {
+      "cached_tokens": 3840
+    }
+  }
+}

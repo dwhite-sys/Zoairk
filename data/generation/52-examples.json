@@ -1,0 +1,25 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T15:36:44.908686+00:00",
+  "count": 100,
+  "variation_focus": "Mountain monastery rescue preparations, cliff paths, bell tower rigging and avalanche shelter. Diversify 1-5 action counts and syntax under v12;30do30check40mixed. No repeated source action pairs across tool groups.",
+  "status": "pending_review_at_generation",
+  "requested_count": 100,
+  "count_deviation": null,
+  "max_tokens": 65536,
+  "batch_path": "data/review/52-examples.json",
+  "sha256": "245ccc54a520d2aa34c4bf440532f6d9c8ff3cf978209c760af829440a678ddc",
+  "rules_sha256": "fbe36f69a4bd38c752fd93a1100bedb629db2d9a850ac89ccef4a7abc53842a8",
+  "feedback_session_sha256": "2659014464f35ef3c66c41fed4e1263da3e44f29bd8298c6324f2c83b06fd370",
+  "feedback_reviewed_count": 1699,
+  "usage": {
+    "prompt_tokens": 61340,
+    "completion_tokens": 38610,
+    "total_tokens": 99950,
+    "prompt_tokens_details": {
+      "cached_tokens": 3712
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}

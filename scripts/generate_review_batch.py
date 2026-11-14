@@ -60,6 +60,7 @@ def main():
     p.add_argument('--output', type=Path, required=True)
     p.add_argument('--raw-output', type=Path, required=True, help='Scratch file outside data/review; preserves rejected responses.')
     p.add_argument('--timeout', type=int, default=600)
+    p.add_argument('--drop-exact-duplicates', action='store_true', help='Retain every unique candidate unchanged and record excluded exact normalized query duplicates.')
     p.add_argument('--accept-short-batch', action='store_true', help='Keep all complete candidates if a normally finished response contains fewer than requested; record the deviation.')
     a = p.parse_args()
     if not 1 <= a.count <= 100:
@@ -114,7 +115,25 @@ def main():
     decoded = json.loads(text)
     actual_count = len(decoded) if isinstance(decoded, list) else 0
     expected_count = actual_count if a.accept_short_batch and 0 < actual_count < a.count else a.count
-    rows=validate(decoded,expected_count,tools,{' '.join(q.lower().split()) for q in prior_queries})
+    excluded_duplicates = []
+    existing = {' '.join(q.lower().split()) for q in prior_queries}
+    if a.drop_exact_duplicates and isinstance(decoded, list):
+        if len(decoded) != expected_count:
+            raise ValueError(f'Expected exactly {expected_count} examples before deduplication.')
+        seen = set(existing)
+        unique = []
+        for index, row in enumerate(decoded, 1):
+            key = ' '.join(row.get('query', '').lower().split())
+            if key and key in seen:
+                excluded_duplicates.append({'response_index':index, 'query':row['query']})
+            else:
+                unique.append(row)
+                seen.add(key)
+        decoded = unique
+        expected_count = len(decoded)
+        if not decoded:
+            raise ValueError('No unique candidates in response.')
+    rows=validate(decoded,expected_count,tools,existing)
     content=json.dumps(rows,ensure_ascii=False,indent=2)+'\n'
     # Check with the same validator the webapp uses, before writing a batch.
     checker="const fs=require('node:fs'); const R=require('./review-app/review.js'); R.parseFile(fs.readFileSync(0,'utf8'));"
@@ -126,8 +145,8 @@ def main():
     meta.parent.mkdir(parents=True,exist_ok=True)
     metadata={'model':a.model,'reasoning_effort':a.reasoning_effort,'created_at':datetime.now(timezone.utc).isoformat(),
               'count':len(rows),'variation_focus':a.focus,'status':'pending_review_at_generation',
-              'requested_count':a.count,
-              'count_deviation':None if len(rows)==a.count else f'Returned {len(rows)} complete candidates; retained all unchanged under --accept-short-batch.',
+              'requested_count':a.count, 'response_count':actual_count, 'excluded_exact_duplicates':excluded_duplicates,
+              'count_deviation':None if len(rows)==a.count else f'Response contained {actual_count} candidates; retained {len(rows)} unchanged after permitted short-count handling and exact-query deduplication.',
               'max_tokens':max_tokens,
               'batch_path':str(a.output.resolve().relative_to(ROOT)),
               'sha256':hashlib.sha256(content.encode()).hexdigest(),

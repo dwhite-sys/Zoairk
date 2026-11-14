@@ -1,0 +1,28 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "requested_count": 100,
+  "response_count": 100,
+  "count": 99,
+  "excluded_exact_duplicates": [
+    {
+      "response_index": 12,
+      "query": "I bank the campfire coals with the small shovel, then I stack the cooking pots beside the tent."
+    }
+  ],
+  "recovery": "Original complete response initially rejected for duplicate; all unique candidates recovered unchanged before semantic review. No semantic filtering.",
+  "raw_response_sha256": "22828f4b64c2402849e741ee186236237b5e2bbd36c8c33a9bb31965847a6cf3",
+  "rules_sha256": "9e286747402c4ab7526f35af3882dd9c0259aac9c0048258b42e6f2dfc3adac5",
+  "feedback_reviewed_count": 1499,
+  "batch_path": "data/review/50-examples.json",
+  "sha256": "414ba3438c943ad3f41bc6cfa74889ee0b5fef801bb2c32e4bf2f68115b70934",
+  "status": "pending_review_at_generation",
+  "recovered_at": "2026-11-14T15:38:04.592374+00:00",
+  "usage": {
+    "prompt_tokens": 54854,
+    "completion_tokens": 42013,
+    "total_tokens": 96867,
+    "prompt_tokens_details": {
+      "cached_tokens": 3712
+    }
+  }
+}

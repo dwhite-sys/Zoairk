@@ -39,5 +39,28 @@
     "denied": 5,
     "finish": "complete",
     "tokens": 47360
-  }
+  },
+  "duplicate_recoveries": [
+    {
+      "batch": 50,
+      "response_count": 100,
+      "retained_unique": 99,
+      "excluded_exact_query_duplicates": 1,
+      "semantic_filtering": false
+    },
+    {
+      "batch": 53,
+      "response_count": 100,
+      "retained_unique": 99,
+      "excluded_exact_query_duplicates": 1,
+      "semantic_filtering": false
+    },
+    {
+      "batch": 54,
+      "response_count": 100,
+      "retained_unique": 99,
+      "excluded_exact_query_duplicates": 1,
+      "semantic_filtering": false
+    }
+  ]
 }
