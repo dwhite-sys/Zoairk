@@ -94,3 +94,7 @@ A wax seal before opening a named locker/strongbox belongs to that locker/strong
 
 REFERENCE AND DESTINATION CHECK
 If a timber prop was wedged under a beam, the wedge must resolve to that timber prop rather than an invented separate wedge. For plural crates followed by a single lid, identify which crate explicitly. All quoted reference spans must occur literally in the input; do not quote the chips when the query says the ice chips. For mark X on slate, use action mark on slate and target X; do not turn the requested destination into a pre-existing property X on slate of the target.
+
+LEADING TOOLS ARE NOT TRAILING SOURCE TEXT
+For With the hand pick, I chip the crust, quote only chip the crust (or the full literal leading clause). Never quote chip the crust with the hand pick: those words in that order do not occur. The extraction can still set instrument hand pick from the leading phrase.
+Name the lighting object as instrument (brazier, lantern, candle), not the emitted light as if it were a separate inventory object. Always check that the query explicitly specifies use of a tool; earlier taking it does not authorize inferring it for a later action.
