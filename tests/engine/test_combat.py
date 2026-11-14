@@ -42,3 +42,14 @@ def test_death_drops_belongings_and_respawn_keeps_npc_memory():
     out = g.handle("respawn", player="Drew")
     assert g.player_hp["Drew"] == 10 and any("wake up" in (m.get("text") or "") for m in out)
     assert any("come back to life" in e["text"] for e in w.current.npcs[0].memory)
+
+
+def test_loot_dead_npc():
+    g = Game("worlds/demo.json"); g.intro("Drew"); g._enter("Drew")
+    jerry = g.world.current.npcs[0]
+    npcs = g.world.current.npcs
+    assert not g._loot("Drew", "Jerry", npcs).ok                    # alive: won't let you
+    jerry.hp = 0
+    ev = g._loot("Drew", "Jerry's body", npcs)
+    assert ev.ok and "hammer" in ev.message and jerry.inventory == []
+    assert [o.properties.name for o in g.inventories["Drew"]] == ["hammer"]

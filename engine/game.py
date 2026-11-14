@@ -12,7 +12,7 @@ LOOK = re.compile(r"^\s*(look|l|look around)\s*$", re.I)
 INV = re.compile(r"^\s*(i|inv|inventory|what am i (carrying|holding))\??\s*$", re.I)
 RESPAWN = re.compile(r"^\s*(respawn|revive|start over)\s*$", re.I)
 HEALTH = re.compile(r"^\s*(health|hp|status|how am i)\??\s*$", re.I)
-ITEM_VERBS = {"take", "drop", "put", "give"}
+ITEM_VERBS = {"take", "drop", "put", "give", "loot"}
 SPEECH = re.compile(r"[\"“”]")
 
 
@@ -104,9 +104,13 @@ class Game:
         from .types import Event
         w, inv = self.world, self.inventories[player]
         obj, other = w.find(c.get("target")), (c.get("instrument") or "").strip()
+        if c["key"] == "loot":
+            obj = True
         if obj is None:
             return Event(c["key"], False, c.get("target"), None, {}, f"You don't see any {c.get('target')} here.")
         key = c["key"]
+        if key == "loot":
+            return self._loot(player, c.get("target") or "", npcs)
         if key == "take":
             src = w.find(other) if other else None
             return inventory.take(w, inv, obj, src if src is not obj else None)
@@ -170,6 +174,24 @@ class Game:
                     r["message"] += f" {name}'s belongings fall to the ground: " + ", ".join(o.properties.name for o in dropped) + "."
                 self.inventories[name] = []
         return Event("attack", True, name, weapon, {f"{name}.hp": r["hp"], f"{name}.status": r["status"]}, r["message"])
+
+    def _loot(self, player, target, npcs):
+        """Take everything a dead NPC carried."""
+        from .types import Event
+        t = re.sub(r"('s)?\s*(dead\s+)?(body|corpse)$", "", target.strip(), flags=re.I).strip().lower()
+        n = next((x for x in npcs if t in (x.name.lower(), (x.title or "").lower(),
+                                            (x.title or "").lower().removeprefix("the "))), None)
+        if n is None:
+            return Event("loot", False, target, None, {}, f"There is no {target} here to loot.")
+        if n.hp > 0:
+            return Event("loot", False, n.label, None, {}, f"{n.label} is very much alive and won't let you.")
+        if not n.inventory:
+            return Event("loot", True, n.label, None, {}, f"You search {n.label}'s body but find nothing.")
+        got = [o.properties.name for o in n.inventory]
+        self.inventories[player].extend(n.inventory)
+        n.inventory = []
+        return Event("loot", True, n.label, None, {f"{n.name}.looted": True},
+                     f"You search {n.label}'s body and take: {', '.join(got)}.")
 
     def intro(self, player: str = "The player") -> list[dict]:
         self._enter(player)
@@ -259,6 +281,12 @@ class Game:
             events = [self._items(player, c, npcs) for c in items] + interactions.run(actions)
             for c in fights:
                 events.append(self._attack(player, c["target"], c.get("instrument") or None, alive_npcs, here))
+            for e in events:                       # opening a container reveals what is inside (Zork)
+                if e.action == "open" and e.ok:
+                    box = w.find(e.target)
+                    if box is not None and hasattr(box, "contents"):
+                        inside = ", ".join(f"a {o.properties.name}" for o in box.contents) or "nothing"
+                        e.message += f" Inside the {e.target}: {inside}."
             prose = narrator.narrate(events, w.current.description)
             event_text = f"{player}: {text}. Result: {prose}"
             for n in npcs:
@@ -266,7 +294,9 @@ class Game:
             hit = next((e.target for e in events if e.action == "attack" and e.ok), None)
             out = [_msg("narrator", prose, effects=_effects(events), **({"hit": hit} if hit else {}))]
 
-        for d in npc.gauge(npcs, event_text, turn=w.turn):   # gauge records memory and the engage reply
+        focus = next((n.name for n in npcs if re.search(rf"\b{re.escape(n.name)}\b", text, re.I)
+                      or (n.title and n.title.lower().removeprefix("the ") in text.lower())), None)
+        for d in npc.gauge(npcs, event_text, turn=w.turn, focus=focus):   # gauge records memory and the engage reply
             who = next(n for n in npcs if n.name == d.npc)
             text = _reveal_or_mask(who, d.expression)
             if d.decision == "express":                    # express is non-verbal: drop any quoted speech

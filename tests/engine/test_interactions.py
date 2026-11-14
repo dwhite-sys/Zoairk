@@ -11,7 +11,9 @@ DEMO = Path(__file__).resolve().parents[2] / "worlds" / "demo.json"
 
 @pytest.fixture
 def world():
-    return World(DEMO)
+    w = World(DEMO)
+    w.find("mailbox").states.open = True     # the leaflet lives inside the mailbox (Zork)
+    return w
 
 
 def AS(world, action, target, instrument=None):
@@ -24,6 +26,7 @@ def test_keys():
 
 
 def test_open_mailbox(world):
+    world.find("mailbox").states.open = False
     (ev,) = run([AS(world, "open", "mailbox")])
     assert ev.ok and ev.changed == {"mailbox.open": True} and ev.target == "mailbox"
     assert world.find("mailbox").states.open is True

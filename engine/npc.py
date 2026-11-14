@@ -17,7 +17,7 @@ TOOL = [{"type": "function", "function": {
         "confidence": {"type": "number"},
         "expression": {"type": "string"}}, "required": ["decision", "confidence"]}}}]
 DECIDE_SYS = ("Call npc_decide exactly once. You decide how one NPC in a text adventure responds to the latest event. "
-              "Choose: nothing (NPC not involved or it is not relevant to them), express (a short non-verbal reaction, body language only, NO spoken words or quotes; "
+              "Choose: nothing (NPC not involved or it is not relevant to them), express (a short non-verbal reaction, body language only, NO spoken words or quotes, and NO attacks or physical contact with anyone; "
               "give it as 'expression' in third person), engage (the NPC speaks or acts). "
               "confidence is 0-1: how strongly this NPC wants to respond.")
 ENGAGE_SYS = ("You are playing an NPC in a text adventure. Stay in character. Reply with 1-3 sentences: what the NPC "
@@ -80,7 +80,7 @@ NOISE_SIGMA = 0.15   # how chaotic NPC choices feel
 ENGAGE_FLOOR = 0.5   # a noisy engage score below this becomes an express
 
 
-def gauge(npcs: list[Npc], event_text: str, turn: int = 0) -> list[NpcDecision]:
+def gauge(npcs: list[Npc], event_text: str, turn: int = 0, focus: str | None = None) -> list[NpcDecision]:
     """Decide for all NPCs concurrently; at most one engages, chosen by confidence plus noise."""
     npcs = [n for n in npcs if getattr(n, "hp", 1) > 0]          # the dead do not act
     if not npcs:
@@ -91,6 +91,9 @@ def gauge(npcs: list[Npc], event_text: str, turn: int = 0) -> list[NpcDecision]:
     # adds "a little random chance for pizzazz". The best noisy engage wins; an engage whose noisy score
     # falls under ENGAGE_FLOOR, or that loses to a stronger one, becomes an express instead.
     noisy = {id(d): d.confidence + random.gauss(0.0, NOISE_SIGMA) for d in decisions}
+    for d in decisions:          # the NPC the player attacked or spoke to is directly involved: it always gets its say
+        if focus and d.npc.lower() == focus.lower() and d.decision == "engage":
+            noisy[id(d)] = 10.0
     ranked = sorted(decisions, key=lambda d: noisy[id(d)], reverse=True)
     engages = [d for d in ranked if d.decision == "engage"]
     for i, d in enumerate(engages):

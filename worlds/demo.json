@@ -20,22 +20,24 @@
      ],
      "description": "A dented tin mailbox on a wooden post.",
      "weight": 60,
-     "container": true
-    },
-    {
-     "name": "leaflet",
-     "aliases": [
-      "flyer",
-      "paper",
-      "note"
-     ],
-     "templates": [
-      "readable",
-      "flammable"
-     ],
-     "description": "A folded leaflet.",
-     "text": "WELCOME TO ZOAIRK! Everything you do here is remembered.",
-     "weight": 0.1
+     "container": true,
+     "contents": [
+      {
+       "name": "leaflet",
+       "aliases": [
+        "flyer",
+        "paper",
+        "note"
+       ],
+       "templates": [
+        "readable",
+        "flammable"
+       ],
+       "description": "A folded leaflet.",
+       "text": "WELCOME TO ZOAIRK! Everything you do here is remembered.",
+       "weight": 0.1
+      }
+     ]
     },
     {
      "name": "match",

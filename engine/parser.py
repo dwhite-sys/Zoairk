@@ -40,6 +40,7 @@ VERB_MAP = {
     "drop": "drop", "put down": "drop", "discard": "drop",
     "put": "put", "place": "put", "stash": "put", "store": "put", "insert": "put",
     "give": "give", "hand": "give", "offer": "give",
+    "loot": "loot", "search": "loot", "rob": "loot", "frisk": "loot",
 }
 
 
