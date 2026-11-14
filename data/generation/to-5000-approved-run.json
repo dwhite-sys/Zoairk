@@ -23,11 +23,11 @@
     }
   ],
   "latest_checkpoint": {
-    "reviewed": 3291,
-    "approved": 3073,
-    "denied": 218,
-    "new_reviewed": 2291,
-    "new_approved": 2192
+    "reviewed": 3391,
+    "approved": 3167,
+    "denied": 224,
+    "new_reviewed": 2391,
+    "new_approved": 2286
   },
   "additional_stale_remote_commits": [
     "6855278 (1049 reviews reset to pending; authoritative runtime and subsequent session imports restored complete labels)"
@@ -62,5 +62,13 @@
       "excluded_exact_query_duplicates": 1,
       "semantic_filtering": false
     }
-  ]
+  ],
+  "hosted_sync_issue": {
+    "hosted_examples": 1299,
+    "hosted_approved": 106,
+    "hosted_denied": 7,
+    "hosted_pending": 1186,
+    "diagnosis": "Hosted deployment dataset and persisted runtime are stale; repo has no automatic deployment configuration. Existing hosted session backed up before any synchronization.",
+    "pending": "Deployment must pull latest source batches and import canonical session with existing labels reconciled. One older hosted approval conflicts with newer baseline denial; preserve canonical baseline."
+  }
 }
