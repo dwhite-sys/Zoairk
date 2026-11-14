@@ -1,0 +1,20 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:07:29.801283+00:00",
+  "count": 20,
+  "variation_focus": "Tavern cellar, kitchen, hearth and supplies; 1-4 concrete actions, preserve materials and destinations, vary narration and question phrasing beyond Could I.",
+  "status": "pending_review_at_generation",
+  "batch_path": "data/review/13-examples.json",
+  "sha256": "fa8fe139258dbe65c82a7bae984ca92fee06bb935ed2d4e03016226e2b466fd2",
+  "rules_sha256": "bf5fc4c51883392ccfd92050e418070cea08aa5e29db82fb8207f91ad830f3cb",
+  "usage": {
+    "prompt_tokens": 7464,
+    "completion_tokens": 17282,
+    "total_tokens": 24746,
+    "prompt_tokens_details": {
+      "cached_tokens": 896
+    }
+  },
+  "seed_source": "data/review/exports/zoairk-review-session.json"
+}

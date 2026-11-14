@@ -1,0 +1,20 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:07:39.645690+00:00",
+  "count": 20,
+  "variation_focus": "Cave travel, campsites, ropes and climbing; varied natural syntax and explicit destinations; include some time clauses placed mid-sentence rather than repeating after-that-check templates.",
+  "status": "pending_review_at_generation",
+  "batch_path": "data/review/11-examples.json",
+  "sha256": "6aba2ffb588047b6a2bfff0c509941cebf1b08204877976ff88cb59c38c9990d",
+  "rules_sha256": "bf5fc4c51883392ccfd92050e418070cea08aa5e29db82fb8207f91ad830f3cb",
+  "usage": {
+    "prompt_tokens": 7468,
+    "completion_tokens": 19378,
+    "total_tokens": 26846,
+    "prompt_tokens_details": {
+      "cached_tokens": 896
+    }
+  },
+  "seed_source": "data/review/exports/zoairk-review-session.json"
+}
