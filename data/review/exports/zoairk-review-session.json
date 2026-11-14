@@ -4841,9 +4841,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "deny",
+      "reason": "AI review (Codex): calls and order are correct, but \"I take\" is not an exact source phrase. The input says \"then take\". Use 'I sheathe' and 'take' -> committed action -> enter_command.",
+      "reviewedAt": "2026-11-14T13:14:58.743Z"
     },
     {
       "example": {
@@ -4932,9 +4932,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:15:08.492Z"
     },
     {
       "example": {
@@ -5015,9 +5015,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:15:15.128Z"
     },
     {
       "example": {
@@ -5098,9 +5098,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:15:20.019Z"
     }
   ]
 }
