@@ -1,0 +1,20 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:18:35.087089+00:00",
+  "count": 20,
+  "variation_focus": "Crypt passages, statues, urns and adventuring gear. Emphasize different temporal constructions and small conversational interruptions without ambiguous scope. No dialogue, invented outcomes or dependent actual actions after checks.",
+  "status": "pending_review_at_generation",
+  "batch_path": "data/review/24-examples.json",
+  "sha256": "8c55211ffcba51ed3d8ebe94c77a130b56b01f1999cf2a3dafb03adb1f2a0382",
+  "rules_sha256": "7936c2f91282b03b80332219381a00950f8a3f0591e6240fccaf55826141d246",
+  "usage": {
+    "prompt_tokens": 16123,
+    "completion_tokens": 16380,
+    "total_tokens": 32503,
+    "prompt_tokens_details": {
+      "cached_tokens": 1408
+    }
+  },
+  "seed_source": "data/review/exports/zoairk-review-session.json"
+}

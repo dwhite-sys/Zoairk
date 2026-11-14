@@ -1,0 +1,20 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:18:36.318995+00:00",
+  "count": 20,
+  "variation_focus": "Forest exploration, fallen trees, shallow streams and trail markers. Mix terse and conversational DM-facing actions and varied feasibility phrasing. Include 1-4 calls, explicit tools and self actions.",
+  "status": "pending_review_at_generation",
+  "batch_path": "data/review/23-examples.json",
+  "sha256": "377e3ba762a73241cfabd9f7a9673d419468b511c8e440500012c86eadfc8c04",
+  "rules_sha256": "7936c2f91282b03b80332219381a00950f8a3f0591e6240fccaf55826141d246",
+  "usage": {
+    "prompt_tokens": 15834,
+    "completion_tokens": 16943,
+    "total_tokens": 32777,
+    "prompt_tokens_details": {
+      "cached_tokens": 1408
+    }
+  },
+  "seed_source": "data/review/exports/zoairk-review-session.json"
+}
