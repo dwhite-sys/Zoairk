@@ -268,6 +268,10 @@
     catch (error) { status('connection-message', error.message, true); return; }
     if (location.protocol === 'https:' && url.startsWith('ws:')) { status('connection-message', 'This HTTPS page needs a wss:// backend URL.', true); return; }
     clearTimeout(reconnectTimer);
+    // A new connection needs its own initial scene, even when Play stays open.
+    lookRequested = false;
+    streamLine = null;
+    if (pendingCommit) finishCommit('Connection changed before confirmation. Check the backend before committing again.', true);
     if (socket) { const old = socket; socket = null; old.close(); }
     connectionState(false, 'Connecting to backend…');
     let current;

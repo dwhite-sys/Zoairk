@@ -76,18 +76,16 @@ Tests cover world/ownership logic, a real HTTP/WebSocket transport connection, a
 
 The test peer in `tests/fixtures/backend.cjs` validates payloads and emits clearly labeled protocol-test output. It is **not a game engine** and never runs under `npm start`. Automated testing does not establish compatibility with an unavailable real backend or verify its persistence, AI, or gameplay. Real phone hardware and Safari have not been tested.
 
-## Resume checkpoint — November 14, 2026
+## Development status — November 14, 2026
 
-Work paused at the team's request before PC shutdown. The implementation is committed on the local `frontend` branch as `4d6f613`.
+Resumed on the local `frontend` branch after the shutdown checkpoint. The complete frontend flow was operated manually against the explicitly labeled protocol test server: area and linked scenes, scene-owned object, NPC inventory, player inventory/backstory, world acknowledgement, streamed output, blank input, and command history.
 
-- Completed: home menu; area/scenes editor; scene objects, NPCs and exits; NPC inventory; player inventory/backstory; stats placeholders; ownership validation; configurable WebSocket connection; confirmed world commit; streamed play terminal.
-- Verified in the selected checkout: 10 logic/integration checks and 8 desktop/mobile browser checks passed (`npm run test:all`). Screenshots are in ignored `frontend-app/test-results/`.
-- Still pending: a manual browser run of the new frontend. Do not report the actual game flow as finished until it has been operated by hand and connected to the real engine.
-- Backend implementation is absent from this branch. Automated tests use an explicitly labeled protocol fixture, not a real game engine. The team's response to the WebSocket/schema/state-vocabulary question is still pending.
-- Current outgoing envelopes: `{type:"create_game",payload:world}` and `{type:"command",payload:{command}}`. World payload is the nested schema documented above, replacing the original flat area/scene data. Play initially sends `look`.
-- Object states are provisional: unspecified, open/closed, locked/unlocked, on/off, intact/broken. The first scene is the player start. Stats remain null placeholders.
-- Next: confirm protocol/schema/states; start the actual checkout's preview; manually build/commit a world and operate the terminal; integrate and test with the real backend. Do not start unrelated engine or model-training work.
-- To restart from the repository root: `cd frontend-app`, then `npm start` (port 3001). Backend normally uses `ws://localhost:8000/ws`; change it in the header if needed. `npm ci` restores dev dependencies if needed; `npm run test:all` runs all checks.
-- Temporary local preview/protocol-peer processes do not survive shutdown. For a protocol-only manual test, run `node tests/fixtures/backend.cjs` separately and point the UI at `ws://127.0.0.1:8082/ws`; stop that test peer and restore the real backend URL afterward.
-- The original supplied three boilerplate files are backed up locally under `C:/Users/Grant Jones/Desktop/a_Fall_2026/iHack/.frontend-stage/*.original`. This staging folder is not part of the repository.
-- No changes from this frontend task have been pushed. The review app's earlier GitHub branch is `codex/review-webapp`; this task stays on the user's `frontend` branch.
+The manual check found a reconnect bug: changing the WebSocket connection while Play was already open did not request a new scene. The fix starts a fresh `look` request on the new connection without replaying player commands; it also releases a world commit awaiting confirmation on the old connection. A desktop/mobile browser regression test covers reconnection.
+
+Validation: 10 logic/integration checks and 10 desktop/mobile browser checks pass (`npm run test:all`). Screenshots are under ignored `frontend-app/test-results/`. The preview runs from this checkout at http://localhost:3001.
+
+Still pending: the real backend is absent from this branch and nothing was listening on port 8000 during verification. The backend URL, nested world schema, supported state list, and real game persistence/AI need confirmation and integration. The protocol fixture verifies transport, not gameplay. Stats remain the requested placeholders, and the first scene remains the starting scene.
+
+Next: provide the engine's WebSocket contract, integrate it, and repeat the complete demo against the real engine. Current messages and provisional object states are documented above. No changes from this frontend task have been pushed.
+
+Restart from the repository root with `cd frontend-app`, then `npm start`. Install test dependencies with `npm ci` if needed. For protocol-only manual checks, separately run `node tests/fixtures/backend.cjs` and use `ws://127.0.0.1:8082/ws`; restore the real endpoint afterward.

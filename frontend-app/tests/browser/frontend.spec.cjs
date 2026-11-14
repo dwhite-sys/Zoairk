@@ -106,6 +106,20 @@ test('empty worlds, invalid exits and absent backend do not claim success or los
   await expect(page.locator('#upload-status')).toContainText('destination scene');
   await expect(page.getByLabel('Area name', { exact: true })).toHaveValue('Hollow Coast');
 });
+test('reconnecting from the play screen requests a fresh scene without replaying a player command', async ({ page }) => {
+  const frames = [];
+  page.on('websocket', socket => socket.on('framesent', frame => { try { frames.push(JSON.parse(frame.payload)); } catch {} }));
+  await connect(page);
+  await page.getByRole('link', { name: 'Play a game', exact: false }).click();
+  await expect(page.locator('#terminal-output .msg.engine')).toHaveCount(1);
+  await page.locator('#command-input').fill('take lantern');
+  await page.locator('#terminal-form').getByRole('button', { name: 'Send', exact: true }).click();
+  await expect(page.locator('#terminal-output .msg.engine')).toHaveCount(2);
+  await connect(page);
+  await expect(page.locator('#terminal-output .msg.engine')).toHaveCount(3);
+  expect(frames.filter(frame => frame.type === 'command' && frame.payload.command === 'look')).toHaveLength(2);
+  expect(frames.filter(frame => frame.type === 'command' && frame.payload.command === 'take lantern')).toHaveLength(1);
+});
 test('text stays literal; disconnected commands stay in the input; bad backend messages are handled', async ({ page }) => {
   const scene = await minimumWorld(page);
   await scene.getByLabel('Scene name', { exact: true }).fill('<img src=x onerror="alert(1)">');

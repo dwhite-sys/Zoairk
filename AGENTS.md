@@ -14,7 +14,7 @@
 - Missing: actual backend engine, trained models, evaluation, and confirmed world schema/object states. Frontend tests use an explicitly labeled protocol fixture, not real gameplay.
 - Run: cd frontend-app then npm start (http://localhost:3001). Backend defaults to ws://localhost:8000/ws and can be changed in the header. review-app runs separately on port 3000.
 - Test: from frontend-app/, npm ci then npm run test:all (installed Edge). Covers ownership logic, HTTP/WebSocket integration, and desktop/mobile flows; open and use it manually too.
-- Paused for PC shutdown at team request. Implementation commit 4d6f613; 18 automated checks pass; manual browser verification and real-engine integration remain pending. Read the resume checkpoint in frontend-app/README.md before continuing.
+- Status: resumed; frontend manually checked with the labeled protocol fixture. Reconnecting Play refreshes the scene without replaying commands. 20 automated checks pass; real-engine integration remains pending.
 - Event rules: Devpost https://ihack-2026.devpost.com; web access failed during setup, so additional restrictions remain unverified.
 
 ## Working rules
