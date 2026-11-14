@@ -36,7 +36,7 @@ VERB_MAP = {
     "hurl": "throw", "chuck": "throw", "lob": "throw", "fling": "throw", "pitch": "throw", "examine": "examine", "inspect": "examine", "look": "examine",
     "attack": "attack", "hit": "attack", "punch": "attack", "kick": "attack", "stab": "attack",
     "fight": "attack", "slap": "attack", "shove": "attack", "tackle": "attack", "swing at": "attack",
-    "pick up": "take", "take": "take", "grab": "take", "get": "take", "collect": "take",
+    "pick up": "take", "take": "take", "steal": "take", "snatch": "take", "swipe": "take", "pickpocket": "take", "nick": "take", "grab": "take", "get": "take", "collect": "take",
     "drop": "drop", "put down": "drop", "discard": "drop",
     "put": "put", "place": "put", "stash": "put", "store": "put", "insert": "put",
     "give": "give", "hand": "give", "offer": "give",

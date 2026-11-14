@@ -1,6 +1,7 @@
 """Turn loop: player input → parse → state machine → narration → NPC gauge → save (contracts C1–C5)."""
 from __future__ import annotations
 
+import random
 import re
 
 from . import combat, inventory
@@ -15,6 +16,7 @@ RESPAWN = re.compile(r"^\s*(respawn|revive|start over)\s*$", re.I)
 EXAMINE = re.compile(r"^\s*(?:check|examine|inspect|x|look at|look in|look inside|study|search)\s+(?:out\s+)?(.+?)\s*\??$", re.I)
 HEALTH = re.compile(r"^\s*(health|hp|status|how am i)\??\s*$", re.I)
 ITEM_VERBS = {"take", "drop", "put", "give", "loot", "drink"}
+STEAL_CHANCE = 0.4          # base chance to snatch an item from a living NPC (higher when they are hurt)
 SPEECH = re.compile(r"[\"“”]")
 
 
@@ -108,6 +110,10 @@ class Game:
         obj, other = w.find(c.get("target")), (c.get("instrument") or "").strip()
         if c["key"] == "loot":
             obj = True
+        if obj is None and c["key"] == "take":
+            stolen = self._steal(player, c.get("target") or "", other, npcs)
+            if stolen is not None:
+                return stolen
         if obj is None:
             return Event(c["key"], False, c.get("target"), None, {}, f"You don't see any {c.get('target')} here.")
         key = c["key"]
@@ -146,6 +152,35 @@ class Game:
         if npc is None:
             return Event("give", False, obj.properties.name, other, {}, f"There is no {other or 'one'} here to give it to.")
         return inventory.give(inv, obj, npc)
+
+    def _steal(self, player, target, source, npcs):
+        """Taking something a living NPC carries is a theft: it may fail, and they notice either way."""
+        t = re.sub(r"^(the|a|an)\s+", "", target.strip().lower())
+        for n in npcs:
+            if n.hp <= 0:
+                continue
+            names = {n.name.lower(), (n.title or "").lower(), (n.title or "").lower().removeprefix("the ")} - {""}
+            owner = next((nm for nm in names if t.startswith(nm + "'s ") or t.startswith(nm + "s ")), None)
+            item_name = t.split(" ", 1)[1] if owner else t
+            def match(i):
+                nm = i.properties.name.lower()
+                return nm == item_name or nm.endswith(" " + item_name) or item_name in self.world.aliases.get(id(i), [])
+            if not owner and source.lower() not in names and not any(match(i) for i in n.inventory):
+                continue
+            item = next((i for i in n.inventory if match(i)), None)
+            if item is None:
+                continue
+            chance = STEAL_CHANCE + (0.3 if n.hp < combat.MAX_HP / 2 else 0)
+            if random.random() < chance:
+                n.inventory.remove(item)
+                self.inventories[player].append(item)
+                return Event("steal", True, item.properties.name, n.name, {f"{item.properties.name}.owner": player},
+                             f"{player} snatches the {item.properties.name} from {n.label} before they can react. "
+                             f"{n.label} notices it is gone.")
+            return Event("steal", False, item.properties.name, n.name, {},
+                         f"{player} grabs for {n.label}'s {item.properties.name}, but {n.label} jerks it away and "
+                         f"keeps hold of it, glaring.")
+        return None
 
     def _armed(self, player: str) -> str:
         """What the acting player visibly holds, so NPCs can weigh a threat (team feedback)."""
