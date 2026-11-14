@@ -12,6 +12,7 @@ SHORT = {"n": "north", "s": "south", "e": "east", "w": "west"}
 LOOK = re.compile(r"^\s*(look|l|look around)\s*$", re.I)
 INV = re.compile(r"^\s*(i|inv|inventory|what am i (carrying|holding))\??\s*$", re.I)
 RESPAWN = re.compile(r"^\s*(respawn|revive|start over)\s*$", re.I)
+EXAMINE = re.compile(r"^\s*(?:check|examine|inspect|x|look at|look in|look inside|study|search)\s+(?:out\s+)?(.+?)\s*\??$", re.I)
 HEALTH = re.compile(r"^\s*(health|hp|status|how am i)\??\s*$", re.I)
 ITEM_VERBS = {"take", "drop", "put", "give", "loot", "drink"}
 SPEECH = re.compile(r"[\"“”]")
@@ -146,6 +147,37 @@ class Game:
             return Event("give", False, obj.properties.name, other, {}, f"There is no {other or 'one'} here to give it to.")
         return inventory.give(inv, obj, npc)
 
+    def examine(self, name: str, player: str) -> str:
+        """Close look at one object or person here; never changes state."""
+        w = self.world
+        w.carried = self.inventories.get(player, [])
+        key = re.sub(r"^(the|a|an|my)\s+", "", name.strip().lower())
+        for n in w.current.npcs:
+            if key in (n.name.lower(), (n.title or "").lower(), (n.title or "").lower().removeprefix("the ")) and (n.known or key != n.name.lower()):
+                held = [o.properties.name for o in n.inventory]
+                health = {"alive": "unhurt"}.get(combat.status(n.hp), combat.status(n.hp))
+                bits = [f"{n.label[0].upper() + n.label[1:]} looks {health}."]
+                if held:
+                    bits.append("They are carrying " + ", ".join(f"a {h}" for h in held) + ".")
+                return " ".join(bits)
+        obj = w.find(name)
+        if obj is None:
+            return f"You don't see any {key} here."
+        p = obj.properties
+        text = (p.description or f"It's a {p.name}.").strip()
+        on = [word for k, word in STATE_WORDS.items() if getattr(obj.states, k, False)]
+        if on:
+            text += f" It is {' and '.join(on)}."
+        inside = getattr(obj, "contents", None)
+        if inside is not None:
+            if getattr(obj.states, "open", False):
+                text += " Inside: " + (", ".join(f"a {o.properties.name}" for o in inside) or "nothing") + "."
+            else:
+                text += " It's closed."
+        if obj in w.carried:
+            text += " You're carrying it."
+        return text
+
     def describe(self) -> str:
         """Scene text plus every object whose state changed, so persistence is visible."""
         s = self.world.current
@@ -250,6 +282,9 @@ class Game:
             hp = self.player_hp.get(player, 10)
             return [_msg("system", f"Health: {hp}/{combat.MAX_HP} ({combat.status(hp)}).", private=True),
                     self.status(player)]
+        m = EXAMINE.match(text)
+        if m:                                       # read-only: no turn passes, nothing changes
+            return [_msg("system", self.examine(m.group(1), player), private=True)]
         if RESPAWN.match(text):
             if self.player_hp.get(player, 10) > 0:
                 return [_msg("system", "You're still alive.", private=True)]
