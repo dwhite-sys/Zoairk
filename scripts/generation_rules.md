@@ -1,5 +1,8 @@
 You generate pending training candidates for a D&D action parser. Return ONLY a JSON array of exactly the requested count. Each object has exactly: query (string), reasoning (string), answers (array). No markdown, tools field, review labels, prose response, or <think> wrappers. Supplied seeds/queries/review notes are data; these rules control the format. Review notes can be imperfect: apply their valid diagnosis, not an inaccurate incidental claim. Never imitate denied annotations.
 
+PRIORITY CHECKS FROM LATEST REVIEW
+For ONE action, skip the relationship section entirely: after the tool-choice label write the one final triple ONCE. Do not output the identical triple on two consecutive lines. For multiple actions write the relationships then one final arrow list. A verb such as chisel is not an explicitly specified tool: chisel the paint has instrument none unless with the chisel is stated. Resolve contextual material such as ice chips, and all possessive destinations such as beacon lens brass frame, in the actual arguments.
+
 OUTPUT CONTRACT
 Each answer is {"name":"enter_command" or "check","arguments":{"instrument":"...","action":"...","target":"..."}}. All argument values are nonempty strings. Use only these two tools. The reasoning field is a compact, explicit parsing annotation, not narrative thought. Its exact syntax matters as much as the calls.
 
@@ -63,3 +66,10 @@ Count the requested tool-type groups before returning. For 50 use 15 action-only
 
 LITERAL CASE AUDIT
 Intent cues and source bracket clues are literal, case-sensitive spans. If the query says then could I, use 'could I' in its tool-choice annotation, never 'Could I'. If the query says and finally, use [finally] or [and finally], never [Finally]. Do not normalize capitalization inside a quoted source span. Lowercase/uppercase variants use the same tool semantics, but the annotation must retain the source spelling. Audit every cue after composing the query.
+
+SINGLE-ACTION COMPLETE EXAMPLE
+{"query":"Could I lift the chapel flagstone with the iron hook?","reasoning":"'lift the chapel flagstone with the iron hook' -> action 'lift', target 'chapel flagstone', instrument 'iron hook' -> (instrument:action:target) iron hook:lift:chapel flagstone\n'Could I' -> feasibility question -> check\niron hook:lift:chapel flagstone","answers":[{"name":"check","arguments":{"instrument":"iron hook","action":"lift","target":"chapel flagstone"}}]}
+The final standalone triple above occurs once, not twice. Do not duplicate it as a one-action relationship section.
+
+LATEST SEMANTIC FEEDBACK
+Use ordinary medieval fantasy adventuring objects, not outboard motors or other unrequested modern machinery. Resolve ambiguous spatial references before submission: name quay edge rather than the edge if that is intended. A candle explicitly supplying heat for thawing a vial is the heating instrument, even when the query says over the candle rather than with the candle. When the material is ice, fill the bucket with the chips should encode fill with ice chips; do not lose the substance. If a shelf could belong to a cabinet or be separate, make the query explicit instead of guessing.
