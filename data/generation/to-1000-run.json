@@ -1,0 +1,11 @@
+{
+  "baseline_commit": "15960b463a7744ac5a90b854e0e1a0ab36c81358",
+  "starting_reviewed": 700,
+  "starting_approved": 605,
+  "starting_denied": 95,
+  "target_total_reviewed": 1000,
+  "additional_candidates": 300,
+  "first_batch": 34,
+  "method": "Adaptive system prompts plus accumulated denial feedback; AI review via local webapp, immutable candidate batches and Git checkpoints. Acceptance rate measures annotation review, not trained model accuracy.",
+  "generation_failures": []
+}
