@@ -1,4 +1,4 @@
-﻿# Zoairk — iHack 2026
+# Zoairk — iHack 2026
 - Build a reusable Zork-inspired text adventure engine with AI agents and an authoritative persistent state machine.
 - Category: Reinventing the Past. Audience: text adventure players and creators of games using this engine.
 - Deadline: November 14, 2026, 3:00 p.m. MST (America/Denver).
@@ -14,7 +14,7 @@
 - Missing: actual backend engine, trained models, evaluation, and confirmed world schema/object states. Frontend tests use an explicitly labeled protocol fixture, not real gameplay.
 - Run: cd frontend-app then npm start (http://localhost:3001). Backend defaults to ws://localhost:8000/ws and can be changed in the header. review-app runs separately on port 3000.
 - Test: from frontend-app/, npm ci then npm run test:all (installed Edge). Covers ownership logic, HTTP/WebSocket integration, and desktop/mobile flows; open and use it manually too.
-- Next: confirm the world payload and state vocabulary with the backend team, integrate the real engine, and run the judge demo against it. See frontend-app/README.md for the protocol.
+- Paused for PC shutdown at team request. Implementation commit 4d6f613; 18 automated checks pass; manual browser verification and real-engine integration remain pending. Read the resume checkpoint in frontend-app/README.md before continuing.
 - Event rules: Devpost https://ihack-2026.devpost.com; web access failed during setup, so additional restrictions remain unverified.
 
 ## Working rules
