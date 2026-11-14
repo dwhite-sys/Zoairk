@@ -1,0 +1,20 @@
+{"name": "Zoairk demo", "start_scene": "front_lawn",
+ "scenes": {
+  "front_lawn": {"description": "You stand on the overgrown front lawn of an old white house. A battered mailbox leans by the path. Jerry, the village blacksmith, is hammering at a portable anvil by the gate, and Joe watches nervously from the window of his little shop across the lane.",
+   "exits": {"north": "house"},
+   "objects": [
+     {"name": "mailbox", "aliases": ["box", "post box"], "templates": ["openable", "flammable"], "description": "A dented tin mailbox on a wooden post."},
+     {"name": "leaflet", "aliases": ["flyer", "paper", "note"], "templates": ["readable", "flammable"], "description": "A folded leaflet.", "text": "WELCOME TO ZOAIRK! Everything you do here is remembered."},
+     {"name": "match", "aliases": ["matchstick", "matches"], "templates": ["igniter"], "description": "A single wooden match."},
+     {"name": "rock", "aliases": ["stone"], "templates": ["throwable"], "description": "A fist-sized rock."},
+     {"name": "window", "aliases": ["shop window", "glass"], "templates": ["fragile"], "description": "Joe's shop window."}],
+   "npcs": [
+     {"name": "Jerry", "profile": "Jerry, a grumpy, proud village blacksmith. Short-tempered, protective of his tools, secretly kind. Speaks bluntly."},
+     {"name": "Joe", "profile": "Joe, a nervous shopkeeper who watches everything from his shop window. Easily startled, polite, worried about fire and damage."}]},
+  "house": {"description": "A dusty front hall. A guard dozes on a chair by a stack of old books.",
+   "exits": {"south": "front_lawn"},
+   "objects": [
+     {"name": "book", "aliases": ["old book", "books"], "templates": ["readable", "flammable"], "description": "A crumbling book.", "text": "The pages describe a lighthouse far to the east."},
+     {"name": "vase", "aliases": ["pot"], "templates": ["fragile"], "description": "A blue porcelain vase."}],
+   "npcs": [
+     {"name": "Theo", "profile": "Theo, a sleepy house guard. Slow to wake, gruff when disturbed, loyal to the owner of the house."}]}}}
