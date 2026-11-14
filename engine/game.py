@@ -64,7 +64,7 @@ class Game:
             self.locations[player] = w.current.name
             w.turn += 1
             w.save()
-            return [self._scene(), _msg("narrator", self.describe())]
+            return [{**self._scene(), "private": True}, _msg("narrator", self.describe(), private=True)]
 
         npcs = w.current.npcs
         if SPEECH.search(text):                          # quotes mark speech: no parse, straight to memory

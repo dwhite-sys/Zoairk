@@ -57,14 +57,20 @@ async def send_all(ws, messages):
 
 
 GAME = None                 # the one shared world
+CURRENT_ACTOR = None        # the player whose turn is being broadcast (always sees their own turn)
 PLAYERS: dict = {}          # websocket -> player name
 QUEUE: asyncio.Queue | None = None
 
 
-async def broadcast(messages):
+async def broadcast(messages, scene=None):
+    """Send to everyone, or (with scene) only to players currently in that room."""
+    locations = getattr(GAME, "locations", {})
     for ws in list(PLAYERS):
+        if scene is not None and locations.get(PLAYERS[ws], scene) != scene and PLAYERS[ws] != CURRENT_ACTOR:
+            continue
         # A scene change belongs only to the player who moved; everyone else keeps their own room.
-        mine = [m for m in messages if not (m.get("type") == "switch_scene" and m.get("player") not in (None, PLAYERS[ws]))]
+        mine = [m for m in messages
+                if not ((m.get("type") == "switch_scene" or m.get("private")) and m.get("player") not in (None, PLAYERS[ws]))]
         try:
             await send_all(ws, mine)
         except websockets.ConnectionClosed:
@@ -75,8 +81,11 @@ async def turn_worker():
     """Apply queued inputs one at a time, in arrival order (FIFO)."""
     loop = asyncio.get_running_loop()
     while True:
+        global CURRENT_ACTOR
         name, text = await QUEUE.get()
-        await broadcast([{"type": "message", "role": "player", "player": name, "text": text}])
+        CURRENT_ACTOR = name
+        here = getattr(GAME, "locations", {}).get(name)          # room where the turn happens
+        await broadcast([{"type": "message", "role": "player", "player": name, "text": text}], scene=here)
         try:
             replies = await loop.run_in_executor(None, functools.partial(GAME.handle, text, player=name))
         except Exception as exc:  # keep everyone connected if one turn fails
@@ -84,7 +93,8 @@ async def turn_worker():
             replies = [{"type": "message", "role": "system", "text": "Something went wrong with that turn."}]
         for r in replies or []:
             r.setdefault("player", name)
-        await broadcast(replies)
+        # Players in the room where it happened see it; a player who just moved sees their new room.
+        await broadcast(replies, scene=here)
         QUEUE.task_done()
 
 
