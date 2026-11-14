@@ -32,10 +32,11 @@ function addLine(className, build) {
   build(p);
   log.appendChild(p);
   log.scrollTop = log.scrollHeight;
+  return p;
 }
 
 function addText(className, text) {
-  addLine(className, (p) => { p.textContent = text; });
+  return addLine(className, (p) => { p.textContent = text; });
 }
 
 function showNpcMessage(msg) {
@@ -59,11 +60,66 @@ function showNpcMessage(msg) {
   });
 }
 
+function showStatus(msg) {
+  if (msg.player && msg.player !== MY_NAME) return; // private to this player
+  const box = document.getElementById("player-status");
+  const max = Number(msg.max) > 0 ? Number(msg.max) : 10;
+  const hp = Math.max(0, Math.min(max, Number(msg.hp) || 0));
+  const ratio = hp / max;
+  const fill = document.getElementById("hp-fill");
+  fill.style.width = `${ratio * 100}%`;
+  fill.style.background = `hsl(${Math.round(ratio * 120)}, 65%, 45%)`; // green -> red
+  const hpText = document.getElementById("hp-text");
+  hpText.textContent = hp <= 0 ? "You are dead" : `${hp}/${max}`;
+  hpText.classList.toggle("dead", hp <= 0);
+  renderInventory(Array.isArray(msg.inventory) ? msg.inventory : []);
+  box.hidden = false;
+}
+
+// Inventory overlay: read-only list of carried items (actions still go through chat).
+const invButton = document.getElementById("inv-button");
+const invOverlay = document.getElementById("inv-overlay");
+
+function renderInventory(items) {
+  document.getElementById("inv-count").textContent = items.length;
+  const list = document.getElementById("inv-list");
+  list.replaceChildren();
+  if (!items.length) {
+    const li = document.createElement("li");
+    li.className = "inv-empty";
+    li.textContent = "You are carrying nothing.";
+    list.appendChild(li);
+  }
+  for (const item of items) {
+    const li = document.createElement("li");
+    li.textContent = item;
+    list.appendChild(li);
+  }
+}
+
+function setInventoryOpen(open) {
+  invOverlay.hidden = !open;
+  invButton.setAttribute("aria-expanded", String(open));
+  if (!open) input.focus();
+}
+
+invButton.addEventListener("click", () => setInventoryOpen(invOverlay.hidden));
+document.getElementById("inv-close").addEventListener("click", () => setInventoryOpen(false));
+invOverlay.addEventListener("click", (event) => {
+  if (event.target === invOverlay) setInventoryOpen(false); // click outside the panel
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !invOverlay.hidden) setInventoryOpen(false);
+});
+renderInventory([]);
+
 function showMessage(msg) {
+  if (msg.type === "status") { showStatus(msg); return; }
   if (msg.type === "switch_scene") {
     sceneName.textContent = msg.scene;
     sceneDescription.textContent = msg.description || "";
     addText("scene-break", msg.scene);
+    if (window.Fx) Fx.scene(msg.description);
     return;
   }
   if (msg.type !== "message") return;
@@ -73,7 +129,10 @@ function showMessage(msg) {
   }
   if (msg.role === "npc") showNpcMessage(msg);
   else if (msg.role === "system") addText("system", msg.text);
-  else addText("narrator", msg.text);
+  else {
+    const line = addText("narrator", msg.text);
+    if (window.Fx) Fx.play(msg.effects, line, msg.text);
+  }
 }
 
 function setThinking(on) {
@@ -123,6 +182,7 @@ form.addEventListener("submit", (event) => {
   const text = input.value;
   if (!socket || socket.readyState !== WebSocket.OPEN) return;
   if (text.trim() === "") return; // blank input does nothing (no turn)
+  if (window.Fx) Fx.unlock(); // audio may only start from a user gesture
 
   addText("player", text);
   socket.send(JSON.stringify({ type: "send_message", text }));
@@ -130,5 +190,21 @@ form.addEventListener("submit", (event) => {
   pending += 1;
   setThinking(true);
 });
+
+const muteBtn = document.getElementById("mute");
+function renderMute() {
+  const m = window.Fx ? Fx.isMuted() : false;
+  muteBtn.textContent = m ? "🔇" : "🔊";
+  muteBtn.setAttribute("aria-label", m ? "Unmute sound" : "Mute sound");
+}
+if (muteBtn && window.Fx) {
+  renderMute();
+  muteBtn.addEventListener("click", () => {
+    Fx.unlock();
+    Fx.setMuted(!Fx.isMuted());
+    renderMute();
+    input.focus();
+  });
+}
 
 connect();
