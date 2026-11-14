@@ -61,8 +61,8 @@ def main():
     p.add_argument('--raw-output', type=Path, required=True, help='Scratch file outside data/review; preserves rejected responses.')
     p.add_argument('--timeout', type=int, default=600)
     a = p.parse_args()
-    if not 1 <= a.count <= 20:
-        p.error('Generate 1–20 at a time; review each batch before generating more.')
+    if not 1 <= a.count <= 50:
+        p.error('Generate 1–50 at a time; review each batch before generating more.')
     if a.output.exists():
         raise SystemExit('Output exists; refusing to replace a previous batch.')
     session_path = ROOT/'data/review/exports/zoairk-review-session.json'
@@ -86,7 +86,8 @@ def main():
     notes = [{'query': e['example']['query'], 'review_note': e['reason']}
              for e in session['entries'] if e['decision']=='deny' and e['reason']]
     rules = (ROOT/'scripts/generation_rules.md').read_text()
-    payload = {'model':a.model, 'stream':False, 'temperature':0.8, 'max_tokens':22000,
+    max_tokens = max(22000, a.count * 1100)
+    payload = {'model':a.model, 'stream':False, 'temperature':0.8, 'max_tokens':max_tokens,
                'reasoning_effort':a.reasoning_effort,
                'messages':[{'role':'system','content':rules}, {'role':'user','content':json.dumps({
                    'task':f'Generate exactly {a.count} NEW candidates as a JSON array. They are pending review, not approved.',
@@ -121,6 +122,7 @@ def main():
     meta.parent.mkdir(parents=True,exist_ok=True)
     metadata={'model':a.model,'reasoning_effort':a.reasoning_effort,'created_at':datetime.now(timezone.utc).isoformat(),
               'count':len(rows),'variation_focus':a.focus,'status':'pending_review_at_generation',
+              'max_tokens':max_tokens,
               'batch_path':str(a.output.resolve().relative_to(ROOT)),
               'sha256':hashlib.sha256(content.encode()).hexdigest(),
               'rules_sha256':hashlib.sha256(rules.encode()).hexdigest(),
