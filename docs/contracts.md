@@ -33,6 +33,8 @@ Each piece is built against these. If one must change, change it here first and 
   applied one at a time; every result is broadcast with a `"player"` field. Client connects with
   `ws://127.0.0.1:8765/?name=<player>`. Server → client also sends `{"type":"message","role":"player",
   "player":name,"text":input}` for each queued input, and `role: "system"` join/leave lines.
+- Narrator messages may carry `"effects": [...]` from {fire, extinguish, shatter, throw, hit, open, close, read}:
+  front-end sound/visual cues for what actually happened. Scene descriptions mention burning objects.
 - Server: `ws://127.0.0.1:8765`. Static web page served from `web/` at `http://127.0.0.1:8000`.
 
 ## C5: world JSON (`worlds/*.json`)

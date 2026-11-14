@@ -16,6 +16,17 @@ STATE_WORDS = {"open": "open", "on_fire": "on fire", "broken": "broken"}
 QUOTED = re.compile(r"[\"“][^\"”]*[\"”]")
 
 
+EFFECTS = {"ignite": "fire", "extinguish": "extinguish", "break_object": "shatter", "throw": "throw",
+           "attack": "hit", "open": "open", "close": "close", "read": "read"}
+
+
+def _effects(events) -> list[str]:
+    """Front-end cues for what actually happened (only successful events)."""
+    return sorted({EFFECTS[e.action] for e in events if e.ok and e.action in EFFECTS}
+                  | ({"shatter"} if any(e.ok and str(e.changed.get(k)) == "True" and k.endswith(".broken")
+                                        for e in events for k in e.changed) else set()))
+
+
 def _reveal_or_mask(npc, text: str) -> str:
     """An unknown NPC's name is revealed only when spoken aloud; otherwise narration uses its title."""
     if npc.known or not npc.title or not text:
@@ -149,7 +160,7 @@ class Game:
             event_text = f"{player}: {text}. Result: {prose}"
             for n in npcs:
                 n.remember(w.turn, "action", event_text)
-            out = [_msg("narrator", prose)]
+            out = [_msg("narrator", prose, effects=_effects(events))]
 
         for d in npc.gauge(npcs, event_text, turn=w.turn):   # gauge records memory and the engage reply
             who = next(n for n in npcs if n.name == d.npc)
@@ -164,6 +175,6 @@ class Game:
                 players_here = [p for p, loc in self.locations.items() if loc == w.current.name]
                 ev = self._attack(d.npc, d.attack, None, present, players_here)
                 if ev.ok:
-                    out.append(_msg("narrator", "⚔ " + ev.message))
+                    out.append(_msg("narrator", "⚔ " + ev.message, effects=["hit"]))
         w.save()
         return out
