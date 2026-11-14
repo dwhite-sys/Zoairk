@@ -1,0 +1,23 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:52:02.298766+00:00",
+  "count": 50,
+  "variation_focus": "Mountain refuge, ice cave, abandoned alchemy laboratory and rope lift station. Exactly 15 do-only, 15 check-only, 20 mixed. Clear explicit owners for every referenced part; varied syntax and difficulty with single through four actions. Include actual actions before hypothetical sequences, question-first preparations and independent real follow-ups. Copy exact case of source cues; no prior-query duplicates.",
+  "status": "pending_review_at_generation",
+  "max_tokens": 55000,
+  "batch_path": "data/review/37-examples.json",
+  "sha256": "68d212d09ce38718e91ae13b434fa3602043c920e4aecf028af5a2f303ee5dac",
+  "rules_sha256": "e64a83a7e518681cd6512122f5940389ef0b27fca274a1670ef30c7996aa1226",
+  "feedback_session_sha256": "bdd4de6391105ebf8edebafba75ab4bb3388551a2458eec33b1abc52c1ded3b5",
+  "feedback_reviewed_count": 750,
+  "usage": {
+    "prompt_tokens": 31376,
+    "completion_tokens": 29072,
+    "total_tokens": 60448,
+    "prompt_tokens_details": {
+      "cached_tokens": 2816
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}

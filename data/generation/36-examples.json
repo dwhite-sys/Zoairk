@@ -1,0 +1,23 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:52:16.560860+00:00",
+  "count": 50,
+  "variation_focus": "Harbor warehouse, ship repair yard, smugglers cellar and coastal beacon. Exactly 15 committed-only, 15 feasibility-only, 20 mixed. Broad verbs and 1\u20134 action syntax, source/execution order, precise tool roles, owned parts/destinations, literal case-sensitive intent cues and temporal markers. Varied natural syntax; no inferred actual state changes from checks.",
+  "status": "pending_review_at_generation",
+  "max_tokens": 55000,
+  "batch_path": "data/review/36-examples.json",
+  "sha256": "324cbd6767ef27b42d00e707bdd8dd61094d32e4ab6500407236e234573bcb74",
+  "rules_sha256": "e64a83a7e518681cd6512122f5940389ef0b27fca274a1670ef30c7996aa1226",
+  "feedback_session_sha256": "bdd4de6391105ebf8edebafba75ab4bb3388551a2458eec33b1abc52c1ded3b5",
+  "feedback_reviewed_count": 750,
+  "usage": {
+    "prompt_tokens": 31255,
+    "completion_tokens": 34730,
+    "total_tokens": 65985,
+    "prompt_tokens_details": {
+      "cached_tokens": 2944
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}
