@@ -358,10 +358,19 @@ class Game:
                 else:
                     rest.append(c)
             actions = parser.calls_to_action_sets(rest, w)
-            if not actions and not fights and not items:   # gibberish / nothing resolvable: no turn
-                return [_msg("system", "Nothing happens.")]
+            roleplay = None
+            if not actions and not fights and not items:
+                names = [n.lower() for n in alive_npcs] + [h.lower() for h in here]
+                if not any(re.search(rf"\b{re.escape(nm)}\b", text.lower()) for nm in names if nm):
+                    return [_msg("system", "Nothing happens.")]   # gibberish / nothing resolvable: no turn
+                # Free-form role-play aimed at someone here (insults, gestures): no rules change,
+                # but it is narrated and the NPCs witness it, so they can react or fight back.
+                roleplay = Event("roleplay", True, None, None, {},
+                                 f"{player} does this (pure role-play; nothing in the world changes): {text}")
             w.turn += 1
             events = [self._items(player, c, npcs) for c in items] + interactions.run(actions)
+            if roleplay is not None:
+                events.append(roleplay)
             for c in fights:
                 events.append(self._attack(player, c["target"], c.get("instrument") or None, alive_npcs, here))
             for e in events:                       # opening a container reveals what is inside (Zork)
