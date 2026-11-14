@@ -1,0 +1,23 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:58:27.664989+00:00",
+  "count": 50,
+  "variation_focus": "Dwarven caravan tunnel, mountain bridge, abandoned abbey kitchen and goblin supply cache. Exactly 15 do-only, 15 check-only, 20 mixed. Follow literal format including one final triple for a single action. Broader action vocabulary and 1\u20134-action complexity, source-order versus temporal execution, explicit part owners and nonambiguous pronouns, careful tool roles. No modern engines, copied queries or hypothetical access dependencies.",
+  "status": "pending_review_at_generation",
+  "max_tokens": 55000,
+  "batch_path": "data/review/39-examples.json",
+  "sha256": "b327a3fba01a4f140ea2ca15eeedfefdba05f352f9d8de7903f664c786263719",
+  "rules_sha256": "ec899d388bfa525d16830f02eb7a22923278ad254d0b544cef5db69ce0937f5e",
+  "feedback_session_sha256": "6e4f3d3160f5cb2dd6aba78773088ed35b7c976a36e572cd63a67a8abf0b2dac",
+  "feedback_reviewed_count": 900,
+  "usage": {
+    "prompt_tokens": 35726,
+    "completion_tokens": 31754,
+    "total_tokens": 67480,
+    "prompt_tokens_details": {
+      "cached_tokens": 3328
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}
