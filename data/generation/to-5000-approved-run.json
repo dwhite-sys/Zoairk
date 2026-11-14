@@ -7,5 +7,14 @@
   "first_batch": 40,
   "method": "Every candidate reviewed by Codex; decisions saved through the local app normal session-import flow, source batches and canonical exports pushed through Git. Denials feed later generation prompts. No weight updates or automatic approvals.",
   "recovered_stale_remote_commit": "753799a (900 decisions reset to pending; remaining decided entries identical to baseline; complete runtime intact)",
-  "generation_failures": []
+  "generation_failures": [],
+  "generation_count_deviations": [
+    {
+      "batch": 42,
+      "requested": 50,
+      "returned": 49,
+      "entered": 49,
+      "handling": "All complete candidates retained without semantic edits; original raw response preserved."
+    }
+  ]
 }

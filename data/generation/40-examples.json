@@ -1,0 +1,23 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T15:13:01.700296+00:00",
+  "count": 50,
+  "variation_focus": "Forest ranger outpost, beaver-dammed creek, abandoned toll bridge and hunters camp. 50 unique fantasy adventuring examples: 15 do-only, 15 check-only, 20 mixed; 1\u20134 actions and varied natural syntax. Preserve all inferred part owners in actual arguments, e.g. bridge crossbar and hearth fire, not unqualified parts after context. Use exact single-action annotation once and literal source-case cues.",
+  "status": "pending_review_at_generation",
+  "max_tokens": 55000,
+  "batch_path": "data/review/40-examples.json",
+  "sha256": "5586ccfac17491cc0bb07aac1576d4e6609fec7e29abd25514440bdf0f633311",
+  "rules_sha256": "ec899d388bfa525d16830f02eb7a22923278ad254d0b544cef5db69ce0937f5e",
+  "feedback_session_sha256": "eeaf75f3e8710ba8cc804b223351bd642f2f51226d39941d88b79f83c4bf38a6",
+  "feedback_reviewed_count": 1000,
+  "usage": {
+    "prompt_tokens": 38850,
+    "completion_tokens": 31079,
+    "total_tokens": 69929,
+    "prompt_tokens_details": {
+      "cached_tokens": 3328
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}

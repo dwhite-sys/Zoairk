@@ -1,0 +1,23 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T15:12:58.807143+00:00",
+  "count": 50,
+  "variation_focus": "Cavern shrine, subterranean mushroom farm, dwarven lock chamber and miners bunkhouse. 50 unique examples with 15 committed,15 feasibility,20 mixed. Distinct verbs, actions and sentence shapes. Explicit part ownership and source/destination/materials, single through four calls. Avoid repeating prior stock templates; no conditional outcomes or real follow-ups depending on simulated access.",
+  "status": "pending_review_at_generation",
+  "max_tokens": 55000,
+  "batch_path": "data/review/41-examples.json",
+  "sha256": "3a83727cc79e404fe4f651ac111aed78b1b1bce48bc9ee4931c8f19ba8879c63",
+  "rules_sha256": "ec899d388bfa525d16830f02eb7a22923278ad254d0b544cef5db69ce0937f5e",
+  "feedback_session_sha256": "eeaf75f3e8710ba8cc804b223351bd642f2f51226d39941d88b79f83c4bf38a6",
+  "feedback_reviewed_count": 1000,
+  "usage": {
+    "prompt_tokens": 38763,
+    "completion_tokens": 31283,
+    "total_tokens": 70046,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}

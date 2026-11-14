@@ -1,0 +1,25 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T15:14:21.625548+00:00",
+  "count": 49,
+  "variation_focus": "Royal archive, scriptorium, ruined aviary and castle dovecote; diverse fantasy action parsing",
+  "status": "pending_review_at_generation",
+  "max_tokens": 55000,
+  "batch_path": "data/review/42-examples.json",
+  "sha256": "9b1be8c446a109ee142233b2591c86c3d9178d7d84c279a844e974797750f829",
+  "rules_sha256": "ec899d388bfa525d16830f02eb7a22923278ad254d0b544cef5db69ce0937f5e",
+  "feedback_session_sha256": "eeaf75f3e8710ba8cc804b223351bd642f2f51226d39941d88b79f83c4bf38a6",
+  "feedback_reviewed_count": 1000,
+  "usage": {
+    "prompt_tokens": 38924,
+    "completion_tokens": 21515,
+    "total_tokens": 60439,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json",
+  "requested_count": 50,
+  "count_deviation": "Returned 49 complete candidates instead of 50; all 49 retained unmodified for review, no semantic filtering."
+}
