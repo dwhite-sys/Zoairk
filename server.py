@@ -63,14 +63,26 @@ QUEUE: asyncio.Queue | None = None
 
 
 async def broadcast(messages, scene=None):
-    """Send to everyone, or (with scene) only to players currently in that room."""
+    """Deliver each message to the right players.
+
+    - switch_scene / private: only the player it belongs to;
+    - to_scene: only players currently in that room (others_only skips the actor);
+    - otherwise, with scene: players in that room plus the actor; without scene: everyone.
+    """
     locations = getattr(GAME, "locations", {})
     for ws in list(PLAYERS):
-        if scene is not None and locations.get(PLAYERS[ws], scene) != scene and PLAYERS[ws] != CURRENT_ACTOR:
-            continue
-        # A scene change belongs only to the player who moved; everyone else keeps their own room.
-        mine = [m for m in messages
-                if not ((m.get("type") == "switch_scene" or m.get("private")) and m.get("player") not in (None, PLAYERS[ws]))]
+        me = PLAYERS[ws]
+        mine = []
+        for m in messages:
+            owner = m.get("player")
+            if (m.get("type") == "switch_scene" or m.get("private")) and owner not in (None, me):
+                continue
+            if "to_scene" in m:
+                if locations.get(me) != m["to_scene"] or (m.get("others_only") and owner == me):
+                    continue
+            elif scene is not None and locations.get(me, scene) != scene and me != CURRENT_ACTOR:
+                continue
+            mine.append(m)
         try:
             await send_all(ws, mine)
         except websockets.ConnectionClosed:

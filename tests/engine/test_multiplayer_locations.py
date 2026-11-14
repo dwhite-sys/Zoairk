@@ -11,3 +11,11 @@ def test_players_move_independently():
     look = g.handle("look", player="Dawson")[0]["text"]
     assert "front lawn" in look and "dusty front hall" not in look
     assert "dusty front hall" in g.handle("look", player="Drew")[0]["text"]
+
+
+def test_leave_and_arrive_notices_go_to_the_right_rooms():
+    g = Game("worlds/demo.json"); g.intro("Dawson"); g.intro("Drew")
+    out = g.handle("go north", player="Drew")
+    notices = {m["text"]: m["to_scene"] for m in out if "to_scene" in m}
+    assert notices == {"Drew heads north.": "front_lawn", "Drew arrives.": "house"}
+    assert all(m.get("others_only") for m in out if "to_scene" in m)

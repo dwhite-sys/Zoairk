@@ -84,12 +84,16 @@ class Game:
         m = MOVE.match(text)
         if m:
             direction = SHORT.get(m.group(1).lower(), m.group(1).lower())
+            left = w.current.name
             if not w.move(direction):
                 return [_msg("system", "You can't go that way.")]
             self.locations[player] = w.current.name
             w.turn += 1
             w.save()
-            return [{**self._scene(), "private": True}, _msg("narrator", self.describe(), private=True)]
+            arrived = w.current.name
+            return [{**self._scene(), "private": True}, _msg("narrator", self.describe(), private=True),
+                    _msg("system", f"{player} heads {direction}.", to_scene=left, others_only=True),
+                    _msg("system", f"{player} arrives.", to_scene=arrived, others_only=True)]
 
         npcs = w.current.npcs
         if SPEECH.search(text):                          # quotes mark speech: no parse, straight to memory
