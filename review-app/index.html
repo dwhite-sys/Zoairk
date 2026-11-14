@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101714">
+  <title>Zoairk · Example review</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="review.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="app-header">
+      <a class="brand" href="./" aria-label="Zoairk home">Zoairk<span aria-hidden="true"> / </span></a>
+      <h1>Example review</h1>
+      <div class="header-actions">
+        <label for="file-input" class="button secondary">Import examples</label>
+        <input id="file-input" type="file" accept=".json,.jsonl,application/json" hidden>
+        <details id="export-menu" class="export-menu">
+          <summary class="button secondary">Export datasets</summary>
+          <section class="exports" aria-label="Export datasets">
+            <button id="export-needle" class="export-button" disabled><span>Needle training<small>Approved examples · JSONL</small></span></button>
+            <button id="export-classifier" class="export-button" disabled><span>Classifier training<small>Approve + deny labels · JSONL</small></span></button>
+            <button id="export-session" class="export-button" disabled><span>Save review session<small>Back up or move to another device</small></span></button>
+            <p>Progress is saved in this browser.</p>
+          </section>
+        </details>
+      </div>
+    </header>
+    <main class="content">
+      <section class="batch-info" aria-label="Review progress">
+        <span class="batch-total"><strong id="total-count">0</strong> examples</span>
+        <dl class="stats"><div><dt>Approved</dt><dd id="approved-count">0</dd></div><div><dt>Denied</dt><dd id="denied-count">0</dd></div><div><dt>Pending</dt><dd id="pending-count">0</dd></div></dl>
+        <span id="progress-caption" class="sr-only">Import a file to begin</span>
+        <div class="progress-track"><div id="progress-bar"></div></div>
+      </section>
+      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+      <section id="empty-state" class="empty-state">
+        <div id="drop-zone" class="drop-zone">
+          <h2>Import your examples</h2>
+          <p>Drop <code>examples.json</code> here to start reviewing.</p>
+          <label for="file-input" class="button primary">Choose a file</label>
+          <span class="limit">JSON or JSONL · Up to 10 MB</span>
+        </div>
+        <button id="load-sample" class="text-button">Or try the 10 sample examples</button>
+      </section>
+      <section id="workspace" hidden>
+        <div class="queue-toolbar"><div class="tabs" role="group" aria-label="Filter examples"><button class="tab active" data-filter="pending">Pending <span id="pending-tab-count">0</span></button><button class="tab" data-filter="all">All examples</button><button class="tab" data-filter="reviewed">Reviewed</button></div><span id="position" class="position"></span></div>
+        <div id="review-layout" class="review-layout">
+          <article class="example-card">
+            <div class="card-heading"><span class="eyebrow">Player input</span><span id="decision-badge" class="badge">Pending review</span></div>
+            <h2 id="query" class="query"></h2>
+            <section class="reasoning-output" aria-labelledby="reasoning-heading"><h3 id="reasoning-heading" class="eyebrow">Reasoning</h3><pre id="reasoning"></pre></section>
+            <div class="answer-heading"><h3 class="eyebrow">Tool calls</h3><span id="call-count"></span></div>
+            <ol id="calls" class="calls"></ol>
+            <details class="tool-details"><summary>Tool definitions</summary><pre id="tools"></pre></details>
+          </article>
+          <aside class="decision-panel">
+            <h2>Review</h2>
+            <label for="review-reason">Note <span>optional</span></label>
+            <textarea id="review-reason" rows="3" placeholder="What needs fixing?"></textarea>
+            <button id="approve" class="button approve">✓ Approve example</button>
+            <button id="deny" class="button deny">✕ Deny example</button>
+            <button id="clear-decision" class="text-button" hidden>Return to pending</button>
+            <div class="save-status" id="save-status">Saved in this browser</div>
+          </aside>
+        </div>
+        <div id="queue-empty" class="queue-empty" hidden><h2 id="queue-empty-title">You’re all caught up.</h2><p id="queue-empty-text">Export your datasets, or import another batch.</p><button id="see-all" class="button secondary">See all examples</button></div>
+        <footer class="review-footer"><div><button id="previous" class="button small secondary">← Previous</button><button id="next" class="button small secondary">Next →</button></div><button id="undo" class="text-button" disabled>↶ Undo last decision</button></footer>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

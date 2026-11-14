@@ -1,5 +1,18 @@
 # Zoairk
 
+## Example review webapp
+
+The standalone browser review app lives in [`review-app/`](review-app/). It imports JSON examples, displays reasoning and ordered tool calls, and exports approved Needle examples and labeled classifier data.
+
+```sh
+cd review-app
+npm start
+```
+
+Open http://localhost:3000. For phone access on the same network, run `npm run start:lan` from that folder. See the [app README](review-app/README.md) for the input format, exports, persistence, and testing instructions.
+
+## Needle seed dataset
+
 Training examples for parsing natural-language actions into temporally ordered `enter_command(instrument, action, target)` calls with Needle 3.
 
 ## Dataset

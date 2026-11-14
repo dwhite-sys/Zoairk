@@ -1,0 +1,19 @@
+{
+  "name": "zoairk-review",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Browser-based training example review for Zoairk",
+  "scripts": {
+    "start": "node scripts/serve.cjs",
+    "start:lan": "node scripts/serve.cjs --host 0.0.0.0",
+    "test": "node --test tests/*.test.cjs",
+    "test:e2e": "playwright test",
+    "test:all": "npm test && npm run test:e2e"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1"
+  }
+}

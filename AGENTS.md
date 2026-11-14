@@ -1,0 +1,31 @@
+﻿# Zoairk — iHack 2026
+- Build a reusable Zork-inspired text adventure engine with AI agents and an authoritative persistent state machine.
+- Category: Reinventing the Past. Audience: text adventure players and creators of games using this engine.
+- Deadline: November 14, 2026, 3:00 p.m. MST (America/Denver).
+- Work in C:/Users/Grant Jones/Desktop/HACKATHON/iHack2026/Zoairk.
+- Stack chosen by team: Python backend; JavaScript, HTML, CSS frontend. Explain as we go; learning takes priority over speed.
+- Demo: in two minutes, show DM-style reactions, player/NPC actions through the same system, NPC memory affected by interaction, and persistent objects/NPC state.
+- NPC memory must reflect inaction, nonverbal and verbal communication, and engagement such as combat.
+- Quotation marks identify speech; players need not name a recipient. Exact recipient behavior needs team agreement.
+- Blank/whitespace-only input and gibberish do nothing: no turn, world-state, or NPC-memory changes; await valid input.
+- AI proposes actions and narration; the state machine validates actions and owns world truth. Persist NPC memory and object/NPC state.
+- Immediate scope: responsive browser app to import examples.json, manually approve/deny, and export Needle/classifier datasets. Reasoning is first-class output, visible alongside calls and preserved in both exports.
+- Done: seed dataset (10 examples, 25 calls); standalone review-app/ webapp, local persistence, undo, duplicate checks, session transfer, and dataset downloads.
+- Missing: game engine, trained models, model evaluation, automatic generation/review, and background training. These are outside the current webapp request.
+- Run: cd review-app then npm start, then http://localhost:3000; npm run start:lan prints phone-accessible URLs for the same network. Node 18+; no runtime dependencies or Python needed for review.
+- Test: from review-app/, npm test; npm ci then npm run test:e2e (installed Edge). Tests cover logic, HTTP integration, desktop/mobile browser flows, errors, repeated imports, persistence, reasoning, and exports.
+- Next: use the review app to curate examples; separately agree model training and game-engine work. Browser state is per device; import/export sessions for transfer.
+- Event rules: Devpost https://ihack-2026.devpost.com; web access failed during setup, so additional restrictions remain unverified.
+
+## Working rules
+- Do the legwork: run, test, research, and fix issues yourself. Team owns product, appearance, behavior, and tool decisions; bundle questions into one message.
+- Choose small implementation details and tell the team what you chose. When learning, explaining comes before speed.
+- Build what was requested and build it well; do not add unrequested features.
+- After every change, run the changed part and confirm its behavior. Once the whole flow exists, run it start to finish as a person would, and repeat after later changes.
+- Open and use browser apps in a browser; otherwise run and operate the application directly. Never call something done without seeing it work.
+- Test logic with unit tests, connections with integration tests, and the complete flow manually and automatically. Cover empty input, wrong input, and repeating an action.
+- Commit after each working step with a clear message. Never commit passwords, API keys, or other secrets.
+- Report broken or skipped work before reporting what works.
+- After each step, explain in a few sentences what was built, why, and one concept the team can explain to a judge.
+- On "demo check", run the full demo like a judge, fix failures, and supply a five-line demo script.
+- The team authorized the review webapp directly. Keep this scope; ask before adding automatic training or game features.
