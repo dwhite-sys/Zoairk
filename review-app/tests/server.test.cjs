@@ -30,7 +30,7 @@ test('sample import, labeling, and both dataset exports integrate end to end', a
   const restored = R.parseFile(R.session(entries)).entries;
   assert.equal(R.counts(restored).approved, 1);
   assert.equal(R.counts(restored).denied, 1);
-  assert.equal(JSON.parse(R.needle(restored)).answers[0].arguments.action, 'unlock');
+  assert.deepEqual(JSON.parse(R.needle(restored)), entries[0].example);
   assert.equal(R.classifier(restored).trim().split('\n').length, 2);
 });
 test('serves the dataset named by EXAMPLES_FILE and rejects a bad one', async () => {
@@ -174,7 +174,7 @@ test('keeps one shared workspace that every browser reads and writes', async () 
     const after = await (await fetch(`${origin}/needle-training/api/session`)).json();
     assert.equal(R.counts(after.entries).denied, 1);
     assert.equal(after.entries[1].reason, 'wrong order');
-    assert.equal(JSON.parse(R.needle(after.entries)).answers[0].arguments.action, 'unlock');
+    assert.deepEqual(JSON.parse(R.needle(after.entries)), entries[0].example);
 
     // An example the server has never seen is accepted rather than rejected.
     const fresh = entries[5].example;

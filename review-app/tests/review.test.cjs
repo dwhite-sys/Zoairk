@@ -7,7 +7,8 @@ const R = require('../review.js');
 const examples = JSON.parse(fs.readFileSync(path.join(__dirname, '../examples.json'), 'utf8'));
 const batch = () => R.parseFile(JSON.stringify(examples)).entries;
 test('all original examples validate, retaining 25 calls and temporal order', () => {
-  const entries = batch();
+  const original = fs.readFileSync(path.join(__dirname, '../../past/examples-2026-11-14-01.json'), 'utf8');
+  const entries = R.parseFile(original).entries;
   assert.equal(entries.length, 10);
   assert.equal(entries.reduce((n, e) => n + e.example.answers.length, 0), 25);
   assert.deepEqual(entries[0].example.answers.map(a => a.arguments.action), ['unlock', 'cut']);

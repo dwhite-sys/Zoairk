@@ -1,540 +1,804 @@
 [
   {
-    "query": "I cut the rope with my knife, but before that, I unlock the door with my key",
+    "query": "I drop the pouch.",
     "tools": [
       {
         "name": "enter_command",
-        "description": "Perform one action on a target using an instrument. Emit calls in the temporal order stated by the query.",
+        "description": "Commit one character action for the authoritative engine to validate and execute. Emit committed actions only, in the requested order.",
         "parameters": {
           "type": "object",
           "properties": {
             "instrument": {
               "type": "string",
-              "description": "Instrument explicitly named in the query."
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
             },
             "action": {
               "type": "string",
-              "description": "Action verb or verb phrase, such as cut or pick up."
+              "description": "Action verb or verb phrase."
             },
             "target": {
               "type": "string",
-              "description": "Target explicitly named in the query."
+              "description": "Target of the action; resolve pronouns from the query."
             }
           },
           "required": [
             "instrument",
             "action",
             "target"
-          ]
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "check",
+        "description": "Simulate one hypothetical character action without changing actual game state. For a hypothetical sequence, carry simulated changes forward within that sequence. A check does not authorize execution.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "instrument": {
+              "type": "string",
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
+            },
+            "action": {
+              "type": "string",
+              "description": "Action verb or verb phrase."
+            },
+            "target": {
+              "type": "string",
+              "description": "Target of the action; resolve pronouns from the query."
+            }
+          },
+          "required": [
+            "instrument",
+            "action",
+            "target"
+          ],
+          "additionalProperties": false
         }
       }
     ],
-    "reasoning": "'cut the rope with my knife' -> action 'cut', target 'rope', instrument 'knife' -> (instrument:action:target) knife:cut:rope\n[but before]\n'unlock the door with my key' -> action 'unlock', target 'door', instrument 'key' -> (instrument:action:target) key:unlock:door\nkey:unlock:door [before] knife:cut:rope\nkey:unlock:door -> knife:cut:rope",
+    "reasoning": "'drop the pouch' -> action 'drop', target 'pouch', instrument 'none' -> (instrument:action:target) none:drop:pouch\n'I drop' -> committed action -> enter_command\nnone:drop:pouch",
     "answers": [
       {
         "name": "enter_command",
         "arguments": {
-          "instrument": "key",
-          "action": "unlock",
-          "target": "door"
+          "instrument": "none",
+          "action": "drop",
+          "target": "pouch"
+        }
+      }
+    ]
+  },
+  {
+    "query": "I cut the banner with the dagger after taking the dagger.",
+    "tools": [
+      {
+        "name": "enter_command",
+        "description": "Commit one character action for the authoritative engine to validate and execute. Emit committed actions only, in the requested order.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "instrument": {
+              "type": "string",
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
+            },
+            "action": {
+              "type": "string",
+              "description": "Action verb or verb phrase."
+            },
+            "target": {
+              "type": "string",
+              "description": "Target of the action; resolve pronouns from the query."
+            }
+          },
+          "required": [
+            "instrument",
+            "action",
+            "target"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "check",
+        "description": "Simulate one hypothetical character action without changing actual game state. For a hypothetical sequence, carry simulated changes forward within that sequence. A check does not authorize execution.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "instrument": {
+              "type": "string",
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
+            },
+            "action": {
+              "type": "string",
+              "description": "Action verb or verb phrase."
+            },
+            "target": {
+              "type": "string",
+              "description": "Target of the action; resolve pronouns from the query."
+            }
+          },
+          "required": [
+            "instrument",
+            "action",
+            "target"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ],
+    "reasoning": "'cut the banner with the dagger' -> action 'cut', target 'banner', instrument 'dagger' -> (instrument:action:target) dagger:cut:banner\n[after]\n'taking the dagger' -> action 'take', target 'dagger', instrument 'none' -> (instrument:action:target) none:take:dagger\n'I cut' and 'taking' -> committed action -> enter_command\nnone:take:dagger [before] dagger:cut:banner\nnone:take:dagger -> dagger:cut:banner",
+    "answers": [
+      {
+        "name": "enter_command",
+        "arguments": {
+          "instrument": "none",
+          "action": "take",
+          "target": "dagger"
         }
       },
       {
         "name": "enter_command",
         "arguments": {
-          "instrument": "knife",
+          "instrument": "dagger",
           "action": "cut",
+          "target": "banner"
+        }
+      }
+    ]
+  },
+  {
+    "query": "Before I enter the crypt, I extinguish my torch, but before that, I close the chest.",
+    "tools": [
+      {
+        "name": "enter_command",
+        "description": "Commit one character action for the authoritative engine to validate and execute. Emit committed actions only, in the requested order.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "instrument": {
+              "type": "string",
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
+            },
+            "action": {
+              "type": "string",
+              "description": "Action verb or verb phrase."
+            },
+            "target": {
+              "type": "string",
+              "description": "Target of the action; resolve pronouns from the query."
+            }
+          },
+          "required": [
+            "instrument",
+            "action",
+            "target"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "check",
+        "description": "Simulate one hypothetical character action without changing actual game state. For a hypothetical sequence, carry simulated changes forward within that sequence. A check does not authorize execution.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "instrument": {
+              "type": "string",
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
+            },
+            "action": {
+              "type": "string",
+              "description": "Action verb or verb phrase."
+            },
+            "target": {
+              "type": "string",
+              "description": "Target of the action; resolve pronouns from the query."
+            }
+          },
+          "required": [
+            "instrument",
+            "action",
+            "target"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ],
+    "reasoning": "[Before]\n'enter the crypt' -> action 'enter', target 'crypt', instrument 'none' -> (instrument:action:target) none:enter:crypt\n'extinguish my torch' -> action 'extinguish', target 'torch', instrument 'none' -> (instrument:action:target) none:extinguish:torch\n[but before that]\n'close the chest' -> action 'close', target 'chest', instrument 'none' -> (instrument:action:target) none:close:chest\n'I enter', 'I extinguish', and 'I close' -> committed action -> enter_command\nnone:close:chest [before] none:extinguish:torch [before] none:enter:crypt\nnone:close:chest -> none:extinguish:torch -> none:enter:crypt",
+    "answers": [
+      {
+        "name": "enter_command",
+        "arguments": {
+          "instrument": "none",
+          "action": "close",
+          "target": "chest"
+        }
+      },
+      {
+        "name": "enter_command",
+        "arguments": {
+          "instrument": "none",
+          "action": "extinguish",
+          "target": "torch"
+        }
+      },
+      {
+        "name": "enter_command",
+        "arguments": {
+          "instrument": "none",
+          "action": "enter",
+          "target": "crypt"
+        }
+      }
+    ]
+  },
+  {
+    "query": "Could I push the stone?",
+    "tools": [
+      {
+        "name": "enter_command",
+        "description": "Commit one character action for the authoritative engine to validate and execute. Emit committed actions only, in the requested order.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "instrument": {
+              "type": "string",
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
+            },
+            "action": {
+              "type": "string",
+              "description": "Action verb or verb phrase."
+            },
+            "target": {
+              "type": "string",
+              "description": "Target of the action; resolve pronouns from the query."
+            }
+          },
+          "required": [
+            "instrument",
+            "action",
+            "target"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "check",
+        "description": "Simulate one hypothetical character action without changing actual game state. For a hypothetical sequence, carry simulated changes forward within that sequence. A check does not authorize execution.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "instrument": {
+              "type": "string",
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
+            },
+            "action": {
+              "type": "string",
+              "description": "Action verb or verb phrase."
+            },
+            "target": {
+              "type": "string",
+              "description": "Target of the action; resolve pronouns from the query."
+            }
+          },
+          "required": [
+            "instrument",
+            "action",
+            "target"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ],
+    "reasoning": "'push the stone' -> action 'push', target 'stone', instrument 'none' -> (instrument:action:target) none:push:stone\n'Could I' -> feasibility question -> check\nnone:push:stone",
+    "answers": [
+      {
+        "name": "check",
+        "arguments": {
+          "instrument": "none",
+          "action": "push",
+          "target": "stone"
+        }
+      }
+    ]
+  },
+  {
+    "query": "Would I be able to take the crown and then close the sarcophagus?",
+    "tools": [
+      {
+        "name": "enter_command",
+        "description": "Commit one character action for the authoritative engine to validate and execute. Emit committed actions only, in the requested order.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "instrument": {
+              "type": "string",
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
+            },
+            "action": {
+              "type": "string",
+              "description": "Action verb or verb phrase."
+            },
+            "target": {
+              "type": "string",
+              "description": "Target of the action; resolve pronouns from the query."
+            }
+          },
+          "required": [
+            "instrument",
+            "action",
+            "target"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "check",
+        "description": "Simulate one hypothetical character action without changing actual game state. For a hypothetical sequence, carry simulated changes forward within that sequence. A check does not authorize execution.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "instrument": {
+              "type": "string",
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
+            },
+            "action": {
+              "type": "string",
+              "description": "Action verb or verb phrase."
+            },
+            "target": {
+              "type": "string",
+              "description": "Target of the action; resolve pronouns from the query."
+            }
+          },
+          "required": [
+            "instrument",
+            "action",
+            "target"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ],
+    "reasoning": "'take the crown' -> action 'take', target 'crown', instrument 'none' -> (instrument:action:target) none:take:crown\n[then]\n'close the sarcophagus' -> action 'close', target 'sarcophagus', instrument 'none' -> (instrument:action:target) none:close:sarcophagus\n'Would I be able to' -> feasibility question -> check\nnone:take:crown [before] none:close:sarcophagus\nnone:take:crown -> none:close:sarcophagus",
+    "answers": [
+      {
+        "name": "check",
+        "arguments": {
+          "instrument": "none",
+          "action": "take",
+          "target": "crown"
+        }
+      },
+      {
+        "name": "check",
+        "arguments": {
+          "instrument": "none",
+          "action": "close",
+          "target": "sarcophagus"
+        }
+      }
+    ]
+  },
+  {
+    "query": "Could I climb the rope after sheathing my dagger and then dropping my shield?",
+    "tools": [
+      {
+        "name": "enter_command",
+        "description": "Commit one character action for the authoritative engine to validate and execute. Emit committed actions only, in the requested order.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "instrument": {
+              "type": "string",
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
+            },
+            "action": {
+              "type": "string",
+              "description": "Action verb or verb phrase."
+            },
+            "target": {
+              "type": "string",
+              "description": "Target of the action; resolve pronouns from the query."
+            }
+          },
+          "required": [
+            "instrument",
+            "action",
+            "target"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "check",
+        "description": "Simulate one hypothetical character action without changing actual game state. For a hypothetical sequence, carry simulated changes forward within that sequence. A check does not authorize execution.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "instrument": {
+              "type": "string",
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
+            },
+            "action": {
+              "type": "string",
+              "description": "Action verb or verb phrase."
+            },
+            "target": {
+              "type": "string",
+              "description": "Target of the action; resolve pronouns from the query."
+            }
+          },
+          "required": [
+            "instrument",
+            "action",
+            "target"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ],
+    "reasoning": "'climb the rope' -> action 'climb', target 'rope', instrument 'none' -> (instrument:action:target) none:climb:rope\n[after]\n'sheathing my dagger' -> action 'sheathe', target 'dagger', instrument 'none' -> (instrument:action:target) none:sheathe:dagger\n[then]\n'dropping my shield' -> action 'drop', target 'shield', instrument 'none' -> (instrument:action:target) none:drop:shield\n'Could I' -> feasibility question -> check\nnone:sheathe:dagger [before] none:drop:shield [before] none:climb:rope\nnone:sheathe:dagger -> none:drop:shield -> none:climb:rope",
+    "answers": [
+      {
+        "name": "check",
+        "arguments": {
+          "instrument": "none",
+          "action": "sheathe",
+          "target": "dagger"
+        }
+      },
+      {
+        "name": "check",
+        "arguments": {
+          "instrument": "none",
+          "action": "drop",
+          "target": "shield"
+        }
+      },
+      {
+        "name": "check",
+        "arguments": {
+          "instrument": "none",
+          "action": "climb",
           "target": "rope"
         }
       }
     ]
   },
   {
-    "query": "I crack the nut with my hammer, then pick up the shell with my tongs",
+    "query": "I take the crowbar. Could I lift the grate with it?",
     "tools": [
       {
         "name": "enter_command",
-        "description": "Perform one action on a target using an instrument. Emit calls in the temporal order stated by the query.",
+        "description": "Commit one character action for the authoritative engine to validate and execute. Emit committed actions only, in the requested order.",
         "parameters": {
           "type": "object",
           "properties": {
             "instrument": {
               "type": "string",
-              "description": "Instrument explicitly named in the query."
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
             },
             "action": {
               "type": "string",
-              "description": "Action verb or verb phrase, such as cut or pick up."
+              "description": "Action verb or verb phrase."
             },
             "target": {
               "type": "string",
-              "description": "Target explicitly named in the query."
+              "description": "Target of the action; resolve pronouns from the query."
             }
           },
           "required": [
             "instrument",
             "action",
             "target"
-          ]
-        }
-      }
-    ],
-    "reasoning": "'crack the nut with my hammer' -> action 'crack', target 'nut', instrument 'hammer' -> (instrument:action:target) hammer:crack:nut\n[then]\n'pick up the shell with my tongs' -> action 'pick up', target 'shell', instrument 'tongs' -> (instrument:action:target) tongs:pick up:shell\nhammer:crack:nut [before] tongs:pick up:shell\nhammer:crack:nut -> tongs:pick up:shell",
-    "answers": [
-      {
-        "name": "enter_command",
-        "arguments": {
-          "instrument": "hammer",
-          "action": "crack",
-          "target": "nut"
+          ],
+          "additionalProperties": false
         }
       },
       {
-        "name": "enter_command",
-        "arguments": {
-          "instrument": "tongs",
-          "action": "pick up",
-          "target": "shell"
-        }
-      }
-    ]
-  },
-  {
-    "query": "Before I paint the wall with my brush, I sand the wall with my sandpaper",
-    "tools": [
-      {
-        "name": "enter_command",
-        "description": "Perform one action on a target using an instrument. Emit calls in the temporal order stated by the query.",
+        "name": "check",
+        "description": "Simulate one hypothetical character action without changing actual game state. For a hypothetical sequence, carry simulated changes forward within that sequence. A check does not authorize execution.",
         "parameters": {
           "type": "object",
           "properties": {
             "instrument": {
               "type": "string",
-              "description": "Instrument explicitly named in the query."
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
             },
             "action": {
               "type": "string",
-              "description": "Action verb or verb phrase, such as cut or pick up."
+              "description": "Action verb or verb phrase."
             },
             "target": {
               "type": "string",
-              "description": "Target explicitly named in the query."
+              "description": "Target of the action; resolve pronouns from the query."
             }
           },
           "required": [
             "instrument",
             "action",
             "target"
-          ]
+          ],
+          "additionalProperties": false
         }
       }
     ],
-    "reasoning": "'paint the wall with my brush' -> action 'paint', target 'wall', instrument 'brush' -> (instrument:action:target) brush:paint:wall\n[before]\n'sand the wall with my sandpaper' -> action 'sand', target 'wall', instrument 'sandpaper' -> (instrument:action:target) sandpaper:sand:wall\nsandpaper:sand:wall [before] brush:paint:wall\nsandpaper:sand:wall -> brush:paint:wall",
+    "reasoning": "'take the crowbar' -> action 'take', target 'crowbar', instrument 'none' -> (instrument:action:target) none:take:crowbar\n'lift the grate with it' -> 'it' refers to 'crowbar' -> action 'lift', target 'grate', instrument 'crowbar' -> (instrument:action:target) crowbar:lift:grate\n'I take' -> committed action -> enter_command\n'Could I' -> feasibility question -> check\nnone:take:crowbar [before] crowbar:lift:grate\nnone:take:crowbar -> crowbar:lift:grate",
     "answers": [
       {
         "name": "enter_command",
         "arguments": {
-          "instrument": "sandpaper",
-          "action": "sand",
-          "target": "wall"
+          "instrument": "none",
+          "action": "take",
+          "target": "crowbar"
         }
       },
       {
-        "name": "enter_command",
+        "name": "check",
         "arguments": {
-          "instrument": "brush",
-          "action": "paint",
-          "target": "wall"
-        }
-      }
-    ]
-  },
-  {
-    "query": "After I loosen the bolt with my wrench, I remove the screw with my screwdriver",
-    "tools": [
-      {
-        "name": "enter_command",
-        "description": "Perform one action on a target using an instrument. Emit calls in the temporal order stated by the query.",
-        "parameters": {
-          "type": "object",
-          "properties": {
-            "instrument": {
-              "type": "string",
-              "description": "Instrument explicitly named in the query."
-            },
-            "action": {
-              "type": "string",
-              "description": "Action verb or verb phrase, such as cut or pick up."
-            },
-            "target": {
-              "type": "string",
-              "description": "Target explicitly named in the query."
-            }
-          },
-          "required": [
-            "instrument",
-            "action",
-            "target"
-          ]
-        }
-      }
-    ],
-    "reasoning": "'loosen the bolt with my wrench' -> action 'loosen', target 'bolt', instrument 'wrench' -> (instrument:action:target) wrench:loosen:bolt\n[after]\n'remove the screw with my screwdriver' -> action 'remove', target 'screw', instrument 'screwdriver' -> (instrument:action:target) screwdriver:remove:screw\nscrewdriver:remove:screw [after] wrench:loosen:bolt\nwrench:loosen:bolt -> screwdriver:remove:screw",
-    "answers": [
-      {
-        "name": "enter_command",
-        "arguments": {
-          "instrument": "wrench",
-          "action": "loosen",
-          "target": "bolt"
-        }
-      },
-      {
-        "name": "enter_command",
-        "arguments": {
-          "instrument": "screwdriver",
-          "action": "remove",
-          "target": "screw"
-        }
-      }
-    ]
-  },
-  {
-    "query": "I sweep the floor with my broom after I scrub the table with my sponge",
-    "tools": [
-      {
-        "name": "enter_command",
-        "description": "Perform one action on a target using an instrument. Emit calls in the temporal order stated by the query.",
-        "parameters": {
-          "type": "object",
-          "properties": {
-            "instrument": {
-              "type": "string",
-              "description": "Instrument explicitly named in the query."
-            },
-            "action": {
-              "type": "string",
-              "description": "Action verb or verb phrase, such as cut or pick up."
-            },
-            "target": {
-              "type": "string",
-              "description": "Target explicitly named in the query."
-            }
-          },
-          "required": [
-            "instrument",
-            "action",
-            "target"
-          ]
-        }
-      }
-    ],
-    "reasoning": "'sweep the floor with my broom' -> action 'sweep', target 'floor', instrument 'broom' -> (instrument:action:target) broom:sweep:floor\n[after]\n'scrub the table with my sponge' -> action 'scrub', target 'table', instrument 'sponge' -> (instrument:action:target) sponge:scrub:table\nbroom:sweep:floor [after] sponge:scrub:table\nsponge:scrub:table -> broom:sweep:floor",
-    "answers": [
-      {
-        "name": "enter_command",
-        "arguments": {
-          "instrument": "sponge",
-          "action": "scrub",
-          "target": "table"
-        }
-      },
-      {
-        "name": "enter_command",
-        "arguments": {
-          "instrument": "broom",
-          "action": "sweep",
-          "target": "floor"
-        }
-      }
-    ]
-  },
-  {
-    "query": "I dig the hole with my shovel, then trim the hedge with my shears, and finally water the flowers with my watering can",
-    "tools": [
-      {
-        "name": "enter_command",
-        "description": "Perform one action on a target using an instrument. Emit calls in the temporal order stated by the query.",
-        "parameters": {
-          "type": "object",
-          "properties": {
-            "instrument": {
-              "type": "string",
-              "description": "Instrument explicitly named in the query."
-            },
-            "action": {
-              "type": "string",
-              "description": "Action verb or verb phrase, such as cut or pick up."
-            },
-            "target": {
-              "type": "string",
-              "description": "Target explicitly named in the query."
-            }
-          },
-          "required": [
-            "instrument",
-            "action",
-            "target"
-          ]
-        }
-      }
-    ],
-    "reasoning": "'dig the hole with my shovel' -> action 'dig', target 'hole', instrument 'shovel' -> (instrument:action:target) shovel:dig:hole\n[then]\n'trim the hedge with my shears' -> action 'trim', target 'hedge', instrument 'shears' -> (instrument:action:target) shears:trim:hedge\n[finally]\n'water the flowers with my watering can' -> action 'water', target 'flowers', instrument 'watering can' -> (instrument:action:target) watering can:water:flowers\nshovel:dig:hole [before] shears:trim:hedge [before] watering can:water:flowers\nshovel:dig:hole -> shears:trim:hedge -> watering can:water:flowers",
-    "answers": [
-      {
-        "name": "enter_command",
-        "arguments": {
-          "instrument": "shovel",
-          "action": "dig",
-          "target": "hole"
-        }
-      },
-      {
-        "name": "enter_command",
-        "arguments": {
-          "instrument": "shears",
-          "action": "trim",
-          "target": "hedge"
-        }
-      },
-      {
-        "name": "enter_command",
-        "arguments": {
-          "instrument": "watering can",
-          "action": "water",
-          "target": "flowers"
-        }
-      }
-    ]
-  },
-  {
-    "query": "I fasten the board with my drill, but first I measure the board with my tape measure and then mark the board with my pencil",
-    "tools": [
-      {
-        "name": "enter_command",
-        "description": "Perform one action on a target using an instrument. Emit calls in the temporal order stated by the query.",
-        "parameters": {
-          "type": "object",
-          "properties": {
-            "instrument": {
-              "type": "string",
-              "description": "Instrument explicitly named in the query."
-            },
-            "action": {
-              "type": "string",
-              "description": "Action verb or verb phrase, such as cut or pick up."
-            },
-            "target": {
-              "type": "string",
-              "description": "Target explicitly named in the query."
-            }
-          },
-          "required": [
-            "instrument",
-            "action",
-            "target"
-          ]
-        }
-      }
-    ],
-    "reasoning": "'fasten the board with my drill' -> action 'fasten', target 'board', instrument 'drill' -> (instrument:action:target) drill:fasten:board\n[but first]\n'measure the board with my tape measure' -> action 'measure', target 'board', instrument 'tape measure' -> (instrument:action:target) tape measure:measure:board\n[then]\n'mark the board with my pencil' -> action 'mark', target 'board', instrument 'pencil' -> (instrument:action:target) pencil:mark:board\ntape measure:measure:board [before] pencil:mark:board [before] drill:fasten:board\ntape measure:measure:board -> pencil:mark:board -> drill:fasten:board",
-    "answers": [
-      {
-        "name": "enter_command",
-        "arguments": {
-          "instrument": "tape measure",
-          "action": "measure",
-          "target": "board"
-        }
-      },
-      {
-        "name": "enter_command",
-        "arguments": {
-          "instrument": "pencil",
-          "action": "mark",
-          "target": "board"
-        }
-      },
-      {
-        "name": "enter_command",
-        "arguments": {
-          "instrument": "drill",
-          "action": "fasten",
-          "target": "board"
-        }
-      }
-    ]
-  },
-  {
-    "query": "I dry the plate with my towel after I rinse the plate with my sprayer, but before I polish the glass with my cloth",
-    "tools": [
-      {
-        "name": "enter_command",
-        "description": "Perform one action on a target using an instrument. Emit calls in the temporal order stated by the query.",
-        "parameters": {
-          "type": "object",
-          "properties": {
-            "instrument": {
-              "type": "string",
-              "description": "Instrument explicitly named in the query."
-            },
-            "action": {
-              "type": "string",
-              "description": "Action verb or verb phrase, such as cut or pick up."
-            },
-            "target": {
-              "type": "string",
-              "description": "Target explicitly named in the query."
-            }
-          },
-          "required": [
-            "instrument",
-            "action",
-            "target"
-          ]
-        }
-      }
-    ],
-    "reasoning": "'dry the plate with my towel' -> action 'dry', target 'plate', instrument 'towel' -> (instrument:action:target) towel:dry:plate\n[after]\n'rinse the plate with my sprayer' -> action 'rinse', target 'plate', instrument 'sprayer' -> (instrument:action:target) sprayer:rinse:plate\n[but before]\n'polish the glass with my cloth' -> action 'polish', target 'glass', instrument 'cloth' -> (instrument:action:target) cloth:polish:glass\ntowel:dry:plate [after] sprayer:rinse:plate\ntowel:dry:plate [before] cloth:polish:glass\nsprayer:rinse:plate -> towel:dry:plate -> cloth:polish:glass",
-    "answers": [
-      {
-        "name": "enter_command",
-        "arguments": {
-          "instrument": "sprayer",
-          "action": "rinse",
-          "target": "plate"
-        }
-      },
-      {
-        "name": "enter_command",
-        "arguments": {
-          "instrument": "towel",
-          "action": "dry",
-          "target": "plate"
-        }
-      },
-      {
-        "name": "enter_command",
-        "arguments": {
-          "instrument": "cloth",
-          "action": "polish",
-          "target": "glass"
-        }
-      }
-    ]
-  },
-  {
-    "query": "I slice the bread with my knife, but before that I lift the lid with my hook, and before lifting the lid I unlock the box with my key",
-    "tools": [
-      {
-        "name": "enter_command",
-        "description": "Perform one action on a target using an instrument. Emit calls in the temporal order stated by the query.",
-        "parameters": {
-          "type": "object",
-          "properties": {
-            "instrument": {
-              "type": "string",
-              "description": "Instrument explicitly named in the query."
-            },
-            "action": {
-              "type": "string",
-              "description": "Action verb or verb phrase, such as cut or pick up."
-            },
-            "target": {
-              "type": "string",
-              "description": "Target explicitly named in the query."
-            }
-          },
-          "required": [
-            "instrument",
-            "action",
-            "target"
-          ]
-        }
-      }
-    ],
-    "reasoning": "'slice the bread with my knife' -> action 'slice', target 'bread', instrument 'knife' -> (instrument:action:target) knife:slice:bread\n[but before]\n'lift the lid with my hook' -> action 'lift', target 'lid', instrument 'hook' -> (instrument:action:target) hook:lift:lid\n[before lifting the lid]\n'unlock the box with my key' -> action 'unlock', target 'box', instrument 'key' -> (instrument:action:target) key:unlock:box\nhook:lift:lid [before] knife:slice:bread\nkey:unlock:box [before] hook:lift:lid\nkey:unlock:box -> hook:lift:lid -> knife:slice:bread",
-    "answers": [
-      {
-        "name": "enter_command",
-        "arguments": {
-          "instrument": "key",
-          "action": "unlock",
-          "target": "box"
-        }
-      },
-      {
-        "name": "enter_command",
-        "arguments": {
-          "instrument": "hook",
+          "instrument": "crowbar",
           "action": "lift",
-          "target": "lid"
-        }
-      },
-      {
-        "name": "enter_command",
-        "arguments": {
-          "instrument": "knife",
-          "action": "slice",
-          "target": "bread"
+          "target": "grate"
         }
       }
     ]
   },
   {
-    "query": "I stir the soup with my spoon last. Before that, I open the can with my can opener. Before opening the can, I cut the carrot with my knife",
+    "query": "Could I break the wax seal with my dagger? After that check, I close the book either way.",
     "tools": [
       {
         "name": "enter_command",
-        "description": "Perform one action on a target using an instrument. Emit calls in the temporal order stated by the query.",
+        "description": "Commit one character action for the authoritative engine to validate and execute. Emit committed actions only, in the requested order.",
         "parameters": {
           "type": "object",
           "properties": {
             "instrument": {
               "type": "string",
-              "description": "Instrument explicitly named in the query."
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
             },
             "action": {
               "type": "string",
-              "description": "Action verb or verb phrase, such as cut or pick up."
+              "description": "Action verb or verb phrase."
             },
             "target": {
               "type": "string",
-              "description": "Target explicitly named in the query."
+              "description": "Target of the action; resolve pronouns from the query."
             }
           },
           "required": [
             "instrument",
             "action",
             "target"
-          ]
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "check",
+        "description": "Simulate one hypothetical character action without changing actual game state. For a hypothetical sequence, carry simulated changes forward within that sequence. A check does not authorize execution.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "instrument": {
+              "type": "string",
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
+            },
+            "action": {
+              "type": "string",
+              "description": "Action verb or verb phrase."
+            },
+            "target": {
+              "type": "string",
+              "description": "Target of the action; resolve pronouns from the query."
+            }
+          },
+          "required": [
+            "instrument",
+            "action",
+            "target"
+          ],
+          "additionalProperties": false
         }
       }
     ],
-    "reasoning": "'stir the soup with my spoon' -> action 'stir', target 'soup', instrument 'spoon' -> (instrument:action:target) spoon:stir:soup\n[last; before that]\n'open the can with my can opener' -> action 'open', target 'can', instrument 'can opener' -> (instrument:action:target) can opener:open:can\n[before opening the can]\n'cut the carrot with my knife' -> action 'cut', target 'carrot', instrument 'knife' -> (instrument:action:target) knife:cut:carrot\ncan opener:open:can [before] spoon:stir:soup\nknife:cut:carrot [before] can opener:open:can\nknife:cut:carrot -> can opener:open:can -> spoon:stir:soup",
+    "reasoning": "'break the wax seal with my dagger' -> action 'break', target 'wax seal', instrument 'dagger' -> (instrument:action:target) dagger:break:wax seal\n[After that check]\n'close the book' -> action 'close', target 'book', instrument 'none' -> (instrument:action:target) none:close:book\n'Could I' -> feasibility question -> check\n'I close' -> committed action -> enter_command\ndagger:break:wax seal [before] none:close:book\ndagger:break:wax seal -> none:close:book",
+    "answers": [
+      {
+        "name": "check",
+        "arguments": {
+          "instrument": "dagger",
+          "action": "break",
+          "target": "wax seal"
+        }
+      },
+      {
+        "name": "enter_command",
+        "arguments": {
+          "instrument": "none",
+          "action": "close",
+          "target": "book"
+        }
+      }
+    ]
+  },
+  {
+    "query": "Okay, I drop my shield. Could I then climb the ladder and cross the bridge? Those last two are just hypothetical.",
+    "tools": [
+      {
+        "name": "enter_command",
+        "description": "Commit one character action for the authoritative engine to validate and execute. Emit committed actions only, in the requested order.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "instrument": {
+              "type": "string",
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
+            },
+            "action": {
+              "type": "string",
+              "description": "Action verb or verb phrase."
+            },
+            "target": {
+              "type": "string",
+              "description": "Target of the action; resolve pronouns from the query."
+            }
+          },
+          "required": [
+            "instrument",
+            "action",
+            "target"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "check",
+        "description": "Simulate one hypothetical character action without changing actual game state. For a hypothetical sequence, carry simulated changes forward within that sequence. A check does not authorize execution.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "instrument": {
+              "type": "string",
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
+            },
+            "action": {
+              "type": "string",
+              "description": "Action verb or verb phrase."
+            },
+            "target": {
+              "type": "string",
+              "description": "Target of the action; resolve pronouns from the query."
+            }
+          },
+          "required": [
+            "instrument",
+            "action",
+            "target"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ],
+    "reasoning": "'drop my shield' -> action 'drop', target 'shield', instrument 'none' -> (instrument:action:target) none:drop:shield\n[then]\n'climb the ladder' -> action 'climb', target 'ladder', instrument 'none' -> (instrument:action:target) none:climb:ladder\n'cross the bridge' -> action 'cross', target 'bridge', instrument 'none' -> (instrument:action:target) none:cross:bridge\n'I drop' -> committed action -> enter_command\n'Could I' -> feasibility question -> check\nnone:drop:shield [before] none:climb:ladder [before] none:cross:bridge\nnone:drop:shield -> none:climb:ladder -> none:cross:bridge",
     "answers": [
       {
         "name": "enter_command",
         "arguments": {
-          "instrument": "knife",
-          "action": "cut",
-          "target": "carrot"
+          "instrument": "none",
+          "action": "drop",
+          "target": "shield"
+        }
+      },
+      {
+        "name": "check",
+        "arguments": {
+          "instrument": "none",
+          "action": "climb",
+          "target": "ladder"
+        }
+      },
+      {
+        "name": "check",
+        "arguments": {
+          "instrument": "none",
+          "action": "cross",
+          "target": "bridge"
+        }
+      }
+    ]
+  },
+  {
+    "query": "I ring the bell last. Before that, I draw my sword. First I take the mace, then could I smash the statue with it? I'm only asking about smashing the statue; I draw the sword and ring the bell either way.",
+    "tools": [
+      {
+        "name": "enter_command",
+        "description": "Commit one character action for the authoritative engine to validate and execute. Emit committed actions only, in the requested order.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "instrument": {
+              "type": "string",
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
+            },
+            "action": {
+              "type": "string",
+              "description": "Action verb or verb phrase."
+            },
+            "target": {
+              "type": "string",
+              "description": "Target of the action; resolve pronouns from the query."
+            }
+          },
+          "required": [
+            "instrument",
+            "action",
+            "target"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "check",
+        "description": "Simulate one hypothetical character action without changing actual game state. For a hypothetical sequence, carry simulated changes forward within that sequence. A check does not authorize execution.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "instrument": {
+              "type": "string",
+              "description": "Named instrument, or the literal string none when the character acts without a separate instrument."
+            },
+            "action": {
+              "type": "string",
+              "description": "Action verb or verb phrase."
+            },
+            "target": {
+              "type": "string",
+              "description": "Target of the action; resolve pronouns from the query."
+            }
+          },
+          "required": [
+            "instrument",
+            "action",
+            "target"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ],
+    "reasoning": "'ring the bell' -> action 'ring', target 'bell', instrument 'none' -> (instrument:action:target) none:ring:bell\n[last]\n[Before that]\n'draw my sword' -> action 'draw', target 'sword', instrument 'none' -> (instrument:action:target) none:draw:sword\n[First]\n'take the mace' -> action 'take', target 'mace', instrument 'none' -> (instrument:action:target) none:take:mace\n[then]\n'smash the statue with it' -> 'it' refers to 'mace' -> action 'smash', target 'statue', instrument 'mace' -> (instrument:action:target) mace:smash:statue\n'I ring', 'I draw', and 'I take' -> committed action -> enter_command\n'could I' -> feasibility question -> check\nnone:take:mace [before] mace:smash:statue [before] none:draw:sword [before] none:ring:bell\nnone:take:mace -> mace:smash:statue -> none:draw:sword -> none:ring:bell",
+    "answers": [
+      {
+        "name": "enter_command",
+        "arguments": {
+          "instrument": "none",
+          "action": "take",
+          "target": "mace"
+        }
+      },
+      {
+        "name": "check",
+        "arguments": {
+          "instrument": "mace",
+          "action": "smash",
+          "target": "statue"
         }
       },
       {
         "name": "enter_command",
         "arguments": {
-          "instrument": "can opener",
-          "action": "open",
-          "target": "can"
+          "instrument": "none",
+          "action": "draw",
+          "target": "sword"
         }
       },
       {
         "name": "enter_command",
         "arguments": {
-          "instrument": "spoon",
-          "action": "stir",
-          "target": "soup"
+          "instrument": "none",
+          "action": "ring",
+          "target": "bell"
         }
       }
     ]

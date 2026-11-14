@@ -48,7 +48,7 @@ Needle records preserve `query`, `tools`, `reasoning`, and `answers`, with no re
 
 Imports accept an array, `{ "examples": [...] }`, a single example, or JSONL, up to 10 MB / 10,000 examples. Tool calls are checked against their declared required argument names and basic types before import. Reasoning is preserved verbatim; absent reasoning displays as missing and exports as an empty string. A structurally valid example can still be semantically incorrect and needs human review. Exact duplicate examples are skipped, and existing decisions are retained. Undo works during the current visit; reviewed examples can also be returned to pending after a reload. Imports never overwrite or delete the source file.
 
-The sample `examples.json` contains the original 10 records as a JSON array. An example has this shape:
+The sample `examples.json` contains the current batch of 10 records as a JSON array. Previous sample batches are preserved in the repository's `past/` directory. An example has this shape:
 
 ```json
 {
