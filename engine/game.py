@@ -129,14 +129,18 @@ class Game:
                 notes.append(f"The {o.properties.name} is {' and '.join(on)}.")
         for n in s.npcs:
             if n.hp < 10:
-                notes.append(f"{n.name} is {combat.status(n.hp)}.")
+                notes.append(f"{n.label} is {combat.status(n.hp)}.")
+        loose = [o.properties.name for o in s.objects
+                 if o.properties.name.lower() not in s.description.lower()]
+        if loose:
+            notes.append("You also see: " + ", ".join(f"a {x}" for x in loose) + ".")
         return " ".join([s.description, *notes])
 
     def _scene(self) -> dict:
         s = self.world.current
         return {"type": "switch_scene", "scene": s.name, "description": self.describe()}
 
-    def _attack(self, attacker, target, weapon, npcs_by_lower, players_here):
+    def _attack(self, attacker, target, weapon, npcs_by_lower, players_here, npc_weapon=False):
         """Resolve one attack through the state machine (combat.strike) and return an Event."""
         from .types import Event
         hp = {**{n.name: n.hp for n in npcs_by_lower.values()}, **{p: self.player_hp.get(p, 10) for p in players_here}}
@@ -146,7 +150,7 @@ class Game:
         name = next((k for k in hp if k.lower() == t), None)
         if name is None:
             return Event("attack", False, target, weapon, {}, f"{target} is not here.")
-        if weapon and self.world.find(weapon) is None:
+        if weapon and not npc_weapon and self.world.find(weapon) is None:   # players need it in hand/room
             weapon = None
         r = combat.strike(attacker, name, hp, weapon)
         if not r["ok"]:
@@ -250,7 +254,8 @@ class Game:
             if d.decision == "engage" and d.attack:
                 present = {n.name.lower(): n for n in npcs if n.hp > 0 and n.name != d.npc}
                 players_here = [p for p, loc in self.locations.items() if loc == w.current.name]
-                ev = self._attack(d.npc, d.attack, None, present, players_here)
+                weapon = next((i.properties.name for i in who.inventory if getattr(i.properties, "weight", 0) >= 1), None)
+                ev = self._attack(d.npc, d.attack, weapon, present, players_here, npc_weapon=True)
                 if ev.ok:
                     out.append(_msg("narrator", "⚔ " + ev.message, effects=["hit"], hit=ev.target))
         w.save()
