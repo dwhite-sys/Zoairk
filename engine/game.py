@@ -4,6 +4,7 @@ from __future__ import annotations
 import re
 
 from . import combat, inventory
+from .types import Event
 from .world import World
 
 MOVE = re.compile(r"^\s*(?:go|walk|head|move|run)?\s*(north|south|east|west|up|down|n|s|e|w)\s*$", re.I)
