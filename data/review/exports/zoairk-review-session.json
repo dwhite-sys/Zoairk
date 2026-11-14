@@ -248,8 +248,8 @@
         ]
       },
       "decision": "approve",
-      "reason": "Approved because the tool calls match all instrument, action, and target fields and preserve the temporal order: drop the shield first, cut the banner with the dagger, then ring the bell last.",
-      "reviewedAt": "2026-11-14T11:01:35.671Z"
+      "reason": "Approved because all three calls use the correct instrument, action, and target, and follow the stated sequence: none:drop:shield, dagger:cut:banner, none:ring:bell.",
+      "reviewedAt": "2026-11-14T11:14:38.665Z"
     },
     {
       "example": {
