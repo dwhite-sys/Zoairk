@@ -14,9 +14,9 @@ test('all original examples validate, retaining 25 calls and temporal order', ()
   assert.deepEqual(entries[0].example.answers.map(a => a.arguments.action), ['unlock', 'cut']);
 });
 test('supports arrays, wrapped arrays, single records, JSONL and UTF-8 BOM', () => {
-  for (const text of [JSON.stringify(examples), JSON.stringify({ examples }), examples.map(e => JSON.stringify(e)).join('\n')]) assert.equal(R.parseFile(text).entries.length, 10);
+  for (const text of [JSON.stringify(examples), JSON.stringify({ examples }), examples.map(e => JSON.stringify(e)).join('\n')]) assert.equal(R.parseFile(text).entries.length, examples.length);
   assert.equal(R.parseFile(JSON.stringify(examples[0])).entries.length, 1);
-  assert.equal(R.parseFile('\uFEFF' + JSON.stringify(examples)).entries.length, 10);
+  assert.equal(R.parseFile('\uFEFF' + JSON.stringify(examples)).entries.length, examples.length);
 });
 test('empty and malformed files have useful errors', () => {
   for (const text of ['', ' ', '[]', '{"examples":[]}', 'null', '[null]', '{broken', '{"query":23}']) assert.throws(() => R.parseFile(text));
@@ -38,8 +38,8 @@ test('rejects oversized inputs and oversized batches', () => {
 test('repeated imports deduplicate without replacing existing human labels', () => {
   const entries = R.decide(batch(), 0, 'approve', 'human verified');
   const result = R.mergeEntries(entries, batch());
-  assert.equal(result.entries.length, 10);
-  assert.equal(result.duplicates, 10);
+  assert.equal(result.entries.length, examples.length);
+  assert.equal(result.duplicates, examples.length);
   assert.equal(result.entries[0].decision, 'approve');
   assert.equal(result.entries[0].reason, 'human verified');
 });
@@ -69,7 +69,7 @@ test('changing and clearing decisions updates exports without duplicate rows', (
   assert.equal(JSON.parse(R.classifier(entries)).label, 'deny');
   entries = R.decide(entries, 0, null);
   assert.equal(R.classifier(entries), '');
-  assert.equal(R.counts(entries).pending, 10);
+  assert.equal(R.counts(entries).pending, examples.length);
 });
 test('session roundtrip preserves decisions, notes, timestamps, and pending examples', () => {
   const entries = R.decide(batch(), 0, 'deny', 'fix extraction', '2026-11-14T05:00:00.000Z');
