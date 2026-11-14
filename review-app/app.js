@@ -5,7 +5,7 @@
   const R = window.ZoairkReview;
   const $ = id => document.getElementById(id);
   let entries = [], selected = 0, filter = 'pending', busy = true, database = null;
-  let clientId = null, serverSaved = false, syncedFromServer = 0;
+  let clientId = null, serverSaved = false, syncedFromServer = 0, loadedFromServer = 0;
   const history = [];
   function notice(message, error = false) {
     $('notice').textContent = message;
@@ -99,6 +99,23 @@
     // with its own saved session, so a first-time visitor never republishes
     // somebody else's decisions as their own.
     if (saved && entries.length) await persist(entries);
+    // Nobody should have to upload the dataset: when this browser has no
+    // workspace yet, start from whatever file the server is serving.
+    if (!saved && !entries.length) await loadServerDataset();
+  }
+  async function loadServerDataset() {
+    try {
+      const response = await fetch('examples.json');
+      if (!response.ok) return;
+      const merged = R.mergeEntries(entries, R.parseFile(await response.text()).entries);
+      if (!merged.added) return;
+      await persist(merged.entries);
+      entries = merged.entries;
+      filter = 'pending';
+      selected = 0;
+      loadedFromServer = merged.added;
+      notice(`Loaded ${merged.added} ${merged.added === 1 ? 'example' : 'examples'} from the server.`);
+    } catch { /* importing a file by hand still works */ }
   }
   async function loadClientId() {
     const existing = await new Promise((resolve, reject) => {
@@ -258,7 +275,7 @@
   document.addEventListener('click', event => { if (!$('export-menu').contains(event.target)) $('export-menu').open = false; });
   window.addEventListener('beforeunload', event => { if (entries.length && !database) { event.preventDefault(); event.returnValue = ''; } });
   (async () => {
-    try { await openStorage(); if (entries.length && !syncedFromServer) notice('Welcome back. Your review progress has been restored.'); }
+    try { await openStorage(); if (entries.length && !syncedFromServer && !loadedFromServer) notice('Welcome back. Your review progress has been restored.'); }
     catch (error) { database = null; notice('Could not restore local storage. You can still review, but export a session before leaving. ' + error.message, true); }
     finally { busy = false; render(); }
   })();

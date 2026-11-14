@@ -27,6 +27,11 @@ function normalizePrefix(value) {
 function dataDir() {
   return process.env.REVIEW_DATA_DIR || path.join(os.homedir(), '.local', 'share', 'zoairk-review');
 }
+// The dataset reviewers work through lives on this machine. Point EXAMPLES_FILE
+// at it and the page loads it; nobody has to upload a file.
+function examplesFile() {
+  return process.env.EXAMPLES_FILE ? path.resolve(process.env.EXAMPLES_FILE) : path.join(root, 'examples.json');
+}
 function validClient(value) {
   return typeof value === 'string' && /^[A-Za-z0-9_-]{8,64}$/.test(value);
 }
@@ -70,6 +75,19 @@ async function mergeFor(client) {
     try { entries = R.mergeEntries(entries, snapshot.entries).entries; } catch { /* skip an oversized snapshot */ }
   }
   return { format: 'zoairk-review-session', version: 1, entries };
+}
+async function handleExamples(req, res) {
+  if (!['GET', 'HEAD'].includes(req.method)) { json(res, 405, { error: 'Method not allowed.' }); return; }
+  const file = examplesFile();
+  let content;
+  try { content = await fs.readFile(file); }
+  catch { json(res, 500, { error: `Could not read ${file}. Point EXAMPLES_FILE at a readable dataset.` }); return; }
+  // Refuse to serve a dataset the importer would reject, so a bad file fails
+  // here with a clear message instead of in every reviewer's browser.
+  try { R.parseFile(content.toString('utf8')); }
+  catch (error) { json(res, 500, { error: `Dataset rejected: ${error.message}` }); return; }
+  res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': content.length });
+  res.end(req.method === 'HEAD' ? undefined : content);
 }
 async function handleSession(req, res, url) {
   const client = url.searchParams.get('client') || '';
@@ -161,6 +179,7 @@ function createServer({ prefix = normalizePrefix(process.env.APP_PREFIX) } = {})
       }
       route = route.slice(prefix.length);
     }
+    if (route === '/examples.json') { await handleExamples(req, res); return; }
     if (route === '/api/session') { await handleSession(req, res, url); return; }
     if (exportRoutes.has(route)) { await handleExport(req, res, exportRoutes.get(route)); return; }
     if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405, { Allow: 'GET, HEAD' }); res.end('Method not allowed'); return; }
@@ -187,6 +206,7 @@ if (require.main === module) {
     const prefix = normalizePrefix(process.env.APP_PREFIX);
     console.log(`Zoairk review: http://localhost:${actualPort}${prefix}/`);
     console.log(`Review sessions: ${dataDir()}`);
+    console.log(`Dataset: ${examplesFile()}`);
     if (host === '0.0.0.0') {
       for (const list of Object.values(os.networkInterfaces())) for (const net of list || []) if (net.family === 'IPv4' && !net.internal) console.log(`Same Wi-Fi / LAN: http://${net.address}:${actualPort}`);
     }

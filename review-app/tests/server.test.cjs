@@ -33,6 +33,47 @@ test('sample import, labeling, and both dataset exports integrate end to end', a
   assert.equal(JSON.parse(R.needle(restored)).answers[0].arguments.action, 'unlock');
   assert.equal(R.classifier(restored).trim().split('\n').length, 2);
 });
+test('serves the dataset named by EXAMPLES_FILE and rejects a bad one', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'zoairk-data-'));
+  const previous = process.env.EXAMPLES_FILE;
+  const api = createServer();
+  await new Promise(resolve => api.listen(0, '127.0.0.1', resolve));
+  const origin = 'http://127.0.0.1:' + api.address().port;
+  try {
+    const source = JSON.parse(await fs.readFile(path.join(__dirname, '..', 'examples.json'), 'utf8'));
+    const single = path.join(dir, 'mine.json');
+    await fs.writeFile(single, JSON.stringify([source[3]]));
+    process.env.EXAMPLES_FILE = single;
+    const served = await fetch(`${origin}/examples.json`);
+    assert.equal(served.status, 200);
+    const body = await served.json();
+    assert.equal(body.length, 1);
+    assert.equal(body[0].query, source[3].query);
+
+    // JSONL works too, since the importer accepts it.
+    const jsonl = path.join(dir, 'mine.jsonl');
+    await fs.writeFile(jsonl, source.slice(0, 2).map(item => JSON.stringify(item)).join('\n'));
+    process.env.EXAMPLES_FILE = jsonl;
+    const jsonlBody = await (await fetch(`${origin}/examples.json`)).text();
+    assert.equal(jsonlBody.trim().split('\n').length, 2);
+
+    // A dataset the importer would reject fails loudly here instead of in every browser.
+    const broken = path.join(dir, 'broken.json');
+    await fs.writeFile(broken, '{"nope":true}');
+    process.env.EXAMPLES_FILE = broken;
+    const rejected = await fetch(`${origin}/examples.json`);
+    assert.equal(rejected.status, 500);
+    assert.match((await rejected.json()).error, /Dataset rejected/);
+
+    process.env.EXAMPLES_FILE = path.join(dir, 'missing.json');
+    assert.equal((await fetch(`${origin}/examples.json`)).status, 500);
+  } finally {
+    api.closeAllConnections();
+    await new Promise(resolve => api.close(resolve));
+    if (previous === undefined) delete process.env.EXAMPLES_FILE; else process.env.EXAMPLES_FILE = previous;
+    await fs.rm(dir, { recursive: true, force: true });
+  }
+});
 test('serves under an optional path prefix and redirects the bare prefix', async () => {
   const prefixed = createServer({ prefix: '/needle-training' });
   await new Promise(resolve => prefixed.listen(0, '127.0.0.1', resolve));
