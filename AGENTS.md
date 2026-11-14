@@ -10,10 +10,10 @@
 - Blank/whitespace-only input and gibberish do nothing: no turn, world-state, or NPC-memory changes; await valid input.
 - AI proposes actions and narration; the state machine validates actions and owns world truth. Persist NPC memory and object/NPC state.
 - Immediate scope: responsive browser app to import examples.json, manually approve/deny, and export Needle/classifier datasets. Reasoning is first-class output, visible alongside calls and preserved in both exports.
-- Done: seed dataset (10 examples, 25 calls); static review app, local persistence, undo, duplicate checks, session transfer, and dataset downloads.
+- Done: seed dataset (10 examples, 25 calls); standalone review-app/ webapp, local persistence, undo, duplicate checks, session transfer, and dataset downloads.
 - Missing: game engine, trained models, model evaluation, automatic generation/review, and background training. These are outside the current webapp request.
-- Run: npm start, then http://localhost:3000; npm run start:lan prints phone-accessible URLs for the same network. Node 18+; no runtime dependencies or Python needed for review.
-- Test: npm test; npm ci then npm run test:e2e (installed Edge). Tests cover logic, HTTP integration, desktop/mobile browser flows, errors, repeated imports, persistence, reasoning, and exports.
+- Run: cd review-app then npm start, then http://localhost:3000; npm run start:lan prints phone-accessible URLs for the same network. Node 18+; no runtime dependencies or Python needed for review.
+- Test: from review-app/, npm test; npm ci then npm run test:e2e (installed Edge). Tests cover logic, HTTP integration, desktop/mobile browser flows, errors, repeated imports, persistence, reasoning, and exports.
 - Next: use the review app to curate examples; separately agree model training and game-engine work. Browser state is per device; import/export sessions for transfer.
 - Event rules: Devpost https://ihack-2026.devpost.com; web access failed during setup, so additional restrictions remain unverified.
 
