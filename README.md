@@ -18,7 +18,7 @@ Open http://localhost:3000. No dependency install is required to run the app. To
 
 1. Choose **Import examples**, drag a file onto the empty screen, or try **Load sample**.
 2. Read the player input, always-visible reasoning, and numbered calls. Add an optional review note; approve or deny.
-3. Download **Needle training** (`needle-approved.jsonl`) for approved examples only, or **Classifier training** (`classifier-labeled.jsonl`) for both review labels.
+3. Open **Export datasets**, then download **Needle training** (`needle-approved.jsonl`) for approved examples only, or **Classifier training** (`classifier-labeled.jsonl`) for both review labels.
 4. Download **Save review session** to back up decisions or transfer them to another browser/device, then import that file there. This is manual file transfer, not live synchronization. Use one review tab per browser at a time.
 
 Needle records preserve `query`, `tools`, `reasoning`, and `answers`, with no review fields. Classifier records preserve the same fields and add `label` (`"approve"` or `"deny"`) and `review_reason`. The label applies to the complete proposed output, including reasoning. Pending examples appear in neither training export. Denied outputs are never Needle targets. This app prepares datasets; it does not train models.

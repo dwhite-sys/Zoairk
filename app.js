@@ -147,6 +147,7 @@
     });
   }
   function download(content, name, type) {
+    $('export-menu').open = false;
     const url = URL.createObjectURL(new Blob([content], { type }));
     const anchor = document.createElement('a');
     anchor.href = url;
@@ -200,6 +201,7 @@
   $('export-needle').addEventListener('click', () => download(R.needle(entries), 'needle-approved.jsonl', 'application/x-ndjson'));
   $('export-classifier').addEventListener('click', () => download(R.classifier(entries), 'classifier-labeled.jsonl', 'application/x-ndjson'));
   $('export-session').addEventListener('click', () => download(R.session(entries), 'zoairk-review-session.json', 'application/json'));
+  document.addEventListener('click', event => { if (!$('export-menu').contains(event.target)) $('export-menu').open = false; });
   window.addEventListener('beforeunload', event => { if (entries.length && !database) { event.preventDefault(); event.returnValue = ''; } });
   (async () => {
     try { await openStorage(); if (entries.length) notice('Welcome back. Your review progress has been restored.'); }

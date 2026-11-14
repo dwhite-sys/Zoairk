@@ -3,6 +3,7 @@ const fs = require('node:fs/promises');
 const samples = require('../../examples.json');
 const upload = async (page, data, name = 'examples.json') => page.locator('#file-input').setInputFiles({ name, mimeType: 'application/json', buffer: Buffer.from(typeof data === 'string' ? data : JSON.stringify(data)) });
 async function getExport(page, id) {
+  if (!(await page.locator(id).isVisible())) await page.locator('#export-menu > summary').click();
   const pending = page.waitForEvent('download');
   await page.locator(id).click();
   const download = await pending;
