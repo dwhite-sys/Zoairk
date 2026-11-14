@@ -148,10 +148,15 @@ class Game:
         for n in s.npcs:
             if n.hp < 10:
                 notes.append(f"{n.label} is {combat.status(n.hp)}.")
-        loose = [o.properties.name for o in s.objects
-                 if o.properties.name.lower() not in s.description.lower()]
-        if loose:                                  # natural phrasing for things lying around (team feedback)
-            items = [f"a {x}" for x in loose]
+        loose = [o for o in s.objects if o.properties.name.lower() not in s.description.lower()]
+        if loose:                                  # natural, descriptive phrasing for things lying around (team feedback)
+            def phrase(o):
+                d = (o.properties.description or "").strip().rstrip(".")
+                # use the object's own short description ("A single wooden match") when it names the object
+                if d and o.properties.name.split()[-1].lower() in d.lower() and len(d) < 45 and d[:2].lower() in ("a ", "an"):
+                    return d[0].lower() + d[1:]
+                return f"a {o.properties.name}"
+            items = [phrase(o) for o in loose]
             listed = items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
             verb = "lies" if len(items) == 1 else "lie"
             where = "on the ground nearby" if len(items) < 3 else "scattered about"
