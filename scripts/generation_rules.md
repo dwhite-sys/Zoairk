@@ -49,3 +49,6 @@ Resolve context-implied part ownership as well as explicit pronouns: after takin
 
 SCOPES AND CONTEXT (next refinement)
 If crates are stacked by the door and the next action oils the hinge, resolve it to that door's hinge. Include part ownership even when the noun is a definite reference rather than an explicit pronoun. Do not combine a leading Before I enter clause with a later feasibility question in a way that leaves the question before/after entering unclear. For this pattern say explicitly Before that check / After that check, or separate the before-clause commitment sentence from the question. Every temporal relation in the answer must be unambiguously supported by the query.
+
+NOVELTY FOR LARGER BATCHES
+The supplied do_not_repeat_queries list is a hard exclusion list, not inspiration to copy. Check the complete input string of every proposed query against it before returning. Do not copy a seed or a query mentioned in feedback, even when its parse is correct. Larger batches must not recycle the earliest stock campfire/barrel/tailgate sentences. Vary syntax, action combinations and concrete objects enough to create substantively different examples; adding a batch tag or meaningless suffix is not acceptable. Make all candidates mutually unique too.

@@ -11,5 +11,33 @@
   "target_additional_reviewed": 200,
   "first_new_batch": 27,
   "method": "Adaptive prompts and saved denial feedback; AI-reviewed observational comparison, not a controlled trial. Preserve every entered candidate and record any generation failures separately. No weight updates.",
-  "initial_rules_sha256": "ce1dc2b7e48d63d8ace7c2a78c50d84afbbe7113f84b7f4c29491efc06efef9a"
+  "initial_rules_sha256": "ce1dc2b7e48d63d8ace7c2a78c50d84afbbe7113f84b7f4c29491efc06efef9a",
+  "generation_failures": [
+    {
+      "attempt": "32-first",
+      "requested": 50,
+      "returned": 50,
+      "reason": "duplicate queries",
+      "duplicates": [
+        {
+          "index": 5,
+          "query": "Before I douse the campfire, I fill the kettle from the stream."
+        },
+        {
+          "index": 43,
+          "query": "I fill the water barrel from the stream. Could I lift the barrel onto the cart with the rope? After that check, I close the tailgate either way."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 24745,
+        "completion_tokens": 27698,
+        "total_tokens": 52443,
+        "prompt_tokens_details": {
+          "cached_tokens": 2048
+        }
+      },
+      "entered": 0,
+      "handling": "Preserved raw response locally; no candidate file entered; retry entire batch after prompt refinement."
+    }
+  ]
 }
