@@ -1,0 +1,27 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T15:46:15.527833+00:00",
+  "count": 100,
+  "variation_focus": "Orcish border watchpost, ravine crossing, ruined toll bridge and supply wagon.30do30check40mixed; varied1-5 actions, deliberate reverse time syntax, worn/body instruments none, explicit separate tools only. Avoid repeating old query pairs.",
+  "status": "pending_review_at_generation",
+  "requested_count": 100,
+  "response_count": 100,
+  "excluded_exact_duplicates": [],
+  "count_deviation": null,
+  "max_tokens": 65536,
+  "batch_path": "data/review/62-examples.json",
+  "sha256": "af2ec1bcba28bf414450071cb3200bd3a5694b8b6f044fd8829af4550c0e1def",
+  "rules_sha256": "1384a27c0e60790b1e680fc71b25e46e429e688945f8b619dddd7efad967181e",
+  "feedback_session_sha256": "e0f51574fbca5adb238289f95f6187748af56f4d648f178797897d75fded5ac2",
+  "feedback_reviewed_count": 2096,
+  "usage": {
+    "prompt_tokens": 81793,
+    "completion_tokens": 47272,
+    "total_tokens": 129065,
+    "prompt_tokens_details": {
+      "cached_tokens": 4096
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}

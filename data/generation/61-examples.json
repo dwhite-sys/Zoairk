@@ -1,0 +1,32 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T15:45:26.090350+00:00",
+  "count": 95,
+  "variation_focus": "Ancient library vault expedition, rotating bookcase, flooded archive, ivory lectern and map room.30do30check40mixed; varied1-5 actions and sentence structures; before/after relationships aligned; ownership preserved. Keep source annotation simple.",
+  "status": "pending_review_at_generation",
+  "requested_count": 100,
+  "response_count": 96,
+  "excluded_exact_duplicates": [
+    {
+      "response_index": 60,
+      "query": "Could I turn the rotating bookcase locking pin with the brass key?"
+    }
+  ],
+  "count_deviation": "Response contained 96 candidates; retained 95 unchanged after permitted short-count handling and exact-query deduplication.",
+  "max_tokens": 65536,
+  "batch_path": "data/review/61-examples.json",
+  "sha256": "a55906298a7ca91f047a7369268541d544fe206971ae8d15d0711aac2bbd94e4",
+  "rules_sha256": "1384a27c0e60790b1e680fc71b25e46e429e688945f8b619dddd7efad967181e",
+  "feedback_session_sha256": "e0f51574fbca5adb238289f95f6187748af56f4d648f178797897d75fded5ac2",
+  "feedback_reviewed_count": 2096,
+  "usage": {
+    "prompt_tokens": 81454,
+    "completion_tokens": 38551,
+    "total_tokens": 120005,
+    "prompt_tokens_details": {
+      "cached_tokens": 4096
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}
