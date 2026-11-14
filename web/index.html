@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zoairk</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="game">
+    <header class="scene">
+      <div class="scene-top">
+        <h1 id="scene-name">Zoairk</h1>
+        <span id="status" class="status">connecting…</span>
+      </div>
+      <p id="scene-description" class="scene-description"></p>
+    </header>
+
+    <section id="log" class="log" aria-live="polite"></section>
+
+    <div id="thinking" class="thinking" hidden>thinking…</div>
+
+    <form id="input-form" class="input-row" autocomplete="off">
+      <span class="prompt">&gt;</span>
+      <input id="input" type="text" placeholder="What do you do?" aria-label="Command" autofocus>
+      <button type="submit">Send</button>
+    </form>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

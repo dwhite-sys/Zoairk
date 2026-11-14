@@ -78,8 +78,11 @@ class Game:
             out = [_msg("narrator", prose)]
 
         for d in npc.gauge(npcs, event_text, turn=w.turn):   # gauge records memory and the engage reply
-            if d.decision in ("express", "engage") and d.expression:
-                out.append(_msg("npc", d.expression, npc=d.npc, decision=d.decision,
+            text = d.expression
+            if d.decision == "express":                    # express is non-verbal: drop any quoted speech
+                text = re.sub(r"\s*[\"“][^\"”]*[\"”]\s*", " ", text or "").strip()
+            if d.decision in ("express", "engage") and text:
+                out.append(_msg("npc", text, npc=d.npc, decision=d.decision,
                                 confidence=round(d.confidence, 2)))
         w.save()
         return out

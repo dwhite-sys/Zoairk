@@ -16,7 +16,7 @@ TOOL = [{"type": "function", "function": {
         "confidence": {"type": "number"},
         "expression": {"type": "string"}}, "required": ["decision", "confidence"]}}}]
 DECIDE_SYS = ("Call npc_decide exactly once. You decide how one NPC in a text adventure responds to the latest event. "
-              "Choose: nothing (NPC not involved or it is not relevant to them), express (a short non-verbal reaction; "
+              "Choose: nothing (NPC not involved or it is not relevant to them), express (a short non-verbal reaction, body language only, NO spoken words or quotes; "
               "give it as 'expression' in third person), engage (the NPC speaks or acts). "
               "confidence is 0-1: how strongly this NPC wants to respond.")
 ENGAGE_SYS = ("You are playing an NPC in a text adventure. Stay in character. Reply with 1-3 sentences: what the NPC "

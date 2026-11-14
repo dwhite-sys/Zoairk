@@ -1,0 +1,125 @@
+:root {
+  --bg: #0f1113;
+  --panel: #171a1d;
+  --text: #d9dcd6;
+  --dim: #7c8378;
+  --accent: #c8a45a;
+  --npc: #8fc1a9;
+  --express: #6c8fb3;
+  --engage: #c4705a;
+  --border: #2a2f33;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Iosevka", "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.game {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Scene header */
+.scene {
+  padding: 16px 0 12px;
+  border-bottom: 1px solid var(--border);
+}
+.scene-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+#scene-name {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+}
+.scene-description {
+  margin: 6px 0 0;
+  color: var(--dim);
+  font-size: 0.92rem;
+}
+.status { font-size: 0.8rem; color: var(--dim); }
+.status.online { color: var(--npc); }
+
+/* Scrolling log */
+.log {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 0;
+}
+.line { margin: 0 0 10px; white-space: pre-wrap; word-wrap: break-word; }
+.line.player { color: var(--accent); }
+.line.player::before { content: "> "; }
+.line.system { color: var(--dim); font-size: 0.88rem; font-style: italic; }
+.line.scene-break {
+  color: var(--accent);
+  border-top: 1px dashed var(--border);
+  padding-top: 8px;
+}
+
+.npc-name { color: var(--npc); font-weight: bold; }
+.badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 3px;
+  font-size: 0.72rem;
+  vertical-align: middle;
+  color: var(--bg);
+}
+.badge.express { background: var(--express); }
+.badge.engage { background: var(--engage); }
+
+.thinking {
+  color: var(--dim);
+  font-size: 0.88rem;
+  padding: 4px 0;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+@keyframes pulse { 50% { opacity: 0.4; } }
+
+/* Input */
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0 16px;
+  border-top: 1px solid var(--border);
+}
+.prompt { color: var(--accent); }
+#input {
+  flex: 1;
+  min-width: 0;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px;
+  font: inherit;
+}
+#input:focus { outline: 1px solid var(--accent); }
+button {
+  background: var(--panel);
+  color: var(--accent);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 14px;
+  font: inherit;
+  cursor: pointer;
+}
+button:disabled, #input:disabled { opacity: 0.5; }
