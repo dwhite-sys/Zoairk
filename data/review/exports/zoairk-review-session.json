@@ -753,9 +753,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "deny",
+      "reason": "[Before] should technically be before 'enter the hall' because the sentence is being parsed sequentially",
+      "reviewedAt": "2026-11-14T11:58:00.446Z"
     },
     {
       "example": {
@@ -844,9 +844,9 @@
           }
         ]
       },
-      "decision": null,
+      "decision": "approve",
       "reason": "",
-      "reviewedAt": null
+      "reviewedAt": "2026-11-14T11:58:15.562Z"
     }
   ]
 }
