@@ -201,8 +201,10 @@ form.addEventListener("submit", (event) => {
 const muteBtn = document.getElementById("mute");
 function renderMute() {
   const m = window.Fx ? Fx.isMuted() : false;
-  muteBtn.textContent = m ? "🔇" : "🔊";
-  muteBtn.setAttribute("aria-label", m ? "Unmute sound" : "Mute sound");
+  // Say the current state in words (team feedback: the icon alone was ambiguous).
+  muteBtn.textContent = m ? "🔇 Sound off" : "🔊 Sound on";
+  muteBtn.title = m ? "Sound is off. Click to turn it on." : "Sound is on. Click to turn it off.";
+  muteBtn.setAttribute("aria-label", muteBtn.title);
 }
 if (muteBtn && window.Fx) {
   renderMute();
