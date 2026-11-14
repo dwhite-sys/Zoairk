@@ -18,8 +18,9 @@ Each piece is built against these. If one must change, change it here first and 
 ## C3: NPC gauge (`engine/npc.py`)
 - `decide(npc: Npc, event_text: str) -> NpcDecision` via tool `npc_decide(decision, confidence, expression?)`,
   decision ∈ {nothing, express, engage}. Invalid → `nothing`.
-- `gauge(npcs, event_text) -> list[NpcDecision]`: concurrent calls; rank by confidence; then `rand(0,1)`:
-  0 → top engage, 1 → top express (board B7b). Others stay as decided.
+- `gauge(npcs, event_text) -> list[NpcDecision]`: concurrent calls; rank by confidence; then
+  bias + noise (decided 13:20): noisy = confidence + N(0, 0.15); the best noisy engage keeps engage, other
+  engages and any noisy engage < 0.5 become express (replaces the board's placeholder `rand(0,1)`).
 - `engage(npc, event_text) -> str`: the NPC's spoken or acted reply (chat model with profile + memory).
 - Memory: append-only per NPC: `{"turn", "kind": speech|action|inaction|expression|engagement, "text"}`.
 

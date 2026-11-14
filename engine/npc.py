@@ -61,17 +61,22 @@ def decide(npc: Npc, event_text: str, turn: int = 0) -> NpcDecision:
     return d
 
 
+NOISE_SIGMA = 0.15   # how chaotic NPC choices feel
+ENGAGE_FLOOR = 0.5   # a noisy engage score below this becomes an express
+
+
 def gauge(npcs: list[Npc], event_text: str, turn: int = 0) -> list[NpcDecision]:
-    """Decide for all NPCs concurrently, then apply board B7b: one engage at most, chosen by coin flip."""
+    """Decide for all NPCs concurrently; at most one engages, chosen by confidence plus noise."""
     with ThreadPoolExecutor(max_workers=3) as ex:
         decisions = list(ex.map(lambda n: _decide_raw(n, event_text), npcs))
-    ranked = sorted(decisions, key=lambda d: d.confidence, reverse=True)
+    # Bias plus noise (decided with Drew 13:20): the model's confidence is the bias, and Gaussian noise
+    # adds "a little random chance for pizzazz". The best noisy engage wins; an engage whose noisy score
+    # falls under ENGAGE_FLOOR, or that loses to a stronger one, becomes an express instead.
+    noisy = {id(d): d.confidence + random.gauss(0.0, NOISE_SIGMA) for d in decisions}
+    ranked = sorted(decisions, key=lambda d: noisy[id(d)], reverse=True)
     engages = [d for d in ranked if d.decision == "engage"]
-    if random.randint(0, 1) == 0:
-        for d in engages[1:]:
-            d.decision = "express"
-    else:
-        for d in engages:
+    for i, d in enumerate(engages):
+        if i > 0 or noisy[id(d)] < ENGAGE_FLOOR:
             d.decision = "express"
     for d in ranked:
         if d.decision == "express" and not d.expression:
