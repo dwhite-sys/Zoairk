@@ -15,6 +15,7 @@ RESPAWN = re.compile(r"^\s*(respawn|revive|start over)\s*$", re.I)
 EXAMINE = re.compile(r"^\s*(?:check|examine|inspect|x|look at|look in|look inside|study|search)\s+(?:out\s+)?(.+?)\s*\??$", re.I)
 HEALTH = re.compile(r"^\s*(health|hp|status|how am i)\??\s*$", re.I)
 ITEM_VERBS = {"take", "drop", "put", "give", "loot", "drink"}
+EMOTE = re.compile(r"^\s*\*\s*(.+?)\s*\*\s*$")     # *I grimace*: a pure expression, no target needed
 SPEECH = re.compile(r"[\"“”]")
 
 
@@ -46,6 +47,25 @@ def _reveal_or_mask(npc, text: str) -> str:
     title = npc.title
     text = re.sub(rf"(^|[.!?]\s+|\*)({re.escape(npc.name)})\b", lambda m: m.group(1) + title[0].upper() + title[1:], text)
     return re.sub(rf"\b{re.escape(npc.name)}\b", title, text)
+
+
+def _third_person(text: str, player: str) -> str:
+    """'I grimace at my hands' -> 'D grimaces at their hands' (good enough for emotes)."""
+    m = re.match(r"^(?:i)\s+(\w+)(.*)$", text.strip(), re.I)
+    if not m:
+        return f"{player} {text.strip()}"
+    def conj(verb):
+        if re.search(r"(s|sh|ch|x|z|o)$", verb):
+            return verb + "es"
+        if re.search(r"[^aeiou]y$", verb):
+            return verb[:-1] + "ies"
+        return verb + "s"
+    verb, rest = conj(m.group(1)), m.group(2)
+    skip = {"the", "a", "an", "my", "his", "her", "their", "then", "slowly", "quickly", "i"}
+    rest = re.sub(r"\b(and|then)\s+([a-z]+)\b",          # "... and back away" -> "... and backs away"
+                  lambda x: f"{x.group(1)} {x.group(2) if x.group(2) in skip else conj(x.group(2))}", rest)
+    rest = re.sub(r"\bmy\b", "their", re.sub(r"\bmyself\b", "themselves", re.sub(r"\bme\b", "them", rest)))
+    return f"{player} {verb}{rest}"
 
 
 def _msg(role: str, text: str, **extra) -> dict:
@@ -360,7 +380,15 @@ class Game:
                     _msg("system", f"{player} arrives.", to_scene=arrived, others_only=True), self.status(player)]
 
         npcs = w.current.npcs
-        if SPEECH.search(text):                          # quotes mark speech: no parse, straight to memory
+        em = EMOTE.match(text)
+        if em:                                           # player expression: no parse, nothing changes, NPCs see it
+            w.turn += 1
+            shown = _third_person(em.group(1), player)
+            event_text = f"Expression: {shown}{self._armed(player)}"
+            for n in npcs:
+                n.remember(w.turn, "action", event_text)
+            out = [_msg("narrator", f"*{shown}*")]
+        elif SPEECH.search(text):                        # quotes mark speech: no parse, straight to memory
             w.turn += 1
             event_text = f"{player} says: {text}{self._armed(player)}"
             for n in npcs:
