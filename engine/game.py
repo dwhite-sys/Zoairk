@@ -338,9 +338,17 @@ class Game:
             fights, rest, items = [], [], []
             people = {k for k in alive_npcs} | {h.lower() for h in here}
             for c in calls:
-                if c.get("key") == "throw" and (c.get("instrument") or "").strip().lower() in people:
-                    # "throw the rock at Jerry" = an attack on Jerry with the rock as the weapon
-                    c = {**c, "key": "attack", "target": c["instrument"], "instrument": c["target"]}
+                if c.get("key") == "throw":
+                    # "throw the rock at Jerry" = an attack on Jerry with the rock as the weapon.
+                    # The parser puts the person in either slot (sometimes as "at jerry"), so check both.
+                    tg, ins = (re.sub(r"^(at|to|toward|towards)\s+", "", (c.get(k) or "").strip(), flags=re.I)
+                               for k in ("target", "instrument"))
+                    if ins.lower() in people:
+                        c = {**c, "key": "attack", "target": ins, "instrument": tg}
+                    elif tg.lower() in people:
+                        c = {**c, "key": "attack", "target": tg, "instrument": ins}
+                    if c["key"] == "attack" and (c["instrument"] or "").lower() in ("it", "that", "this", ""):
+                        c["instrument"] = next((i["target"] for i in calls if i.get("key") == "take"), c["instrument"])
                 if c.get("key") in ITEM_VERBS:
                     items.append(c)
                     continue

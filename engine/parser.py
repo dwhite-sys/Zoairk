@@ -33,7 +33,7 @@ VERB_MAP = {
     "snuff": "extinguish", "blow out": "extinguish", "open": "open", "close": "close",
     "shut": "close", "read": "read", "smash": "break_object", "shatter": "break_object",
     "break": "break_object", "break_object": "break_object", "throw": "throw", "toss": "throw",
-    "hurl": "throw", "examine": "examine", "inspect": "examine", "look": "examine",
+    "hurl": "throw", "chuck": "throw", "lob": "throw", "fling": "throw", "pitch": "throw", "examine": "examine", "inspect": "examine", "look": "examine",
     "attack": "attack", "hit": "attack", "punch": "attack", "kick": "attack", "stab": "attack",
     "fight": "attack", "slap": "attack", "shove": "attack", "tackle": "attack", "swing at": "attack",
     "pick up": "take", "take": "take", "grab": "take", "get": "take", "collect": "take",
