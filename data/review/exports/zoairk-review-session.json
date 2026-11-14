@@ -6857,9 +6857,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:39:30.090Z"
     },
     {
       "example": {
@@ -6932,9 +6932,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:39:36.419Z"
     },
     {
       "example": {
@@ -7015,9 +7015,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:39:45.904Z"
     },
     {
       "example": {
@@ -7090,9 +7090,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:39:50.690Z"
     },
     {
       "example": {
@@ -7173,9 +7173,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:39:55.176Z"
     },
     {
       "example": {
@@ -7256,9 +7256,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:39:59.700Z"
     },
     {
       "example": {
@@ -7339,9 +7339,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:40:05.349Z"
     },
     {
       "example": {
@@ -7422,9 +7422,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:40:09.828Z"
     },
     {
       "example": {
@@ -7505,9 +7505,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:40:18.165Z"
     },
     {
       "example": {
@@ -7596,9 +7596,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:40:23.163Z"
     },
     {
       "example": {
@@ -7679,9 +7679,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:40:30.417Z"
     },
     {
       "example": {
@@ -7754,9 +7754,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "deny",
+      "reason": "AI review (Codex): the parse drops the explicit crate association. Use target \"crate's lid\" (action \"pry off\", instrument \"none\"), or another consistent representation preserving \"off the crate\", rather than an unqualified \"lid\". This avoids losing which object the lid belongs to.",
+      "reviewedAt": "2026-11-14T13:40:42.676Z"
     },
     {
       "example": {
@@ -7837,9 +7837,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:40:47.825Z"
     },
     {
       "example": {
