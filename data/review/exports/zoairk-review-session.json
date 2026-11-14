@@ -322,9 +322,9 @@
           }
         ]
       },
-      "decision": null,
+      "decision": "approve",
       "reason": "",
-      "reviewedAt": null
+      "reviewedAt": "2026-11-14T11:54:59.083Z"
     },
     {
       "example": {
@@ -413,9 +413,9 @@
           }
         ]
       },
-      "decision": null,
+      "decision": "approve",
       "reason": "",
-      "reviewedAt": null
+      "reviewedAt": "2026-11-14T11:55:45.167Z"
     },
     {
       "example": {
@@ -496,9 +496,9 @@
           }
         ]
       },
-      "decision": null,
+      "decision": "approve",
       "reason": "",
-      "reviewedAt": null
+      "reviewedAt": "2026-11-14T11:55:59.601Z"
     },
     {
       "example": {
@@ -579,9 +579,9 @@
           }
         ]
       },
-      "decision": null,
+      "decision": "approve",
       "reason": "",
-      "reviewedAt": null
+      "reviewedAt": "2026-11-14T11:56:41.794Z"
     },
     {
       "example": {
@@ -662,9 +662,9 @@
           }
         ]
       },
-      "decision": null,
+      "decision": "approve",
       "reason": "",
-      "reviewedAt": null
+      "reviewedAt": "2026-11-14T11:56:48.756Z"
     },
     {
       "example": {
