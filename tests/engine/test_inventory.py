@@ -48,3 +48,10 @@ def test_health_potion_heals_and_is_used_up():
     g.player_hp["Drew"] = 4
     ev = g._items("Drew", {"key": "drink", "target": "health potion", "instrument": ""}, g.world.current.npcs)
     assert ev.ok and g.player_hp["Drew"] == 9 and potion not in g.inventories["Drew"]
+
+
+def test_players_can_give_items_to_each_other():
+    g = Game("worlds/demo.json"); g.intro("Dawson"); g.intro("Drew"); g._enter("Dawson")
+    rock = g.world.find("rock"); inventory.take(g.world, g.inventories["Dawson"], rock)
+    ev = g._items("Dawson", {"key": "give", "target": "rock", "instrument": "Drew"}, g.world.current.npcs)
+    assert ev.ok and rock in g.inventories["Drew"] and rock not in g.inventories["Dawson"]

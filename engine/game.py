@@ -133,6 +133,15 @@ class Game:
             return inventory.put(w, inv, obj, w.find(other))
         npc = next((n for n in npcs if other.lower() in (n.name.lower(), (n.title or "").lower(),
                                                          (n.title or "").lower().removeprefix("the "))), None)
+        mate = next((p for p, loc in self.locations.items()
+                     if p != player and loc == w.current.name and p.lower() == other.lower()), None)
+        if npc is None and mate is not None:          # players can hand things to each other too
+            if obj not in inv:
+                return Event("give", False, obj.properties.name, mate, {}, f"You aren't carrying the {obj.properties.name}.")
+            inv.remove(obj)
+            self.inventories.setdefault(mate, []).append(obj)
+            return Event("give", True, obj.properties.name, mate, {f"{obj.properties.name}.owner": mate},
+                         f"You give the {obj.properties.name} to {mate}.")
         if npc is None:
             return Event("give", False, obj.properties.name, other, {}, f"There is no {other or 'one'} here to give it to.")
         return inventory.give(inv, obj, npc)
