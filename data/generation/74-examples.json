@@ -1,0 +1,27 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T16:15:59.195071+00:00",
+  "count": 100,
+  "variation_focus": "Dwarven tomb, subterranean forge, collapsed tunnel, stone lift, rune chamber.30do30check40mixed, diverse1-5 actions, natural grammar and exact sources/destinations. Literal tool-leading extractions without rewriting.",
+  "status": "pending_review_at_generation",
+  "requested_count": 100,
+  "response_count": 100,
+  "excluded_exact_duplicates": [],
+  "count_deviation": null,
+  "max_tokens": 65536,
+  "batch_path": "data/review/74-examples.json",
+  "sha256": "8a4746b3289c456abbc870cd66223c811d547cfebc73c2775a59e051f13a79ae",
+  "rules_sha256": "fbe0a86f798bb21a5ca5fd8f929733d5286f6524fbc2a282490cdf1e19e0a588",
+  "feedback_session_sha256": "d6762700a5bb649d4145a170a70fcee2af3c4f712490abc5d56e883e34ddab8b",
+  "feedback_reviewed_count": 3691,
+  "usage": {
+    "prompt_tokens": 132092,
+    "completion_tokens": 36509,
+    "total_tokens": 168601,
+    "prompt_tokens_details": {
+      "cached_tokens": 4480
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}
