@@ -69,6 +69,7 @@ function showStatus(msg) {
   const fill = document.getElementById("hp-fill");
   fill.style.width = `${ratio * 100}%`;
   fill.style.background = `hsl(${Math.round(ratio * 120)}, 65%, 45%)`; // green -> red
+  showRespawn(msg.hp <= 0);
   const hpText = document.getElementById("hp-text");
   hpText.textContent = hp <= 0 ? "You are dead" : `${hp}/${max}`;
   hpText.classList.toggle("dead", hp <= 0);
@@ -214,3 +215,23 @@ if (muteBtn && window.Fx) {
 }
 
 connect();
+
+
+// Respawn: shown only while dead; sends the "respawn" command through the normal chat channel.
+function showRespawn(dead) {
+  let btn = document.getElementById("respawn-btn");
+  if (!btn) {
+    btn = document.createElement("button");
+    btn.id = "respawn-btn";
+    btn.type = "button";
+    btn.textContent = "↻ Respawn";
+    btn.addEventListener("click", () => {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ type: "send_message", text: "respawn" }));
+      }
+    });
+    const hp = document.getElementById("hp-text");
+    (hp && hp.parentElement ? hp.parentElement : document.body).appendChild(btn);
+  }
+  btn.hidden = !dead;
+}

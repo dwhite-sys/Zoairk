@@ -10,6 +10,7 @@ MOVE = re.compile(r"^\s*(?:go|walk|head|move|run)?\s*(north|south|east|west|up|d
 SHORT = {"n": "north", "s": "south", "e": "east", "w": "west"}
 LOOK = re.compile(r"^\s*(look|l|look around)\s*$", re.I)
 INV = re.compile(r"^\s*(i|inv|inventory|what am i (carrying|holding))\??\s*$", re.I)
+RESPAWN = re.compile(r"^\s*(respawn|revive|start over)\s*$", re.I)
 HEALTH = re.compile(r"^\s*(health|hp|status|how am i)\??\s*$", re.I)
 ITEM_VERBS = {"take", "drop", "put", "give"}
 SPEECH = re.compile(r"[\"“”]")
@@ -161,6 +162,13 @@ class Game:
             r["message"] = r["message"].replace(name, by_name[name.lower()].label)
         else:
             self.player_hp[name] = r["hp"]
+            if r["hp"] <= 0:                          # death: belongings drop where the player fell
+                dropped = self.inventories.get(name, [])
+                where = self.world.scenes[self.locations.get(name, self.start)]
+                where.objects.extend(dropped)
+                if dropped:
+                    r["message"] += f" {name}'s belongings fall to the ground: " + ", ".join(o.properties.name for o in dropped) + "."
+                self.inventories[name] = []
         return Event("attack", True, name, weapon, {f"{name}.hp": r["hp"], f"{name}.status": r["status"]}, r["message"])
 
     def intro(self, player: str = "The player") -> list[dict]:
@@ -185,8 +193,23 @@ class Game:
             hp = self.player_hp.get(player, 10)
             return [_msg("system", f"Health: {hp}/{combat.MAX_HP} ({combat.status(hp)}).", private=True),
                     self.status(player)]
+        if RESPAWN.match(text):
+            if self.player_hp.get(player, 10) > 0:
+                return [_msg("system", "You're still alive.", private=True)]
+            left = w.current.name
+            self.player_hp[player] = combat.MAX_HP
+            self.locations[player] = self.start
+            self._enter(player)
+            for n in w.current.npcs:              # NPCs keep their memories: they know you died
+                n.remember(w.turn, "action", f"{player} has come back to life and returned.")
+            w.save()
+            return [{**self._scene(), "private": True},
+                    _msg("system", "You wake up with a gasp, whole again.", private=True),
+                    _msg("scene", self.describe(), private=True),
+                    _msg("system", f"{player} comes back to life.", to_scene=self.start, others_only=True),
+                    self.status(player)]
         if self.player_hp.get(player, 10) <= 0:
-            return [_msg("system", "You are dead. You can only look around.")]
+            return [_msg("system", "You are dead. You can only look around, or respawn.", private=True)]
         m = MOVE.match(text)
         if m:
             direction = SHORT.get(m.group(1).lower(), m.group(1).lower())

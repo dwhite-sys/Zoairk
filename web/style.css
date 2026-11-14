@@ -249,3 +249,6 @@ body.fx-white { animation: white-flash 0.35s ease-out; }
 .inv-list li::before { content: "• "; color: var(--accent); }
 .inv-list li.inv-empty { color: var(--dim); font-style: italic; }
 .inv-list li.inv-empty::before { content: ""; }
+
+#respawn-btn { margin-left: 0.6rem; background: #7a2a1f; color: #fff; border: 0; border-radius: 6px; padding: 0.2rem 0.7rem; cursor: pointer; font: inherit; }
+#respawn-btn:hover { background: #a3392a; }
