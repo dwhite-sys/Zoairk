@@ -270,7 +270,11 @@ class Game:
             w.people_here = [n.label for n in npcs if n.hp > 0] + here
             calls = parser.extract_calls(text, w)
             fights, rest, items = [], [], []
+            people = {k for k in alive_npcs} | {h.lower() for h in here}
             for c in calls:
+                if c.get("key") == "throw" and (c.get("instrument") or "").strip().lower() in people:
+                    # "throw the rock at Jerry" = an attack on Jerry with the rock as the weapon
+                    c = {**c, "key": "attack", "target": c["instrument"], "instrument": c["target"]}
                 if c.get("key") in ITEM_VERBS:
                     items.append(c)
                     continue

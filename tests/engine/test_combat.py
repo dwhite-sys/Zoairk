@@ -67,3 +67,16 @@ def test_weapon_damage_ranges_and_sword_in_chest():
     random.seed(3)
     dmgs = {combat.strike("Drew", "X", {"X": 100}, "sword", sword.damage)["damage"] for _ in range(50)}
     assert min(dmgs) >= 4 and max(dmgs) <= 7
+
+
+def test_throwing_at_a_person_is_an_attack_and_drops_the_item(monkeypatch):
+    from engine import inventory, parser, narrator, npc
+    g = Game("worlds/demo.json"); g.intro("Drew"); g._enter("Drew")
+    w = g.world
+    inventory.take(w, g.inventories["Drew"], w.find("rock"))
+    monkeypatch.setattr(parser, "extract_calls", lambda t, world: [{"action": "throw", "key": "throw", "target": "rock", "instrument": "Jerry"}])
+    monkeypatch.setattr(narrator, "narrate", lambda ev, d: " ".join(e.message for e in ev))
+    monkeypatch.setattr(npc, "gauge", lambda *a, **k: [])
+    out = g.handle("throw the rock at Jerry", player="Drew")
+    assert "attacks Jerry with the rock" in out[0]["text"] and "lands on the ground" in out[0]["text"]
+    assert g.inventories["Drew"] == [] and w.find("rock") in w.current.objects
