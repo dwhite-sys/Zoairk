@@ -1,0 +1,27 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T15:43:15.764767+00:00",
+  "count": 100,
+  "variation_focus": "Volcanic foundry dungeon, basalt causeway, cooling cistern, salamander shrine.30do30check40mixed, varied1-5 actions and natural grammar. Literal tool use and independent actual follow-ups; known whole/part identities preserved.",
+  "status": "pending_review_at_generation",
+  "requested_count": 100,
+  "response_count": 100,
+  "excluded_exact_duplicates": [],
+  "count_deviation": null,
+  "max_tokens": 65536,
+  "batch_path": "data/review/59-examples.json",
+  "sha256": "d9ef520e1415a512be9388de3e08de64023069beb5c885291e7530cca7798440",
+  "rules_sha256": "1384a27c0e60790b1e680fc71b25e46e429e688945f8b619dddd7efad967181e",
+  "feedback_session_sha256": "e0f51574fbca5adb238289f95f6187748af56f4d648f178797897d75fded5ac2",
+  "feedback_reviewed_count": 2096,
+  "usage": {
+    "prompt_tokens": 81722,
+    "completion_tokens": 37419,
+    "total_tokens": 119141,
+    "prompt_tokens_details": {
+      "cached_tokens": 4096
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}
