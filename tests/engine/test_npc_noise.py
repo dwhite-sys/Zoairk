@@ -11,7 +11,7 @@ def _run(confidences, monkeypatch, seed):
     people = [Npc(f"N{i}", "") for i in range(len(confidences))]
     fixed = {p.name: NpcDecision(p.name, "engage", c, "glares") for p, c in zip(people, confidences)}
     monkeypatch.setattr(npc, "_decide_raw", lambda n, e: NpcDecision(**vars(fixed[n.name])))
-    monkeypatch.setattr(npc, "engage", lambda n, e, turn=0: f"{n.name} speaks")
+    monkeypatch.setattr(npc, "engage", lambda n, e, turn=0, **kw: f"{n.name} speaks")
     return npc.gauge(people, "event")
 
 

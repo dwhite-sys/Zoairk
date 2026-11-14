@@ -23,7 +23,7 @@ DECIDE_SYS = ("Call npc_decide exactly once. You decide how one NPC in a text ad
               "confidence is 0-1: how strongly this NPC wants to respond. "
               "If the NPC hands over an item it carries in this response (because the player asked for it, paid, "
               "or threatened them and the NPC gives in), you MUST set give to that item's exact name; an item is "
-              "only handed over if give is set. A player holding a weapon who threatens a timid or unarmed NPC "
+              "only handed over if give is set. If the NPC only offers to sell or asks for payment first, give stays empty. A player holding a weapon who threatens a timid or unarmed NPC "
               "is frightening: such an NPC usually gives in and hands over what is demanded.")
 ENGAGE_SYS = ("You are playing an NPC in a text adventure. Stay in character. Reply with 1-3 sentences: what the NPC "
               "says (in quotes) and/or does. No narration of the player's actions, no meta commentary.")
@@ -112,20 +112,54 @@ def gauge(npcs: list[Npc], event_text: str, turn: int = 0, focus: str | None = N
     for d in decisions:
         npc = by_name[d.npc]
         if d.decision == "engage":
-            d.expression = engage(npc, event_text, turn=None)   # the reply travels with the decision
+            d.expression = engage(npc, event_text, turn=None, give=d.give, attack=d.attack)   # reply matches the decision
             _record(npc, d, turn, d.expression)
         else:
             _record(npc, d, turn)
     return decisions
 
 
-def engage(npc: Npc, event_text: str, turn: int | None = 0) -> str:
+def _intent(give: str = "", attack: str = "") -> str:
+    """Tell the reply model what the state machine will actually do, so words and actions agree."""
+    bits = []
+    if give:
+        bits.append(f"You ARE handing over your {give} right now; say or show it.")
+    else:
+        bits.append("You are NOT handing anything over this turn. If you want payment or terms first, "
+                    "ask for them and keep the item.")
+    if attack:
+        bits.append(f"You ARE attacking {attack}.")
+    return " ".join(bits) + "\n"
+
+
+def engage(npc: Npc, event_text: str, turn: int | None = 0, give: str = "", attack: str = "") -> str:
     """The NPC's in-character reply. Records an engagement unless turn is None (gauge records it)."""
     msg = chat([{"role": "system", "content": ENGAGE_SYS},
                 {"role": "user", "content": f"You are: {npc.profile}\n{_carrying(npc)}{_secrecy(npc)}Your recent memory:\n{_memory(npc)}\n"
-                                            f"What just happened: {event_text}\nYour response:"}],
+                                            f"What just happened: {event_text}\n{_intent(give, attack)}Your response:"}],
                temperature=0.7)
     reply = (msg.get("content") or "").strip() or f"{npc.label} glares in silence."
     if turn is not None:
         _remember(npc, "engagement", reply, turn)
     return reply
+
+
+THEFT_TOOL = [{"type": "function", "function": {
+    "name": "theft_outcome", "description": "Decide whether this NPC lets the item go.",
+    "parameters": {"type": "object", "properties": {
+        "lets_go": {"type": "boolean", "description": "true if the NPC loses or surrenders the item"},
+        "reason": {"type": "string"}}, "required": ["lets_go"]}}}]
+
+
+def judge_theft(npc: Npc, attempt: str) -> bool:
+    """The NPC's own judgement decides a theft (team feedback: not a dice roll). Fails safe: they keep it."""
+    msg = chat([{"role": "system", "content": "Call theft_outcome exactly once. Someone is trying to take an item this NPC "
+                 "carries. Judge as this NPC would: a frightened, hurt, outmatched or distracted NPC, or one facing an "
+                 "armed and threatening player, may let it go; a strong, alert, unafraid NPC keeps hold of it."},
+                {"role": "user", "content": f"NPC: {npc.profile}\nHealth: {npc.hp}/10\n{_carrying(npc)}Recent memory:\n"
+                                            f"{_memory(npc)}\nAttempt: {attempt}"}],
+               tools=THEFT_TOOL, temperature=0)
+    try:
+        return bool(msg["tool_calls"][0]["function"]["arguments"].get("lets_go"))
+    except Exception:
+        return False

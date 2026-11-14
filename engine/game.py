@@ -1,7 +1,6 @@
 """Turn loop: player input → parse → state machine → narration → NPC gauge → save (contracts C1–C5)."""
 from __future__ import annotations
 
-import random
 import re
 
 from . import combat, inventory
@@ -16,7 +15,6 @@ RESPAWN = re.compile(r"^\s*(respawn|revive|start over)\s*$", re.I)
 EXAMINE = re.compile(r"^\s*(?:check|examine|inspect|x|look at|look in|look inside|study|search)\s+(?:out\s+)?(.+?)\s*\??$", re.I)
 HEALTH = re.compile(r"^\s*(health|hp|status|how am i)\??\s*$", re.I)
 ITEM_VERBS = {"take", "drop", "put", "give", "loot", "drink"}
-STEAL_CHANCE = 0.4          # base chance to snatch an item from a living NPC (higher when they are hurt)
 SPEECH = re.compile(r"[\"“”]")
 
 
@@ -170,8 +168,9 @@ class Game:
             item = next((i for i in n.inventory if match(i)), None)
             if item is None:
                 continue
-            chance = STEAL_CHANCE + (0.3 if n.hp < combat.MAX_HP / 2 else 0)
-            if random.random() < chance:
+            from . import npc as npc_mod
+            attempt = f"{player} tries to take your {item.properties.name}.{self._armed(player)}"
+            if npc_mod.judge_theft(n, attempt):
                 n.inventory.remove(item)
                 self.inventories[player].append(item)
                 return Event("steal", True, item.properties.name, n.name, {f"{item.properties.name}.owner": player},
