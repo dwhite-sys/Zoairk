@@ -1,0 +1,27 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T15:51:57.897073+00:00",
+  "count": 100,
+  "variation_focus": "Village fire evacuation preparations, medieval watermill gate, grain loft, stable yard and outer wall.30do30check40mixed, varied1-5 actions. Natural player intent using I am going to, I will, Let me and explicit questions. No speech or inventedtools.",
+  "status": "pending_review_at_generation",
+  "requested_count": 100,
+  "response_count": 100,
+  "excluded_exact_duplicates": [],
+  "count_deviation": null,
+  "max_tokens": 65536,
+  "batch_path": "data/review/67-examples.json",
+  "sha256": "b69c999308115b4cd22fdee1d923e94b6741e172601888abc5394edd747334c2",
+  "rules_sha256": "b5f0ae06318471d95416b6ce8dae8c5e346eeb8911d57cbbc62351eb557e4f42",
+  "feedback_session_sha256": "4eef3df6a86ab1e8e25ac0b5fcbc879300be29c62382817c251a9167ea42e0ea",
+  "feedback_reviewed_count": 2696,
+  "usage": {
+    "prompt_tokens": 101565,
+    "completion_tokens": 45396,
+    "total_tokens": 146961,
+    "prompt_tokens_details": {
+      "cached_tokens": 4224
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}

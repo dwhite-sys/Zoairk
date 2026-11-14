@@ -91,3 +91,6 @@ For the same whole object, removing a descriptive adjective is fine, including w
 
 OWNED PARTS AND ACCESS
 A wax seal before opening a named locker/strongbox belongs to that locker/strongbox; include the owner in the seal target. Bottom rung after naming a ladder must target bottom rung of that ladder. Preserve architectural part/location owners in action arguments (shipwreck hold, shrine step, tollhouse latch, stone bridge parapet). A shelf after unlocking a cabinet is ambiguous unless its location is specified; if it is inside the cabinet, include opening before taking from its shelf. Newly formed lashings must identify the rope and/or objects they secure.
+
+REFERENCE AND DESTINATION CHECK
+If a timber prop was wedged under a beam, the wedge must resolve to that timber prop rather than an invented separate wedge. For plural crates followed by a single lid, identify which crate explicitly. All quoted reference spans must occur literally in the input; do not quote the chips when the query says the ice chips. For mark X on slate, use action mark on slate and target X; do not turn the requested destination into a pre-existing property X on slate of the target.
