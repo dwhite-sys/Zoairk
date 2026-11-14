@@ -55,8 +55,10 @@ async function readDataset() {
   }
   return { examples: entries.map(entry => entry.example), source: `${dir} (${names.length} file${names.length === 1 ? '' : 's'})` };
 }
-function validClient(value) {
-  return typeof value === 'string' && /^[A-Za-z0-9_-]{8,64}$/.test(value);
+// Where the generated dataset files go; point EXPORT_DIR inside the repository
+// so a `git add` carries them to the rest of the team.
+function exportDir() {
+  return process.env.EXPORT_DIR ? path.resolve(process.env.EXPORT_DIR) : path.join(dataDir(), 'exports');
 }
 function json(res, status, payload) {
   const body = JSON.stringify(payload);
@@ -73,31 +75,49 @@ async function readBody(req) {
   }
   return Buffer.concat(chunks).toString('utf8');
 }
-async function readSnapshots() {
+// ---- shared review state -------------------------------------------------
+// One workspace for the whole team: every browser reads and writes the same
+// entries, so a decision made on one device is what everybody else sees.
+function stateFile() {
+  return path.join(dataDir(), 'state.json');
+}
+function sessionOf(state) {
+  return { format: 'zoairk-review-session', version: 1, entries: state.entries };
+}
+async function saveState(state) {
+  state.updatedAt = new Date().toISOString();
+  const target = stateFile();
+  const temp = `${target}.${process.pid}.tmp`;
+  await fs.mkdir(dataDir(), { recursive: true });
+  await fs.writeFile(temp, JSON.stringify(state));
+  await fs.rename(temp, target);
+}
+// Fold per-browser snapshots from the previous layout into the shared state.
+async function readLegacySnapshots() {
   let names = [];
   try { names = await fs.readdir(dataDir()); } catch { return []; }
   const snapshots = [];
   for (const name of names) {
-    if (!name.endsWith('.json')) continue;
+    if (!name.endsWith('.json') || name === 'state.json') continue;
     try {
       const snapshot = JSON.parse(await fs.readFile(path.join(dataDir(), name), 'utf8'));
-      if (snapshot && typeof snapshot.client === 'string' && Array.isArray(snapshot.entries)) snapshots.push(snapshot);
+      if (snapshot && Array.isArray(snapshot.entries)) snapshots.push(snapshot);
     } catch { /* ignore a foreign or half-written file */ }
   }
   return snapshots.sort((a, b) => String(a.savedAt).localeCompare(String(b.savedAt)));
 }
-async function mergeFor(client) {
-  const snapshots = await readSnapshots();
-  const own = snapshots.filter(s => s.client === client).reverse();
-  const others = snapshots.filter(s => s.client !== client).reverse();
+async function loadState() {
+  try {
+    const raw = JSON.parse(await fs.readFile(stateFile(), 'utf8'));
+    if (raw && Array.isArray(raw.entries)) return raw;
+  } catch { /* first run, or no state yet */ }
   let entries = [];
-  // Newest first, with this browser's own snapshot ahead of every other one:
-  // mergeEntries lets an existing decision win, and local edits (including
-  // undo) have to survive a refetch.
-  for (const snapshot of [...own, ...others]) {
+  for (const snapshot of (await readLegacySnapshots()).reverse()) {
     try { entries = R.mergeEntries(entries, snapshot.entries).entries; } catch { /* skip an oversized snapshot */ }
   }
-  return { format: 'zoairk-review-session', version: 1, entries };
+  const state = { version: 1, updatedAt: new Date().toISOString(), entries };
+  if (entries.length) await saveState(state);
+  return state;
 }
 async function handleExamples(req, res) {
   if (!['GET', 'HEAD'].includes(req.method)) { json(res, 405, { error: 'Method not allowed.' }); return; }
@@ -108,38 +128,50 @@ async function handleExamples(req, res) {
   res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': body.length, 'X-Zoairk-Dataset': dataset.source });
   res.end(req.method === 'HEAD' ? undefined : body);
 }
-async function handleSession(req, res, url) {
-  const client = url.searchParams.get('client') || '';
-  if (!validClient(client)) { json(res, 400, { error: 'A valid client id is required.' }); return; }
-  if (req.method === 'POST') {
-    let parsed;
-    try { parsed = R.parseFile(await readBody(req)); }
-    catch (error) { json(res, 400, { error: error.message }); return; }
-    if (!parsed.session) { json(res, 400, { error: 'Send a review session file.' }); return; }
-    const snapshot = { client, savedAt: new Date().toISOString(), entries: parsed.entries };
-    const target = path.join(dataDir(), `${client}.json`);
-    const temp = `${target}.${process.pid}.tmp`;
-    try {
-      await fs.mkdir(dataDir(), { recursive: true });
-      await fs.writeFile(temp, JSON.stringify(snapshot));
-      await fs.rename(temp, target);
-    } catch (error) { json(res, 500, { error: 'Could not save the review session.' }); return; }
-    const written = await materialize();
-    json(res, 200, { saved: snapshot.entries.length, savedAt: snapshot.savedAt, exports: written });
+async function handleSession(req, res) {
+  if (req.method === 'GET' || req.method === 'HEAD') { json(res, 200, sessionOf(await loadState())); return; }
+  if (req.method !== 'POST') { json(res, 405, { error: 'Method not allowed.' }); return; }
+  let parsed;
+  try { parsed = R.parseFile(await readBody(req)); }
+  catch (error) { json(res, 400, { error: error.message }); return; }
+  if (!parsed.session) { json(res, 400, { error: 'Send a review session file.' }); return; }
+  const state = await loadState();
+  // Additive: new examples join the shared workspace, existing decisions stay.
+  const merged = R.mergeEntries(state.entries, parsed.entries);
+  state.entries = merged.entries;
+  try { await saveState(state); } catch { json(res, 500, { error: 'Could not save the review session.' }); return; }
+  json(res, 200, { added: merged.added, total: state.entries.length, exports: await materialize(state) });
+}
+// One approve/deny/clear applied to the shared entry for that example.
+async function handleDecision(req, res) {
+  if (req.method !== 'POST') { json(res, 405, { error: 'Method not allowed.' }); return; }
+  let body;
+  try { body = JSON.parse(await readBody(req)); }
+  catch { json(res, 400, { error: 'Send JSON.' }); return; }
+  const decision = body ? body.decision : undefined;
+  if (!body || typeof body.key !== 'string' || !body.key || ![null, 'approve', 'deny'].includes(decision)) {
+    json(res, 400, { error: 'Send a key and a decision of approve, deny or null.' });
     return;
   }
-  if (!['GET', 'HEAD'].includes(req.method)) { json(res, 405, { error: 'Method not allowed.' }); return; }
-  json(res, 200, await mergeFor(client));
-}
-// Union of every browser's snapshot, newest first: the exports describe the
-// dataset as a whole rather than one reviewer's view.
-async function mergeAll() {
-  const snapshots = (await readSnapshots()).reverse();
-  let entries = [];
-  for (const snapshot of snapshots) {
-    try { entries = R.mergeEntries(entries, snapshot.entries).entries; } catch { /* skip an oversized snapshot */ }
+  const state = await loadState();
+  let index = state.entries.findIndex(entry => R.stable(entry.example) === body.key);
+  if (index < 0) {
+    // A client may review an example the server has not seen yet (a file
+    // imported locally); accept it rather than losing the decision.
+    let example;
+    try { example = R.validateExample(body.example, state.entries.length); }
+    catch { json(res, 404, { error: 'That example is not in the shared workspace.' }); return; }
+    state.entries.push({ example, decision: null, reason: '', reviewedAt: null });
+    index = state.entries.length - 1;
   }
-  return entries;
+  state.entries[index] = {
+    ...state.entries[index],
+    decision,
+    reason: decision ? String(body.reason || '').trim() : '',
+    reviewedAt: decision ? new Date().toISOString() : null
+  };
+  try { await saveState(state); } catch { json(res, 500, { error: 'Could not save that decision.' }); return; }
+  json(res, 200, { decision, counts: await materialize(state) });
 }
 const exportRoutes = new Map([
   ['/api/exports/needle.jsonl', ['needle-approved.jsonl', 'application/x-ndjson', entries => R.needle(entries)]],
@@ -150,7 +182,7 @@ async function handleExport(req, res, format) {
   if (!['GET', 'HEAD'].includes(req.method)) { json(res, 405, { error: 'Method not allowed.' }); return; }
   const [filename, type, build] = format;
   let body;
-  try { body = build(await mergeAll()); }
+  try { body = build((await loadState()).entries); }
   catch { json(res, 500, { error: 'Could not build the export.' }); return; }
   const buffer = Buffer.from(body, 'utf8');
   res.writeHead(200, {
@@ -160,11 +192,11 @@ async function handleExport(req, res, format) {
   });
   res.end(req.method === 'HEAD' ? undefined : buffer);
 }
-// Every accepted session rewrites the dataset files, so what sits on disk is
-// always current and can be copied off without opening a browser.
-async function materialize() {
-  const entries = await mergeAll();
-  const dir = path.join(dataDir(), 'exports');
+// Every save rewrites the dataset files so what sits on disk is always current.
+// EXPORT_DIR lets them land inside the repository, where git can carry them.
+async function materialize(state) {
+  const entries = state ? state.entries : (await loadState()).entries;
+  const dir = exportDir();
   try {
     await fs.mkdir(dir, { recursive: true });
     for (const [filename, , build] of exportRoutes.values()) {
@@ -199,7 +231,8 @@ function createServer({ prefix = normalizePrefix(process.env.APP_PREFIX) } = {})
       route = route.slice(prefix.length);
     }
     if (route === '/examples.json') { await handleExamples(req, res); return; }
-    if (route === '/api/session') { await handleSession(req, res, url); return; }
+    if (route === '/api/session') { await handleSession(req, res); return; }
+    if (route === '/api/decision') { await handleDecision(req, res); return; }
     if (exportRoutes.has(route)) { await handleExport(req, res, exportRoutes.get(route)); return; }
     if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405, { Allow: 'GET, HEAD' }); res.end('Method not allowed'); return; }
     const file = files.get(route);
@@ -225,7 +258,9 @@ if (require.main === module) {
     const prefix = normalizePrefix(process.env.APP_PREFIX);
     console.log(`Zoairk review: http://localhost:${actualPort}${prefix}/`);
     console.log(`Review sessions: ${dataDir()}`);
-    console.log(`Dataset: ${examplesFile()}`);
+    console.log(`Dataset: ${datasetDir() || examplesFile()}`);
+    console.log(`Shared state: ${stateFile()}`);
+    console.log(`Generated files: ${exportDir()}`);
     if (host === '0.0.0.0') {
       for (const list of Object.values(os.networkInterfaces())) for (const net of list || []) if (net.family === 'IPv4' && !net.internal) console.log(`Same Wi-Fi / LAN: http://${net.address}:${actualPort}`);
     }

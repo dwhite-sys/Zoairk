@@ -139,46 +139,56 @@ test('normalizes prefix values passed as configuration', () => {
   assert.equal(normalizePrefix('/needle-training/'), '/needle-training');
   assert.equal(normalizePrefix('/a/b//'), '/a/b');
 });
-test('stores review sessions and serves them back to another browser', async () => {
+test('keeps one shared workspace that every browser reads and writes', async () => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'zoairk-review-'));
   const previous = process.env.REVIEW_DATA_DIR;
   process.env.REVIEW_DATA_DIR = dir;
   const api = createServer({ prefix: '/needle-training' });
   await new Promise(resolve => api.listen(0, '127.0.0.1', resolve));
   const origin = 'http://127.0.0.1:' + api.address().port;
-  const clientA = 'clientaaaaaaaaaaa';
-  const clientB = 'clientbbbbbbbbbbb';
+  const decide = body => fetch(`${origin}/needle-training/api/decision`, {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body)
+  });
   try {
     const entries = R.parseFile(await fs.readFile(path.join(__dirname, '..', 'examples.json'), 'utf8')).entries;
-    const decided = R.decide(R.decide(entries, 0, 'approve'), 1, 'deny', 'wrong order of calls');
-    const post = await fetch(`${origin}/needle-training/api/session?client=${clientA}`, {
-      method: 'POST', headers: { 'content-type': 'application/json' }, body: R.session(decided)
+    assert.deepEqual((await (await fetch(`${origin}/needle-training/api/session`)).json()).entries, []);
+
+    // Registering examples is additive and keeps the decisions they arrive with.
+    const post = await fetch(`${origin}/needle-training/api/session`, {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: R.session(R.decide(entries, 0, 'approve'))
     });
     assert.equal(post.status, 200);
-    assert.equal((await post.json()).saved, decided.length);
-    // The snapshot is on disk, so it survives a restart.
-    const stored = JSON.parse(await fs.readFile(path.join(dir, `${clientA}.json`), 'utf8'));
-    assert.equal(stored.entries[0].decision, 'approve');
-    assert.ok(Number.isFinite(Date.parse(stored.savedAt)));
+    assert.equal((await post.json()).added, entries.length);
 
-    // A second browser sees the first browser's decisions.
-    const seen = await (await fetch(`${origin}/needle-training/api/session?client=${clientB}`)).json();
+    // The state file is on disk, so a restart keeps it.
+    const stored = JSON.parse(await fs.readFile(path.join(dir, 'state.json'), 'utf8'));
+    assert.equal(stored.entries.length, entries.length);
+
+    // Any browser sees the same workspace; there is no per-browser view.
+    const seen = await (await fetch(`${origin}/needle-training/api/session`)).json();
     assert.equal(R.counts(seen.entries).approved, 1);
-    assert.equal(R.counts(seen.entries).denied, 1);
-    assert.equal(seen.entries[1].reason, 'wrong order of calls');
-    assert.equal(JSON.parse(R.needle(seen.entries)).answers[0].arguments.action, 'unlock');
 
-    // An undo is a state change, not an event: it propagates, so the other
-    // browser now sees this example as pending. Conflicting edits are the only
-    // thing a browser's own snapshot wins over.
-    await fetch(`${origin}/needle-training/api/session?client=${clientA}`, {
-      method: 'POST', headers: { 'content-type': 'application/json' }, body: R.session(R.decide(decided, 0, null))
-    });
-    const own = await (await fetch(`${origin}/needle-training/api/session?client=${clientA}`)).json();
-    assert.equal(R.counts(own.entries).approved, 0);
-    const other = await (await fetch(`${origin}/needle-training/api/session?client=${clientB}`)).json();
-    assert.equal(R.counts(other.entries).approved, 0);
-    assert.equal(R.counts(other.entries).denied, 1);
+    // A decision from "another browser" is what the shared workspace now says.
+    const key = R.stable(entries[1].example);
+    assert.equal((await decide({ key, example: entries[1].example, decision: 'deny', reason: 'wrong order' })).status, 200);
+    const after = await (await fetch(`${origin}/needle-training/api/session`)).json();
+    assert.equal(R.counts(after.entries).denied, 1);
+    assert.equal(after.entries[1].reason, 'wrong order');
+    assert.equal(JSON.parse(R.needle(after.entries)).answers[0].arguments.action, 'unlock');
+
+    // An example the server has never seen is accepted rather than rejected.
+    const fresh = entries[5].example;
+    assert.equal((await decide({ key: R.stable(fresh), example: fresh, decision: 'approve' })).status, 200);
+    assert.equal(R.counts((await (await fetch(`${origin}/needle-training/api/session`)).json()).entries).approved, 2);
+
+    // Clearing a decision is global too.
+    await decide({ key, decision: null });
+    assert.equal(R.counts((await (await fetch(`${origin}/needle-training/api/session`)).json()).entries).denied, 0);
+
+    // Malformed decisions are refused.
+    assert.equal((await decide({ key, decision: 'maybe' })).status, 400);
+    assert.equal((await decide({ decision: 'approve' })).status, 400);
+    assert.equal((await fetch(`${origin}/needle-training/api/decision`)).status, 405);
   } finally {
     api.closeAllConnections();
     await new Promise(resolve => api.close(resolve));
@@ -186,38 +196,36 @@ test('stores review sessions and serves them back to another browser', async () 
     await fs.rm(dir, { recursive: true, force: true });
   }
 });
-test('every accepted session rewrites the dataset files on disk', async () => {
+test('every decision rewrites the dataset files on disk', async () => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'zoairk-review-'));
   const previous = process.env.REVIEW_DATA_DIR;
   process.env.REVIEW_DATA_DIR = dir;
   const api = createServer();
   await new Promise(resolve => api.listen(0, '127.0.0.1', resolve));
   const origin = 'http://127.0.0.1:' + api.address().port;
-  const client = 'clientexporttest01';
   const read = name => fs.readFile(path.join(dir, 'exports', name), 'utf8');
+  const decide = body => fetch(`${origin}/api/decision`, {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body)
+  });
   try {
     const entries = R.parseFile(await fs.readFile(path.join(__dirname, '..', 'examples.json'), 'utf8')).entries;
-    const decided = R.decide(R.decide(entries, 0, 'approve'), 1, 'deny', 'nope');
-    const posted = await (await fetch(`${origin}/api/session?client=${client}`, {
-      method: 'POST', headers: { 'content-type': 'application/json' }, body: R.session(decided)
-    })).json();
-    assert.equal(posted.exports.approved, 1);
-    assert.equal(posted.exports.denied, 1);
+    await fetch(`${origin}/api/session`, {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: R.session(entries)
+    });
+    await decide({ key: R.stable(entries[0].example), example: entries[0].example, decision: 'approve' });
+    await decide({ key: R.stable(entries[1].example), example: entries[1].example, decision: 'deny', reason: 'nope' });
 
-    // Approved-only for Needle, both labels for the classifier.
     assert.equal((await read('needle-approved.jsonl')).trim().split('\n').length, 1);
     assert.equal((await read('classifier-labeled.jsonl')).trim().split('\n').length, 2);
     assert.equal(JSON.parse((await read('classifier-labeled.jsonl')).trim().split('\n')[1]).review_reason, 'nope');
-    assert.equal(R.parseFile(await read('zoairk-review-session.json')).entries.length, entries.length);
 
-    // Undo must remove the row, not leave a stale approval behind.
-    await fetch(`${origin}/api/session?client=${client}`, {
-      method: 'POST', headers: { 'content-type': 'application/json' }, body: R.session(R.decide(R.decide(decided, 0, null), 1, null))
-    });
+    // Undo must remove the row, not leave a stale label behind.
+    await decide({ key: R.stable(entries[0].example), decision: null });
+    await decide({ key: R.stable(entries[1].example), decision: null });
     assert.equal((await read('needle-approved.jsonl')).trim(), '');
     assert.equal((await read('classifier-labeled.jsonl')).trim(), '');
 
-    // The HTTP exports serve the same merged content.
+    // The HTTP exports serve the same content as the files.
     const exported = await fetch(`${origin}/api/exports/needle.jsonl`);
     assert.equal(exported.status, 200);
     assert.match(exported.headers.get('content-disposition'), /needle-approved\.jsonl/);

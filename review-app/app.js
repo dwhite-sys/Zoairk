@@ -5,7 +5,7 @@
   const R = window.ZoairkReview;
   const $ = id => document.getElementById(id);
   let entries = [], selected = 0, filter = 'pending', busy = true, database = null;
-  let clientId = null, serverSaved = false, syncedFromServer = 0, loadedFromServer = 0;
+  let serverSaved = false, syncedFromServer = 0, loadedFromServer = 0;
   const history = [];
   function notice(message, error = false) {
     $('notice').textContent = message;
@@ -93,12 +93,11 @@
       request.onerror = () => reject(request.error);
     });
     if (saved) entries = R.parseFile(saved).entries;
-    clientId = await loadClientId();
-    await mergeServer();
-    // Catch up work done while the server was unreachable. Only for a browser
-    // with its own saved session, so a first-time visitor never republishes
-    // somebody else's decisions as their own.
-    if (saved && entries.length) await persist(entries);
+    await refreshFromServer();
+    // Nobody should have to upload the dataset: every load merges whatever
+    // file the server is serving, so swapping that file reaches reviewers
+    // without touching their existing decisions.
+    await loadServerDataset();
     // Nobody should have to upload the dataset: every load merges whatever
     // file the server is serving, so swapping that file reaches reviewers
     // without touching their existing decisions.
@@ -114,58 +113,52 @@
       if (!merged.added) return;
       await persist(merged.entries);
       entries = merged.entries;
+      // Register the batch with the shared workspace, or the server never
+      // learns about examples nobody has decided on yet.
+      await pushSession(entries);
       filter = 'pending';
       selected = 0;
       loadedFromServer = merged.added;
       notice(`Loaded ${merged.added} ${merged.added === 1 ? 'example' : 'examples'} from the server.`);
     } catch { /* importing a file by hand still works */ }
   }
-  async function loadClientId() {
-    const existing = await new Promise((resolve, reject) => {
-      const request = database.transaction('workspace').objectStore('workspace').get('client');
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-    if (typeof existing === 'string' && existing) return existing;
-    const created = (self.crypto && self.crypto.randomUUID ? self.crypto.randomUUID() : `${Date.now()}${Math.random().toString(16).slice(2)}`)
-      .replace(/[^A-Za-z0-9_-]/g, '')
-      .slice(0, 64);
-    await new Promise((resolve, reject) => {
-      const transaction = database.transaction('workspace', 'readwrite');
-      transaction.objectStore('workspace').put(created, 'client');
-      transaction.oncomplete = resolve;
-      transaction.onerror = () => reject(transaction.error);
-    });
-    return created;
-  }
-  // Decisions live in this browser's IndexedDB and are mirrored to the server, so
-  // a fresh browser, a phone, or a reloaded profile picks up the shared progress.
-  async function mergeServer() {
-    if (!clientId) return;
+  // The server holds the shared workspace; IndexedDB is a local cache of it so
+  // the page still works when the network drops.
+  async function refreshFromServer() {
     try {
-      const response = await fetch(`api/session?client=${encodeURIComponent(clientId)}`, { headers: { accept: 'application/json' } });
+      const response = await fetch('api/session', { headers: { accept: 'application/json' } });
       if (!response.ok) return;
-      // A successful read means the server is reachable and holds this state.
       serverSaved = true;
       const remote = JSON.parse(await response.text());
       if (!remote || !Array.isArray(remote.entries) || !remote.entries.length) return;
-      const merged = R.mergeEntries(entries, R.parseFile(JSON.stringify(remote)).entries);
-      const restored = merged.added + merged.restored;
-      if (!restored) return;
-      await persist(merged.entries);
-      entries = merged.entries;
-      syncedFromServer = restored;
-      notice(`Restored ${restored} example${restored === 1 ? '' : 's'} from server progress.`);
-    } catch { /* offline: the local copy stays authoritative */ }
+      const fresh = R.parseFile(JSON.stringify(remote)).entries;
+      if (!fresh.length) return;
+      entries = fresh;
+      await writeLocal(entries);
+      syncedFromServer = fresh.length;
+      notice(`Loaded ${fresh.length} example${fresh.length === 1 ? '' : 's'} from the shared workspace.`);
+    } catch { /* offline: the local copy keeps working */ }
   }
-  async function syncServer(candidate) {
-    if (!clientId) return;
+  // Register examples with the shared workspace; the server only ever adds.
+  async function pushSession(candidate) {
     try {
-      const response = await fetch(`api/session?client=${encodeURIComponent(clientId)}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: R.session(candidate) });
+      const response = await fetch('api/session', { method: 'POST', headers: { 'content-type': 'application/json' }, body: R.session(candidate) });
       serverSaved = response.ok;
     } catch { serverSaved = false; }
   }
-  async function persist(candidate) {
+  async function pushDecision(index, decision, reason) {
+    const entry = entries[index];
+    if (!entry) return;
+    try {
+      const response = await fetch('api/decision', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ key: R.stable(entry.example), example: entry.example, decision, reason: decision ? String(reason || '').trim() : '' })
+      });
+      serverSaved = response.ok;
+    } catch { serverSaved = false; }
+  }
+  async function writeLocal(candidate) {
     if (!database) return;
     await new Promise((resolve, reject) => {
       const transaction = database.transaction('workspace', 'readwrite');
@@ -174,14 +167,12 @@
       transaction.onerror = () => reject(transaction.error || new Error('Could not save this review.'));
       transaction.onabort = () => reject(transaction.error || new Error('Saving was interrupted.'));
     });
-    await syncServer(candidate);
+  }
+  async function persist(candidate) {
+    entries = candidate;
+    await writeLocal(candidate);
   }
   async function task(action) {
-    if (busy) return;
-    busy = true;
-    // Do not re-render the form before capturing a typed review note.
-    document.querySelectorAll('button').forEach(button => { button.disabled = true; });
-    $('file-input').disabled = true;
     try { await action(); }
     catch (error) { notice(error.message || 'That operation failed. Your existing reviews have been kept.', true); }
     finally { busy = false; render(); }
@@ -195,6 +186,7 @@
     filter = 'pending';
     selected = entries.findIndex(e => !e.decision);
     if (selected < 0) selected = 0;
+    await pushSession(entries);
     notice(`${filename}: ${merged.added} added, ${merged.restored} decisions restored, ${merged.duplicates} duplicates skipped.`);
   }
   async function importFile(file) {
@@ -212,6 +204,8 @@
       const candidate = R.decide(entries, index, decision, reason);
       await persist(candidate);
       entries = candidate;
+      // One action goes to the shared workspace, so everyone sees it.
+      await pushDecision(index, decision, reason);
       history.push({ index, before });
       if (decision && filter !== 'pending') {
         const indices = visibleIndices();
@@ -260,6 +254,7 @@
     candidate[last.index] = last.before;
     await persist(candidate);
     entries = candidate;
+    await pushDecision(last.index, candidate[last.index].decision, candidate[last.index].reason);
     history.pop();
     selected = last.index;
     filter = 'all';
