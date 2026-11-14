@@ -3,12 +3,15 @@ from __future__ import annotations
 
 import re
 
-from . import combat
+from . import combat, inventory
 from .world import World
 
 MOVE = re.compile(r"^\s*(?:go|walk|head|move|run)?\s*(north|south|east|west|up|down|n|s|e|w)\s*$", re.I)
 SHORT = {"n": "north", "s": "south", "e": "east", "w": "west"}
 LOOK = re.compile(r"^\s*(look|l|look around)\s*$", re.I)
+INV = re.compile(r"^\s*(i|inv|inventory|what am i (carrying|holding))\??\s*$", re.I)
+HEALTH = re.compile(r"^\s*(health|hp|status|how am i)\??\s*$", re.I)
+ITEM_VERBS = {"take", "drop", "put", "give"}
 SPEECH = re.compile(r"[\"“”]")
 
 
@@ -49,10 +52,38 @@ class Game:
         self.start = self.world.current.name
         self.locations: dict[str, str] = {}      # player -> scene name (each player moves on their own)
         self.player_hp: dict[str, int] = {}      # player -> health (combat)
+        self.inventories: dict[str, list] = {}   # player -> carried GameObjects
 
     def _enter(self, player: str) -> None:
-        """Point the shared world at this player's own scene before handling their input."""
+        """Point the shared world at this player's own scene (and inventory) before handling input."""
         self.world.current = self.world.scenes[self.locations.setdefault(player, self.start)]
+        self.world.carried = self.inventories.setdefault(player, [])
+
+    def status(self, player: str) -> dict:
+        """Private per-player status for the front end: health and inventory."""
+        return {"type": "status", "player": player, "private": True, "hp": self.player_hp.get(player, 10),
+                "max": combat.MAX_HP, "inventory": [o.properties.name for o in self.inventories.get(player, [])]}
+
+    def _items(self, player, c, npcs) -> "Event":
+        """take / drop / put / give, resolved by the inventory rules."""
+        from .types import Event
+        w, inv = self.world, self.inventories[player]
+        obj, other = w.find(c.get("target")), (c.get("instrument") or "").strip()
+        if obj is None:
+            return Event(c["key"], False, c.get("target"), None, {}, f"You don't see any {c.get('target')} here.")
+        key = c["key"]
+        if key == "take":
+            src = w.find(other) if other else None
+            return inventory.take(w, inv, obj, src if src is not obj else None)
+        if key == "drop":
+            return inventory.drop(w, inv, obj)
+        if key == "put":
+            return inventory.put(w, inv, obj, w.find(other))
+        npc = next((n for n in npcs if other.lower() in (n.name.lower(), (n.title or "").lower(),
+                                                         (n.title or "").lower().removeprefix("the "))), None)
+        if npc is None:
+            return Event("give", False, obj.properties.name, other, {}, f"There is no {other or 'one'} here to give it to.")
+        return inventory.give(inv, obj, npc)
 
     def describe(self) -> str:
         """Scene text plus every object whose state changed, so persistence is visible."""
@@ -108,6 +139,14 @@ class Game:
         w = self.world
         if LOOK.match(text):
             return [_msg("narrator", self.describe())]
+        if INV.match(text):
+            items = [o.properties.name for o in self.inventories[player]]
+            return [_msg("system", "You are carrying: " + (", ".join(items) or "nothing") + ".", private=True),
+                    self.status(player)]
+        if HEALTH.match(text):
+            hp = self.player_hp.get(player, 10)
+            return [_msg("system", f"Health: {hp}/{combat.MAX_HP} ({combat.status(hp)}).", private=True),
+                    self.status(player)]
         if self.player_hp.get(player, 10) <= 0:
             return [_msg("system", "You are dead. You can only look around.")]
         m = MOVE.match(text)
@@ -122,7 +161,7 @@ class Game:
             arrived = w.current.name
             return [{**self._scene(), "private": True}, _msg("narrator", self.describe(), private=True),
                     _msg("system", f"{player} heads {direction}.", to_scene=left, others_only=True),
-                    _msg("system", f"{player} arrives.", to_scene=arrived, others_only=True)]
+                    _msg("system", f"{player} arrives.", to_scene=arrived, others_only=True), self.status(player)]
 
         npcs = w.current.npcs
         if SPEECH.search(text):                          # quotes mark speech: no parse, straight to memory
@@ -142,18 +181,21 @@ class Game:
                     alive_npcs[n.title.lower().removeprefix("the ")] = n
             w.people_here = [n.label for n in npcs if n.hp > 0] + here
             calls = parser.extract_calls(text, w)
-            fights, rest = [], []
+            fights, rest, items = [], [], []
             for c in calls:
+                if c.get("key") in ITEM_VERBS:
+                    items.append(c)
+                    continue
                 tgt = (c.get("target") or "").strip()
                 if c.get("key") == "attack" and (tgt.lower() in alive_npcs or tgt in here or tgt.lower() in [h.lower() for h in here]):
                     fights.append(c)
                 else:
                     rest.append(c)
             actions = parser.calls_to_action_sets(rest, w)
-            if not actions and not fights:              # gibberish / nothing resolvable: no turn
+            if not actions and not fights and not items:   # gibberish / nothing resolvable: no turn
                 return [_msg("system", "Nothing happens.")]
             w.turn += 1
-            events = interactions.run(actions)
+            events = [self._items(player, c, npcs) for c in items] + interactions.run(actions)
             for c in fights:
                 events.append(self._attack(player, c["target"], c.get("instrument") or None, alive_npcs, here))
             prose = narrator.narrate(events, w.current.description)
@@ -177,4 +219,5 @@ class Game:
                 if ev.ok:
                     out.append(_msg("narrator", "⚔ " + ev.message, effects=["hit"]))
         w.save()
-        return out
+        players_here = [p for p, loc in self.locations.items() if loc == w.current.name]
+        return out + [self.status(p) for p in players_here]

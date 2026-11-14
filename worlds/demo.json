@@ -18,7 +18,9 @@
       "openable",
       "flammable"
      ],
-     "description": "A dented tin mailbox on a wooden post."
+     "description": "A dented tin mailbox on a wooden post.",
+     "weight": 60,
+     "container": true
     },
     {
      "name": "leaflet",
@@ -32,7 +34,8 @@
       "flammable"
      ],
      "description": "A folded leaflet.",
-     "text": "WELCOME TO ZOAIRK! Everything you do here is remembered."
+     "text": "WELCOME TO ZOAIRK! Everything you do here is remembered.",
+     "weight": 0.1
     },
     {
      "name": "match",
@@ -43,7 +46,8 @@
      "templates": [
       "igniter"
      ],
-     "description": "A single wooden match."
+     "description": "A single wooden match.",
+     "weight": 0.1
     },
     {
      "name": "rock",
@@ -53,7 +57,8 @@
      "templates": [
       "throwable"
      ],
-     "description": "A fist-sized rock."
+     "description": "A fist-sized rock.",
+     "weight": 3
     },
     {
      "name": "window",
@@ -64,13 +69,27 @@
      "templates": [
       "fragile"
      ],
-     "description": "Joe's shop window."
+     "description": "Joe's shop window.",
+     "weight": 100
     }
    ],
    "npcs": [
     {
      "name": "Jerry",
-     "profile": "Jerry, a grumpy, proud village blacksmith. Short-tempered, protective of his tools, secretly kind. Speaks bluntly."
+     "profile": "Jerry, a grumpy, proud village blacksmith. Short-tempered, protective of his tools, secretly kind. Speaks bluntly.",
+     "inventory": [
+      {
+       "name": "hammer",
+       "aliases": [
+        "smithing hammer"
+       ],
+       "templates": [
+        "throwable"
+       ],
+       "weight": 4,
+       "description": "Jerry's heavy smithing hammer."
+      }
+     ]
     },
     {
      "name": "Joe",
@@ -95,7 +114,8 @@
       "flammable"
      ],
      "description": "A crumbling book.",
-     "text": "The pages describe a lighthouse far to the east."
+     "text": "The pages describe a lighthouse far to the east.",
+     "weight": 2
     },
     {
      "name": "vase",
@@ -105,7 +125,19 @@
      "templates": [
       "fragile"
      ],
-     "description": "A blue porcelain vase."
+     "description": "A blue porcelain vase.",
+     "weight": 4
+    },
+    {
+     "name": "statue",
+     "aliases": [
+      "marble statue"
+     ],
+     "templates": [
+      "breakable"
+     ],
+     "weight": 500,
+     "description": "A life-size marble statue of a stern old knight."
     }
    ],
    "npcs": [

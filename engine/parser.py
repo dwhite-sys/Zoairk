@@ -21,7 +21,8 @@ SYSTEM = (
     "they are written (clauses introduced by before/after/once/then/first change the order). "
     "Use the object names given below for target and instrument. Give an instrument only if it "
     "is named or clearly implied (e.g. 'use it' refers to an earlier object); otherwise use an "
-    "empty string. If the input is speech in quotes, gibberish, or empty, call no tools."
+    "empty string. For 'put X in Y' and 'take X from Y', X is the target and Y the instrument; for "
+    "'give X to someone', X is the target and the person is the instrument. If the input is speech in quotes, gibberish, or empty, call no tools."
 )
 
 # Verb normalisation to handler keys. Multi-word phrases are checked first.
@@ -35,6 +36,10 @@ VERB_MAP = {
     "hurl": "throw", "examine": "examine", "inspect": "examine", "look": "examine",
     "attack": "attack", "hit": "attack", "punch": "attack", "kick": "attack", "stab": "attack",
     "fight": "attack", "slap": "attack", "shove": "attack", "tackle": "attack", "swing at": "attack",
+    "pick up": "take", "take": "take", "grab": "take", "get": "take", "collect": "take",
+    "drop": "drop", "put down": "drop", "discard": "drop",
+    "put": "put", "place": "put", "stash": "put", "store": "put", "insert": "put",
+    "give": "give", "hand": "give", "offer": "give",
 }
 
 

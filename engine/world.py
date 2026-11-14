@@ -17,6 +17,7 @@ class Npc:
     profile: str
     memory: list[dict] = field(default_factory=list)
     hp: int = 10
+    inventory: list = field(default_factory=list)
     title: str = ""           # how strangers see this NPC, e.g. "the guard"
     known: bool = True        # players know the name (named in the scene, or introduced)
 
@@ -49,24 +50,35 @@ class World:
         self.name = doc["name"]
         self.aliases: dict[int, list[str]] = {}
         self.scenes: dict[str, Scene] = {}
+        self.carried: list[GameObject] = []      # the acting player's inventory (set per turn)
         for sname, s in doc["scenes"].items():
-            objs = []
-            for o in s.get("objects", []):
-                obj = GameObject(o["name"], templates=o.get("templates", []))
-                obj.properties.description = o.get("description", "")
-                if "text" in o:
-                    obj.text = o["text"]
-                self.aliases[id(obj)] = [_norm(o["name"])] + [_norm(a) for a in o.get("aliases", [])]
-                objs.append(obj)
+            objs = [self._make(o) for o in s.get("objects", [])]
             desc = s.get("description", "")
             npcs = [Npc(n["name"], n.get("profile", ""), title=n.get("title", ""),
-                        known=not n.get("title") or n["name"] in desc) for n in s.get("npcs", [])]
+                        known=not n.get("title") or n["name"] in desc,
+                        inventory=[self._make(i) for i in n.get("inventory", [])]) for n in s.get("npcs", [])]
             self.scenes[sname] = Scene(sname, s.get("description", ""), s.get("exits", {}), objs, npcs)
         self.current = self.scenes[doc["start_scene"]]
         self.turn = 0
 
+    def _make(self, o: dict) -> GameObject:
+        obj = GameObject(o["name"], templates=o.get("templates", []))
+        obj.properties.description = o.get("description", "")
+        obj.properties.weight = o.get("weight", 5)
+        if "text" in o:
+            obj.text = o["text"]
+        if o.get("container"):
+            obj.contents = [self._make(c) for c in o.get("contents", [])]
+        self.aliases[id(obj)] = [_norm(o["name"])] + [_norm(a) for a in o.get("aliases", [])]
+        return obj
+
     def visible_objects(self) -> list[GameObject]:
-        return [o for o in self.current.objects if getattr(o.states, "visible", True)]
+        """Room objects, things inside open containers, and what the acting player carries."""
+        out = [o for o in self.current.objects if getattr(o.states, "visible", True)]
+        for o in list(out):
+            if hasattr(o, "contents") and getattr(o.states, "open", True):
+                out += o.contents
+        return out + self.carried
 
     def find(self, name: str | None) -> GameObject | None:
         """Resolve a model-produced name to a visible object: exact alias, then word overlap."""
