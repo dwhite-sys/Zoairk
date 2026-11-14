@@ -1,0 +1,27 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T15:50:23.725436+00:00",
+  "count": 100,
+  "variation_focus": "Sunken temple courtyard, limestone quarry shrine, tide pools and old stone lock.30do30check40mixed, varied1-5 action counts. Use direct short declarations and longer clear plans. Limit check-then-independent eitherway templates; use preparations then checks.",
+  "status": "pending_review_at_generation",
+  "requested_count": 100,
+  "response_count": 100,
+  "excluded_exact_duplicates": [],
+  "count_deviation": null,
+  "max_tokens": 65536,
+  "batch_path": "data/review/66-examples.json",
+  "sha256": "d3396ab117f4802908ac51d164fbe7fd8faa7a92bde9d24386c0cde88a86b6af",
+  "rules_sha256": "b5f0ae06318471d95416b6ce8dae8c5e346eeb8911d57cbbc62351eb557e4f42",
+  "feedback_session_sha256": "4eef3df6a86ab1e8e25ac0b5fcbc879300be29c62382817c251a9167ea42e0ea",
+  "feedback_reviewed_count": 2696,
+  "usage": {
+    "prompt_tokens": 101248,
+    "completion_tokens": 49171,
+    "total_tokens": 150419,
+    "prompt_tokens_details": {
+      "cached_tokens": 4224
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}

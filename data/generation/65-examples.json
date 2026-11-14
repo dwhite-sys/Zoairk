@@ -1,0 +1,27 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T15:49:18.987382+00:00",
+  "count": 100,
+  "variation_focus": "Mountain dragon watch, ruined signal stations, rockslide passage and old suspension bridge.30do30check40mixed.1-5 actions and unambiguous source/execution order; architectural parts precisely resolved. No conditional reactions or unsupported object creations.",
+  "status": "pending_review_at_generation",
+  "requested_count": 100,
+  "response_count": 100,
+  "excluded_exact_duplicates": [],
+  "count_deviation": null,
+  "max_tokens": 65536,
+  "batch_path": "data/review/65-examples.json",
+  "sha256": "b886cebb3bb50898333085adab07e7099ec1f5d23bd2dccf6ce2a0b0dde1d761",
+  "rules_sha256": "b5f0ae06318471d95416b6ce8dae8c5e346eeb8911d57cbbc62351eb557e4f42",
+  "feedback_session_sha256": "4eef3df6a86ab1e8e25ac0b5fcbc879300be29c62382817c251a9167ea42e0ea",
+  "feedback_reviewed_count": 2696,
+  "usage": {
+    "prompt_tokens": 101274,
+    "completion_tokens": 32389,
+    "total_tokens": 133663,
+    "prompt_tokens_details": {
+      "cached_tokens": 4224
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}
