@@ -9,8 +9,13 @@ def test_burning_object_turns_to_ash_on_the_clock():
     m, box = g.world.find("match"), g.world.find("mailbox")
     interactions.run([ActionSet(ObjectEntry(m, "match"), "ignite"),
                       ActionSet(ObjectEntry(box, "mailbox"), "ignite", ObjectEntry(m, "match"))])
+    import random
+    random.seed(0)
     assert g.tick(0.0) == []                       # timers start
-    out = g.tick(1000.0)                           # long after BURN_SECONDS
+    assert g.tick(30.0) == []                      # never before the 60 s minimum
+    out = []
+    for t in range(60, 2000, 30):                  # every 30 s a chance; eventually it burns out
+        out += g.tick(float(t))
     texts = {x["text"] for x in out}
     assert "The mailbox burns down to a pile of ash." in texts and box.states.ash and not box.states.on_fire
     assert all(x["to_scene"] == "front_lawn" for x in out)

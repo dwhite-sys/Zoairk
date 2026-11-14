@@ -16,7 +16,9 @@ SPEECH = re.compile(r"[\"“”]")
 
 
 STATE_WORDS = {"open": "open", "on_fire": "on fire", "broken": "broken", "ash": "burnt to ash"}
-BURN_SECONDS = (20, 60)        # a burning object turns to ash after a random time (world clock)
+BURN_MIN_SECONDS = 60          # nothing burns out sooner than this
+BURN_CHECK_SECONDS = 30        # then, every 30 s, each burning thing has a chance to burn out
+BURN_CHANCE = 0.35             # => usually gone within about 1-2 minutes, slightly unpredictable
 QUOTED = re.compile(r"[\"“][^\"”]*[\"”]")
 
 
@@ -71,12 +73,18 @@ class Game:
                 if not getattr(st, "on_fire", False) or getattr(st, "ash", False):
                     continue
                 if not hasattr(o, "burn_until"):
-                    o.burn_until = now + random.uniform(*BURN_SECONDS)
-                elif now >= o.burn_until and "igniter" not in o.attributes:
+                    o.burn_until = now + BURN_MIN_SECONDS        # first chance after the minimum
+                    continue
+                if now < o.burn_until:
+                    continue
+                if random.random() > BURN_CHANCE:                 # not this time; try again in 30 s
+                    o.burn_until = now + BURN_CHECK_SECONDS
+                    continue
+                if "igniter" not in o.attributes:
                     st.on_fire, st.ash = False, True
                     out.append(_msg("narrator", f"The {o.properties.name} burns down to a pile of ash.",
                                     to_scene=scene.name, effects=["ash"]))
-                elif now >= o.burn_until:                 # a match just burns out
+                else:                                     # a match just burns out
                     st.on_fire = False
                     del o.burn_until
                     out.append(_msg("narrator", f"The {o.properties.name} burns out.", to_scene=scene.name,
@@ -153,7 +161,7 @@ class Game:
 
     def intro(self, player: str = "The player") -> list[dict]:
         self._enter(player)
-        return [self._scene(), _msg("narrator", self.describe())]
+        return [self._scene(), _msg("scene", self.describe())]
 
     def handle(self, text: str, player: str = "The player") -> list[dict]:
         from . import interactions, narrator, npc, parser
@@ -164,7 +172,7 @@ class Game:
         self._enter(player)
         w = self.world
         if LOOK.match(text):
-            return [_msg("narrator", self.describe())]
+            return [_msg("scene", self.describe())]
         if INV.match(text):
             items = [o.properties.name for o in self.inventories[player]]
             return [_msg("system", "You are carrying: " + (", ".join(items) or "nothing") + ".", private=True),
@@ -185,7 +193,7 @@ class Game:
             w.turn += 1
             w.save()
             arrived = w.current.name
-            return [{**self._scene(), "private": True}, _msg("narrator", self.describe(), private=True),
+            return [{**self._scene(), "private": True}, _msg("scene", self.describe(), private=True),
                     _msg("system", f"{player} heads {direction}.", to_scene=left, others_only=True),
                     _msg("system", f"{player} arrives.", to_scene=arrived, others_only=True), self.status(player)]
 
@@ -228,7 +236,8 @@ class Game:
             event_text = f"{player}: {text}. Result: {prose}"
             for n in npcs:
                 n.remember(w.turn, "action", event_text)
-            out = [_msg("narrator", prose, effects=_effects(events))]
+            hit = next((e.target for e in events if e.action == "attack" and e.ok), None)
+            out = [_msg("narrator", prose, effects=_effects(events), **({"hit": hit} if hit else {}))]
 
         for d in npc.gauge(npcs, event_text, turn=w.turn):   # gauge records memory and the engage reply
             who = next(n for n in npcs if n.name == d.npc)
@@ -243,7 +252,7 @@ class Game:
                 players_here = [p for p, loc in self.locations.items() if loc == w.current.name]
                 ev = self._attack(d.npc, d.attack, None, present, players_here)
                 if ev.ok:
-                    out.append(_msg("narrator", "⚔ " + ev.message, effects=["hit"]))
+                    out.append(_msg("narrator", "⚔ " + ev.message, effects=["hit"], hit=ev.target))
         w.save()
         players_here = [p for p, loc in self.locations.items() if loc == w.current.name]
         return out + [self.status(p) for p in players_here]

@@ -150,7 +150,7 @@
   // --- public API -----------------------------------------------------------
 
   // Apply a narrator message's effects list; `lineEl` is the rendered log line.
-  function play(effects, lineEl, text) {
+  function play(effects, lineEl, text, hitMe = true) {
     const list = Array.isArray(effects) ? effects : [];
     for (const name of list) {
       if (ready() && sounds[name]) {
@@ -158,7 +158,7 @@
       }
       if (name === "fire") { flash(lineEl, "fx-fire"); setBurning(true); }
       else if (name === "extinguish" || name === "ash") { flash(lineEl, "fx-smoke"); setBurning(false); }
-      else if (name === "hit") { flash(lineEl, "fx-hit"); shake(); }
+      else if (name === "hit") { flash(lineEl, "fx-hit"); if (hitMe) shake(); } // everyone hears it; only the target shakes
       else if (name === "shatter") { flash(lineEl, "fx-shatter"); flash(document.body, "fx-white"); }
     }
     // "look" narration that describes something burning also lights the room.

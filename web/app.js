@@ -116,9 +116,10 @@ renderInventory([]);
 function showMessage(msg) {
   if (msg.type === "status") { showStatus(msg); return; }
   if (msg.type === "switch_scene") {
-    sceneName.textContent = msg.scene;
-    sceneDescription.textContent = msg.description || "";
-    addText("scene-break", msg.scene);
+    // The header shows only the room; the description is a grey event in the log (team feedback).
+    sceneName.textContent = msg.scene.replace(/_/g, " ");
+    sceneDescription.textContent = "";
+    addText("scene-break", msg.scene.replace(/_/g, " "));
     if (window.Fx) Fx.scene(msg.description);
     return;
   }
@@ -127,11 +128,16 @@ function showMessage(msg) {
     if (msg.player !== MY_NAME) addText("player", `${msg.player}: ${msg.text}`); // others' moves
     return;
   }
+  if (msg.role === "scene") {               // room description: a grey event in the log
+    addText("scene-desc", msg.text);
+    if (window.Fx) Fx.scene(msg.text);
+    return;
+  }
   if (msg.role === "npc") showNpcMessage(msg);
   else if (msg.role === "system") addText("system", msg.text);
   else {
     const line = addText("narrator", msg.text);
-    if (window.Fx) Fx.play(msg.effects, line, msg.text);
+    if (window.Fx) Fx.play(msg.effects, line, msg.text, !msg.hit || msg.hit === MY_NAME);
   }
 }
 
