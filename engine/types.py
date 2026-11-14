@@ -41,3 +41,4 @@ class NpcDecision:
     decision: str            # "nothing" | "express" | "engage"
     confidence: float
     expression: str = ""
+    attack: str = ""          # engage only: someone present the NPC attacks

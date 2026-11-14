@@ -13,6 +13,7 @@ TOOL = [{"type": "function", "function": {
     "name": "npc_decide", "description": "Record how this NPC responds to the latest event.",
     "parameters": {"type": "object", "properties": {
         "decision": {"type": "string", "enum": list(LABELS)},
+        "attack": {"type": "string", "description": "Only with engage: the exact name of someone present this NPC physically attacks, or empty. Only for real provocation (being attacked, threatened, or deeply wronged)."},
         "confidence": {"type": "number"},
         "expression": {"type": "string"}}, "required": ["decision", "confidence"]}}}]
 DECIDE_SYS = ("Call npc_decide exactly once. You decide how one NPC in a text adventure responds to the latest event. "
@@ -41,7 +42,8 @@ def _decide_raw(npc: Npc, event_text: str) -> NpcDecision:
         if decision not in LABELS:
             raise ValueError(decision)
         conf = max(0.0, min(1.0, float(args.get("confidence", 0.0))))
-        return NpcDecision(npc.name, decision, conf, str(args.get("expression") or ""))
+        attack = str(args.get("attack") or "").strip() if decision == "engage" else ""
+        return NpcDecision(npc.name, decision, conf, str(args.get("expression") or ""), attack)
     except Exception:
         return NpcDecision(npc.name, "nothing", 0.0)
 
@@ -67,6 +69,9 @@ ENGAGE_FLOOR = 0.5   # a noisy engage score below this becomes an express
 
 def gauge(npcs: list[Npc], event_text: str, turn: int = 0) -> list[NpcDecision]:
     """Decide for all NPCs concurrently; at most one engages, chosen by confidence plus noise."""
+    npcs = [n for n in npcs if getattr(n, "hp", 1) > 0]          # the dead do not act
+    if not npcs:
+        return []
     with ThreadPoolExecutor(max_workers=3) as ex:
         decisions = list(ex.map(lambda n: _decide_raw(n, event_text), npcs))
     # Bias plus noise (decided with Drew 13:20): the model's confidence is the bias, and Gaussian noise

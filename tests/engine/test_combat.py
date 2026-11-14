@@ -1,0 +1,28 @@
+"""Combat goes through the state machine: health, injured/dead status, persistence (no model calls)."""
+import random
+
+from engine import combat
+from engine.game import Game
+
+
+def test_strike_damage_and_status():
+    random.seed(1)
+    hp = {"Jerry": 10}
+    r = combat.strike("Drew", "Jerry", hp)
+    assert r["ok"] and 1 <= r["damage"] <= 3 and hp["Jerry"] == 10 - r["damage"] and r["status"] == "injured"
+    while hp["Jerry"] > 0:
+        combat.strike("Drew", "Jerry", hp, weapon="rock")
+    assert combat.status(hp["Jerry"]) == "dead"
+    assert not combat.strike("Drew", "Jerry", hp)["ok"]
+
+
+def test_player_vs_npc_and_player_vs_player_through_game():
+    g = Game("worlds/demo.json"); g.intro("Dawson"); g.intro("Drew")
+    npcs = {n.name.lower(): n for n in g.world.current.npcs}
+    ev = g._attack("Dawson", "jerry", "rock", npcs, ["Drew"])
+    assert ev.ok and npcs["jerry"].hp < 10 and "Jerry is injured." in g.describe()
+    ev2 = g._attack("Dawson", "Drew", None, npcs, ["Drew"])
+    assert ev2.ok and g.player_hp["Drew"] < 10
+    g.player_hp["Drew"] = 0
+    assert "dead" in g.handle("open the mailbox", player="Drew")[0]["text"]
+    assert g.world.snapshot()["npc_hp"]["Jerry"] < 10          # persists in the save

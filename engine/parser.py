@@ -33,6 +33,8 @@ VERB_MAP = {
     "shut": "close", "read": "read", "smash": "break_object", "shatter": "break_object",
     "break": "break_object", "break_object": "break_object", "throw": "throw", "toss": "throw",
     "hurl": "throw", "examine": "examine", "inspect": "examine", "look": "examine",
+    "attack": "attack", "hit": "attack", "punch": "attack", "kick": "attack", "stab": "attack",
+    "fight": "attack", "slap": "attack", "shove": "attack", "tackle": "attack", "swing at": "attack",
 }
 
 
@@ -53,6 +55,9 @@ def normalize_verb(verb: str) -> str | None:
 
 def _call_model(text: str, world: World) -> list[dict]:
     names = ", ".join(o.properties.name for o in world.visible_objects())
+    people = ", ".join(getattr(world, "people_here", []))
+    if people:
+        names += f". People here (valid targets for attack): {people}"
     body = {
         "model": MODEL, "stream": False, "think": False, "options": {"temperature": 0},
         "tools": TOOLS,
@@ -86,8 +91,13 @@ def extract_calls(text: str, world: World) -> list[dict]:
 
 
 def parse(text: str, world: World) -> list[ActionSet]:
+    return calls_to_action_sets(extract_calls(text, world), world)
+
+
+def calls_to_action_sets(calls: list[dict], world: World) -> list[ActionSet]:
+    """Object interactions only; attacks on people are resolved by engine.combat."""
     sets = []
-    for c in extract_calls(text, world):
+    for c in calls:
         target = world.find(c["target"])
         if c["key"] is None or target is None:
             continue

@@ -16,6 +16,7 @@ class Npc:
     name: str
     profile: str
     memory: list[dict] = field(default_factory=list)
+    hp: int = 10
 
     def remember(self, turn: int, kind: str, text: str) -> None:
         self.memory.append({"turn": turn, "kind": kind, "text": text})
@@ -88,7 +89,8 @@ class World:
         return {"world": self.name, "turn": self.turn, "scene": self.current.name,
                 "objects": {f"{s.name}/{o.properties.name}": vars(o.states).copy()
                             for s in self.scenes.values() for o in s.objects},
-                "npc_memory": {n.name: n.memory for s in self.scenes.values() for n in s.npcs}}
+                "npc_memory": {n.name: n.memory for s in self.scenes.values() for n in s.npcs},
+                "npc_hp": {n.name: n.hp for s in self.scenes.values() for n in s.npcs}}
 
     def save(self, saves_dir: str | Path = "saves") -> Path:
         out = Path(saves_dir) / f"{self.path.stem}.json"

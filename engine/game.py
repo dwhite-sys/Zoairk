@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import re
 
+from . import combat
 from .world import World
 
 MOVE = re.compile(r"^\s*(?:go|walk|head|move|run)?\s*(north|south|east|west|up|down|n|s|e|w)\s*$", re.I)
@@ -23,6 +24,7 @@ class Game:
         self.world = World(world_path)
         self.start = self.world.current.name
         self.locations: dict[str, str] = {}      # player -> scene name (each player moves on their own)
+        self.player_hp: dict[str, int] = {}      # player -> health (combat)
 
     def _enter(self, player: str) -> None:
         """Point the shared world at this player's own scene before handling their input."""
@@ -36,11 +38,32 @@ class Game:
             on = [word for key, word in STATE_WORDS.items() if getattr(o.states, key, False)]
             if on:
                 notes.append(f"The {o.properties.name} is {' and '.join(on)}.")
+        for n in s.npcs:
+            if n.hp < 10:
+                notes.append(f"{n.name} is {combat.status(n.hp)}.")
         return " ".join([s.description, *notes])
 
     def _scene(self) -> dict:
         s = self.world.current
         return {"type": "switch_scene", "scene": s.name, "description": self.describe()}
+
+    def _attack(self, attacker, target, weapon, npcs_by_lower, players_here):
+        """Resolve one attack through the state machine (combat.strike) and return an Event."""
+        from .types import Event
+        hp = {**{n.name: n.hp for n in npcs_by_lower.values()}, **{p: self.player_hp.get(p, 10) for p in players_here}}
+        name = next((k for k in hp if k.lower() == (target or "").strip().lower()), None)
+        if name is None:
+            return Event("attack", False, target, weapon, {}, f"{target} is not here.")
+        if weapon and self.world.find(weapon) is None:
+            weapon = None
+        r = combat.strike(attacker, name, hp, weapon)
+        if not r["ok"]:
+            return Event("attack", False, name, weapon, {}, r["message"])
+        if name.lower() in npcs_by_lower:
+            npcs_by_lower[name.lower()].hp = r["hp"]
+        else:
+            self.player_hp[name] = r["hp"]
+        return Event("attack", True, name, weapon, {f"{name}.hp": r["hp"], f"{name}.status": r["status"]}, r["message"])
 
     def intro(self, player: str = "The player") -> list[dict]:
         self._enter(player)
@@ -56,6 +79,8 @@ class Game:
         w = self.world
         if LOOK.match(text):
             return [_msg("narrator", self.describe())]
+        if self.player_hp.get(player, 10) <= 0:
+            return [_msg("system", "You are dead. You can only look around.")]
         m = MOVE.match(text)
         if m:
             direction = SHORT.get(m.group(1).lower(), m.group(1).lower())
@@ -76,11 +101,24 @@ class Game:
             said = spoken.strip().rstrip(",")
             out = [_msg("narrator", f'You say, "{said}"' if player == "The player" else f'{player} says, "{said}"')]
         else:
-            actions = parser.parse(text, w)
-            if not actions:                              # gibberish / nothing resolvable: no turn
+            here = [p for p, loc in self.locations.items() if loc == w.current.name and p != player]
+            alive_npcs = {n.name.lower(): n for n in npcs if n.hp > 0}
+            w.people_here = [n.name for n in alive_npcs.values()] + here
+            calls = parser.extract_calls(text, w)
+            fights, rest = [], []
+            for c in calls:
+                tgt = (c.get("target") or "").strip()
+                if c.get("key") == "attack" and (tgt.lower() in alive_npcs or tgt in here or tgt.lower() in [h.lower() for h in here]):
+                    fights.append(c)
+                else:
+                    rest.append(c)
+            actions = parser.calls_to_action_sets(rest, w)
+            if not actions and not fights:              # gibberish / nothing resolvable: no turn
                 return [_msg("system", "Nothing happens.")]
             w.turn += 1
             events = interactions.run(actions)
+            for c in fights:
+                events.append(self._attack(player, c["target"], c.get("instrument") or None, alive_npcs, here))
             prose = narrator.narrate(events, w.current.description)
             event_text = f"{player}: {text}. Result: {prose}"
             for n in npcs:
@@ -94,5 +132,11 @@ class Game:
             if d.decision in ("express", "engage") and text:
                 out.append(_msg("npc", text, npc=d.npc, decision=d.decision,
                                 confidence=round(d.confidence, 2)))
+            if d.decision == "engage" and d.attack:
+                present = {n.name.lower(): n for n in npcs if n.hp > 0 and n.name != d.npc}
+                players_here = [p for p, loc in self.locations.items() if loc == w.current.name]
+                ev = self._attack(d.npc, d.attack, None, present, players_here)
+                if ev.ok:
+                    out.append(_msg("narrator", "⚔ " + ev.message))
         w.save()
         return out
