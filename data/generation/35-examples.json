@@ -1,0 +1,23 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:50:11.246743+00:00",
+  "count": 50,
+  "variation_focus": "Desert caravanserai, canyon crossing, abandoned tollhouse and underground storeroom. Exactly 15 do-only, 15 check-only, 20 mixed. Diverse 1\u20134-action syntax and precise ownership. Previous response failed because bracket [Finally] was not a literal case-sensitive temporal clue in the query. Copy exact source text in brackets and do not invent or capitalize cues. All annotations must match the source, tools and execution order.",
+  "status": "pending_review_at_generation",
+  "max_tokens": 55000,
+  "batch_path": "data/review/35-examples.json",
+  "sha256": "7f577aaf7634b00783a28a7e2b0dad1408558c51caa7ce931bccb4384c8db700",
+  "rules_sha256": "475108d68a1de210cee222bfd7f4ecdf694b75fc34c8de6dbe4e799a92290876",
+  "feedback_session_sha256": "49a089096b86e046664f498c3d467126e1bd4e8b143b0565d29696ad769236dc",
+  "feedback_reviewed_count": 700,
+  "usage": {
+    "prompt_tokens": 29897,
+    "completion_tokens": 26113,
+    "total_tokens": 56010,
+    "prompt_tokens_details": {
+      "cached_tokens": 2816
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}
