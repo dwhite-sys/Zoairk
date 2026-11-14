@@ -19,7 +19,7 @@ def strike(attacker: str, target: str, hp: dict[str, int], weapon: str | None = 
     """Apply one attack to `hp[target]`; returns an event dict for narration."""
     if hp.get(target, MAX_HP) <= 0:
         return {"ok": False, "message": f"{target} is already dead."}
-    lo, hi = damage or ((3, 5) if weapon else (1, 3))     # a weapon's own range, else generic
+    lo, hi = damage or ((1, 2) if weapon else (1, 3))     # a weapon's own range; improvised items (a match) barely hurt
     dmg = random.randint(lo, hi)
     hp[target] = max(0, hp.get(target, MAX_HP) - dmg)
     with_w = f" with the {weapon}" if weapon else ""
