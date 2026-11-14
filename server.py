@@ -4,8 +4,10 @@
     WebSocket: ws://127.0.0.1:8765   (protocol: docs/contracts.md section C4)
     Web page:  http://127.0.0.1:8000
 
-Each browser connection gets its own Game. Game.handle() may make slow LLM
-calls, so it runs in a worker thread to keep the event loop responsive.
+Asynchronous multiplayer: every connection shares ONE Game (one world). Player inputs go into a
+FIFO queue and a single worker applies them in arrival order, so the state machine never sees two
+turns at once (board B4 "FIFO Queue"). Every result is broadcast to all players, tagged with who
+acted. Game.handle() makes slow LLM calls, so it runs in a worker thread.
 """
 
 import asyncio
@@ -33,8 +35,8 @@ class StubGame:
             {"type": "message", "role": "system", "text": "Engine not loaded: running the stub game."},
         ]
 
-    def handle(self, text):
-        return [{"type": "message", "role": "narrator", "text": f"You said: {text}"}]
+    def handle(self, text, player="You"):
+        return [{"type": "message", "role": "narrator", "text": f"{player} said: {text}"}]
 
 
 def make_game():
@@ -54,26 +56,66 @@ async def send_all(ws, messages):
         await ws.send(json.dumps(message))
 
 
-async def play(ws):
-    """One connection = one game session."""
-    loop = asyncio.get_running_loop()
-    game = await loop.run_in_executor(None, make_game)
-    await send_all(ws, await loop.run_in_executor(None, game.intro))
+GAME = None                 # the one shared world
+PLAYERS: dict = {}          # websocket -> player name
+QUEUE: asyncio.Queue | None = None
 
-    async for raw in ws:
+
+async def broadcast(messages):
+    for ws in list(PLAYERS):
         try:
-            data = json.loads(raw)
-        except json.JSONDecodeError:
-            continue
-        if data.get("type") != "send_message":
-            continue
-        text = str(data.get("text", ""))
+            await send_all(ws, messages)
+        except websockets.ConnectionClosed:
+            PLAYERS.pop(ws, None)
+
+
+async def turn_worker():
+    """Apply queued inputs one at a time, in arrival order (FIFO)."""
+    loop = asyncio.get_running_loop()
+    while True:
+        name, text = await QUEUE.get()
+        await broadcast([{"type": "message", "role": "player", "player": name, "text": text}])
         try:
-            replies = await loop.run_in_executor(None, game.handle, text)
-        except Exception as exc:  # keep the connection alive if one turn fails
+            replies = await loop.run_in_executor(None, functools.partial(GAME.handle, text, player=name))
+        except Exception as exc:  # keep everyone connected if one turn fails
             print(f"[server] game.handle failed: {exc!r}")
             replies = [{"type": "message", "role": "system", "text": "Something went wrong with that turn."}]
-        await send_all(ws, replies)
+        for r in replies or []:
+            r.setdefault("player", name)
+        await broadcast(replies)
+        QUEUE.task_done()
+
+
+def player_name(ws) -> str:
+    try:
+        from urllib.parse import parse_qs, urlparse
+        name = parse_qs(urlparse(ws.request.path).query).get("name", [""])[0].strip()[:24]
+    except Exception:
+        name = ""
+    return name or f"Player {len(PLAYERS) + 1}"
+
+
+async def play(ws):
+    """Join the shared world; every input goes through the FIFO queue."""
+    loop = asyncio.get_running_loop()
+    name = player_name(ws)
+    PLAYERS[ws] = name
+    await send_all(ws, await loop.run_in_executor(None, GAME.intro))
+    await broadcast([{"type": "message", "role": "system", "text": f"{name} joined."}])
+    try:
+        async for raw in ws:
+            try:
+                data = json.loads(raw)
+            except json.JSONDecodeError:
+                continue
+            if data.get("type") != "send_message":
+                continue
+            text = str(data.get("text", ""))
+            if text.strip():
+                await QUEUE.put((name, text))
+    finally:
+        PLAYERS.pop(ws, None)
+        await broadcast([{"type": "message", "role": "system", "text": f"{name} left."}])
 
 
 def start_http_server():
@@ -85,6 +127,10 @@ def start_http_server():
 
 
 async def main():
+    global GAME, QUEUE
+    GAME = make_game()
+    QUEUE = asyncio.Queue()
+    asyncio.create_task(turn_worker())
     start_http_server()
     async with websockets.serve(play, HOST, WS_PORT):
         print(f"[server] web page  http://{HOST}:{HTTP_PORT}", flush=True)

@@ -39,7 +39,7 @@ class Game:
     def intro(self) -> list[dict]:
         return [self._scene(), _msg("narrator", self.describe())]
 
-    def handle(self, text: str) -> list[dict]:
+    def handle(self, text: str, player: str = "The player") -> list[dict]:
         from . import interactions, narrator, npc, parser
 
         text = (text or "").strip()
@@ -60,7 +60,7 @@ class Game:
         npcs = w.current.npcs
         if SPEECH.search(text):                          # quotes mark speech: no parse, straight to memory
             w.turn += 1
-            event_text = f"The player says: {text}"
+            event_text = f"{player} says: {text}"
             for n in npcs:
                 n.remember(w.turn, "speech", event_text)
             spoken = " ".join(re.findall(r"[\"“]([^\"”]+)[\"”]", text)) or text
@@ -72,7 +72,7 @@ class Game:
             w.turn += 1
             events = interactions.run(actions)
             prose = narrator.narrate(events, w.current.description)
-            event_text = f"The player: {text}. Result: {prose}"
+            event_text = f"{player}: {text}. Result: {prose}"
             for n in npcs:
                 n.remember(w.turn, "action", event_text)
             out = [_msg("narrator", prose)]

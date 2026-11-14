@@ -1,7 +1,18 @@
 // Zoairk browser client. Talks to server.py over the C4 WebSocket protocol
 // (docs/contracts.md). No framework: plain DOM functions.
 
-const WS_URL = `ws://${location.hostname || "127.0.0.1"}:8765`;
+// Multiplayer: everyone shares one world; pick a name once (kept per browser; ?name= overrides).
+function playerName() {
+  const fromUrl = new URLSearchParams(location.search).get("name");
+  let saved = null;
+  try { saved = localStorage.getItem("zoairk-name"); } catch (e) {}
+  let name = (fromUrl || saved || "").trim();
+  if (!name) name = (prompt("Your name?") || "").trim() || "Player";
+  try { localStorage.setItem("zoairk-name", name); } catch (e) {}
+  return name.slice(0, 24);
+}
+const MY_NAME = playerName();
+const WS_URL = `ws://${location.hostname || "127.0.0.1"}:8765/?name=${encodeURIComponent(MY_NAME)}`;
 
 const log = document.getElementById("log");
 const form = document.getElementById("input-form");
@@ -56,6 +67,10 @@ function showMessage(msg) {
     return;
   }
   if (msg.type !== "message") return;
+  if (msg.role === "player") {
+    if (msg.player !== MY_NAME) addText("player", `${msg.player}: ${msg.text}`); // others' moves
+    return;
+  }
   if (msg.role === "npc") showNpcMessage(msg);
   else if (msg.role === "system") addText("system", msg.text);
   else addText("narrator", msg.text);

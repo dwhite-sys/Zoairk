@@ -28,6 +28,10 @@ Each piece is built against these. If one must change, change it here first and 
 - Server → client: `{"type": "message", "role": "narrator"|"npc"|"system", "npc"?: name, "text": "...",
   "decision"?: "express"|"engage", "confidence"?: n}`
 - Server → client: `{"type": "switch_scene", "scene": name, "description": "..."}`
+- Multiplayer (decided 13:18): one shared world for all connections; inputs go through a FIFO queue,
+  applied one at a time; every result is broadcast with a `"player"` field. Client connects with
+  `ws://127.0.0.1:8765/?name=<player>`. Server → client also sends `{"type":"message","role":"player",
+  "player":name,"text":input}` for each queued input, and `role: "system"` join/leave lines.
 - Server: `ws://127.0.0.1:8765`. Static web page served from `web/` at `http://127.0.0.1:8000`.
 
 ## C5: world JSON (`worlds/*.json`)
