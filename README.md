@@ -77,6 +77,20 @@ environment variables:
 
 To take it down, stop `server.py`. Restarting starts every lobby fresh, and open pages reset themselves.
 
+### Play logs (free play-testing data)
+
+Every turn is logged to `logs/<date>.jsonl`: lobby, player, room, what they typed, every reply (narration, each
+NPC's decision and confidence), turn time, errors, and whether "Nothing happens" came back. Joins, leaves and
+world events (fires burning out) are logged too. `logs/` is git-ignored because it holds player names and inputs.
+
+```sh
+python3 tools/log_report.py                  # turns, success rate, errors, timing, NPC decisions
+python3 tools/log_report.py --lobby play     # one lobby
+```
+
+The report lists every input that got "Nothing happens" and every error: those are the next parser and world
+fixes. Set `ZOAIRK_LOG_DIR` to log somewhere else.
+
 ### How to play
 
 Type what you want to do in plain English and press Enter.

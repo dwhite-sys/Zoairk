@@ -18,6 +18,7 @@ import json
 import mimetypes
 import os
 import time
+from datetime import datetime, timezone
 import threading
 import uuid
 
@@ -32,6 +33,8 @@ MIN_TURN_GAP = float(os.environ.get("ZOAIRK_MIN_TURN_GAP", 2.0))   # seconds bet
 MAX_PENDING = int(os.environ.get("ZOAIRK_MAX_PENDING", 12))        # queued turns per lobby
 MAX_LOBBIES = int(os.environ.get("ZOAIRK_MAX_LOBBIES", 20))
 MAX_PLAYERS = int(os.environ.get("ZOAIRK_MAX_PLAYERS", 8))         # per lobby
+# Interaction log: one JSON line per turn and per world event, for reviewing what works and what doesn't.
+LOG_DIR = os.environ.get("ZOAIRK_LOG_DIR", os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs"))
 WEB_DIR = os.path.join(ROOT, "web")
 
 
@@ -119,6 +122,34 @@ async def broadcast(lobby, messages, scene=None):
             lobby.players.pop(ws, None)
 
 
+def log_event(lobby, kind, **fields):
+    """Append one record to logs/<date>.jsonl. Logging must never break the game."""
+    try:
+        os.makedirs(LOG_DIR, exist_ok=True)
+        now = datetime.now(timezone.utc)
+        record = {"ts": now.isoformat(timespec="milliseconds"), "lobby": lobby.name,
+                  "world": lobby.world_id[:8], "kind": kind, **fields}
+        with open(os.path.join(LOG_DIR, f"{now:%Y-%m-%d}.jsonl"), "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(record, ensure_ascii=False) + "\n")
+    except Exception as exc:
+        print(f"[server] log failed: {exc!r}")
+
+
+def summarize_replies(replies):
+    """The parts of a turn worth reviewing: what was said back and how each NPC decided."""
+    out = []
+    for r in replies or []:
+        if r.get("type") == "message":
+            item = {"role": r.get("role"), "text": r.get("text")}
+            for k in ("npc", "decision", "confidence", "effects", "hit"):
+                if r.get(k) not in (None, [], ""):
+                    item[k] = r[k]
+            out.append(item)
+        elif r.get("type") == "switch_scene":
+            out.append({"role": "scene_change", "text": r.get("scene")})
+    return out
+
+
 async def world_clock():
     """Asynchronous world events (fire burning out) every few seconds, independent of player input."""
     loop = asyncio.get_running_loop()
@@ -134,6 +165,7 @@ async def world_clock():
                 print(f"[server] world clock failed in {lobby.name!r}: {exc!r}")
                 continue
             if events:
+                log_event(lobby, "world", replies=summarize_replies(events))
                 await broadcast(lobby, events)
 
 
@@ -146,11 +178,18 @@ async def turn_worker(lobby):
         lobby.current_actor = name
         here = getattr(game, "locations", {}).get(name)          # room where the turn happens
         await broadcast(lobby, [{"type": "message", "role": "player", "player": name, "text": text}], scene=here)
+        started, error = time.monotonic(), None
         try:
             replies = await loop.run_in_executor(None, functools.partial(game.handle, text, player=name))
         except Exception as exc:  # keep everyone connected if one turn fails
             print(f"[server] game.handle failed: {exc!r}")
+            error = repr(exc)
             replies = [{"type": "message", "role": "system", "text": "Something went wrong with that turn."}]
+        log_event(lobby, "turn", player=name, room=here, input=text,
+                  seconds=round(time.monotonic() - started, 2), error=error,
+                  nothing_happened=any(r.get("text") == "Nothing happens." for r in replies or []),
+                  replies=summarize_replies(replies),
+                  player_hp=getattr(game, "player_hp", {}).get(name))
         for r in replies or []:
             r.setdefault("player", name)
         # Players in the room where it happened see it; a player who just moved sees their new room.
@@ -191,6 +230,7 @@ async def play(ws):
     lobby.players[ws] = name
     await ws.send(json.dumps({"type": "world", "id": lobby.world_id, "lobby": lobby.name}))
     await send_all(ws, await loop.run_in_executor(None, functools.partial(lobby.game.intro, name)))
+    log_event(lobby, "join", player=name)
     await broadcast(lobby, [{"type": "message", "role": "system", "text": f"{name} joined lobby {lobby.name}."}])
     try:
         async for raw in ws:
@@ -212,6 +252,7 @@ async def play(ws):
             await lobby.queue.put((name, text[:500]))
     finally:
         lobby.players.pop(ws, None)
+        log_event(lobby, "leave", player=name)
         await broadcast(lobby, [{"type": "message", "role": "system", "text": f"{name} left."}])
 
 
