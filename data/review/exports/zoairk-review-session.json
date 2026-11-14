@@ -3647,9 +3647,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "deny",
+      "reason": "AI review (Codex): loses the explicit destination. With this three-field schema, use action \"stow in satchel\" (target \"tome\"), consistent with \"put in backpack\", rather than plain \"stow\". Also quote \"light\", not \"I light\", which does not occur in the input.",
+      "reviewedAt": "2026-11-14T13:13:03.986Z"
     },
     {
       "example": {
@@ -3730,9 +3730,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:13:14.117Z"
     },
     {
       "example": {
@@ -3813,9 +3813,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:13:20.890Z"
     },
     {
       "example": {
@@ -3904,9 +3904,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:13:28.040Z"
     },
     {
       "example": {
@@ -3987,9 +3987,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "deny",
+      "reason": "AI review (Codex): the second call should use instrument \"none\", action \"sound\", target \"warhorn\". The horn is the object being sounded, with no separate instrument specified; assigning it as both instrument and target conflicts with the approved self-instrument convention (e.g. ring the bell).",
+      "reviewedAt": "2026-11-14T13:13:38.836Z"
     },
     {
       "example": {
@@ -4078,9 +4078,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:13:49.034Z"
     },
     {
       "example": {
@@ -4161,9 +4161,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "deny",
+      "reason": "AI review (Codex): calls and order are correct, but the tool-choice annotation quotes \"I drop\", which is not in the input. Use \"'I close' and 'drop' -> committed action -> enter_command\". Keep quoted source phrases faithful to the sentence.",
+      "reviewedAt": "2026-11-14T13:14:00.204Z"
     },
     {
       "example": {
@@ -4252,9 +4252,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:14:12.253Z"
     },
     {
       "example": {
@@ -4335,9 +4335,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:14:19.536Z"
     },
     {
       "example": {
@@ -4418,9 +4418,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "deny",
+      "reason": "AI review (Codex): calls and order are correct. The tool-choice annotation should quote \"take\", not \"I take\", because the input says \"then take\". Use exact source phrases: 'I light' and 'take' -> committed action -> enter_command.",
+      "reviewedAt": "2026-11-14T13:14:27.324Z"
     },
     {
       "example": {
@@ -4509,9 +4509,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:14:31.610Z"
     },
     {
       "example": {
@@ -4584,9 +4584,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:14:36.417Z"
     },
     {
       "example": {
@@ -4667,9 +4667,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:14:40.890Z"
     },
     {
       "example": {
@@ -4758,9 +4758,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:14:49.529Z"
     },
     {
       "example": {
