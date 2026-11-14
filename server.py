@@ -89,6 +89,23 @@ async def broadcast(messages, scene=None):
             PLAYERS.pop(ws, None)
 
 
+async def world_clock():
+    """Asynchronous world events (fire burning out) every few seconds, independent of player input."""
+    loop = asyncio.get_running_loop()
+    while True:
+        await asyncio.sleep(5)
+        tick = getattr(GAME, "tick", None)
+        if tick is None:
+            continue
+        try:
+            events = await loop.run_in_executor(None, tick, loop.time())
+        except Exception as exc:
+            print(f"[server] world clock failed: {exc!r}")
+            continue
+        if events:
+            await broadcast(events)
+
+
 async def turn_worker():
     """Apply queued inputs one at a time, in arrival order (FIFO)."""
     loop = asyncio.get_running_loop()
@@ -155,6 +172,7 @@ async def main():
     GAME = make_game()
     QUEUE = asyncio.Queue()
     asyncio.create_task(turn_worker())
+    asyncio.create_task(world_clock())
     start_http_server()
     async with websockets.serve(play, HOST, WS_PORT):
         print(f"[server] web page  http://{HOST}:{HTTP_PORT}", flush=True)

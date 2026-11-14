@@ -15,7 +15,8 @@ ITEM_VERBS = {"take", "drop", "put", "give"}
 SPEECH = re.compile(r"[\"“”]")
 
 
-STATE_WORDS = {"open": "open", "on_fire": "on fire", "broken": "broken"}
+STATE_WORDS = {"open": "open", "on_fire": "on fire", "broken": "broken", "ash": "burnt to ash"}
+BURN_SECONDS = (20, 60)        # a burning object turns to ash after a random time (world clock)
 QUOTED = re.compile(r"[\"“][^\"”]*[\"”]")
 
 
@@ -58,6 +59,31 @@ class Game:
         """Point the shared world at this player's own scene (and inventory) before handling input."""
         self.world.current = self.world.scenes[self.locations.setdefault(player, self.start)]
         self.world.carried = self.inventories.setdefault(player, [])
+
+    def tick(self, now: float) -> list[dict]:
+        """World clock (runs on real time, independent of players): burning objects burn out to ash.
+        Each message carries to_scene, so only players in that room see it. NPCs still act only on player time."""
+        import random
+        out = []
+        for scene in self.world.scenes.values():
+            for o in scene.objects + [c for x in scene.objects for c in getattr(x, "contents", [])]:
+                st = o.states
+                if not getattr(st, "on_fire", False) or getattr(st, "ash", False):
+                    continue
+                if not hasattr(o, "burn_until"):
+                    o.burn_until = now + random.uniform(*BURN_SECONDS)
+                elif now >= o.burn_until and "igniter" not in o.attributes:
+                    st.on_fire, st.ash = False, True
+                    out.append(_msg("narrator", f"The {o.properties.name} burns down to a pile of ash.",
+                                    to_scene=scene.name, effects=["ash"]))
+                elif now >= o.burn_until:                 # a match just burns out
+                    st.on_fire = False
+                    del o.burn_until
+                    out.append(_msg("narrator", f"The {o.properties.name} burns out.", to_scene=scene.name,
+                                    effects=["extinguish"]))
+        if out:
+            self.world.save()
+        return out
 
     def status(self, player: str) -> dict:
         """Private per-player status for the front end: health and inventory."""
