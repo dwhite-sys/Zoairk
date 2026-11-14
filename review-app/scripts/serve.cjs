@@ -13,7 +13,7 @@ const files = new Map([
   ['/app.js', ['app.js', 'application/javascript; charset=utf-8']],
   ['/examples.json', ['examples.json', 'application/json; charset=utf-8']]
 ]);
-const MAX_BODY = 10 * 1024 * 1024;
+const MAX_BODY = R.MAX_BYTES;
 
 function normalizePrefix(value) {
   if (!value) return '';
@@ -46,13 +46,14 @@ async function readDataset() {
   }
   const names = (await fs.readdir(dir)).filter(name => /\.(json|jsonl)$/i.test(name)).sort();
   if (!names.length) throw new Error(`No .json or .jsonl files in ${dir}.`);
-  let entries = [];
+  const incoming = [];
   for (const name of names) {
     const parsed = R.parseFile(await fs.readFile(path.join(dir, name), 'utf8'));
-    // mergeEntries deduplicates, so the same example appearing in two batches
-    // is served once.
-    entries = R.mergeEntries(entries, parsed.entries).entries;
+    incoming.push(...parsed.entries);
   }
+  // Merge once: re-cloning all prior batches per file becomes expensive for
+  // a training workspace with thousands of examples and many source batches.
+  const entries = R.mergeEntries([], incoming).entries;
   return { examples: entries.map(entry => entry.example), source: `${dir} (${names.length} file${names.length === 1 ? '' : 's'})` };
 }
 // Where the generated dataset files go; point EXPORT_DIR inside the repository

@@ -193,7 +193,7 @@
   async function importFile(file) {
     if (!file) return;
     await task(async () => {
-      if (file.size > R.MAX_BYTES) throw new Error('Use a file smaller than 10 MB.');
+      if (file.size > R.MAX_BYTES) throw new Error('Use a file smaller than 64 MB.');
       await importText(await file.text(), file.name);
     });
   }

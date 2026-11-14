@@ -1,0 +1,11 @@
+{
+  "baseline_commit": "8be5a1b16769f29b62d1d8e58f41232a3cbae0df",
+  "starting_reviewed": 1000,
+  "starting_approved": 881,
+  "starting_denied": 119,
+  "target_approved": 5000,
+  "first_batch": 40,
+  "method": "Every candidate reviewed by Codex; decisions saved through the local app normal session-import flow, source batches and canonical exports pushed through Git. Denials feed later generation prompts. No weight updates or automatic approvals.",
+  "recovered_stale_remote_commit": "753799a (900 decisions reset to pending; remaining decided entries identical to baseline; complete runtime intact)",
+  "generation_failures": []
+}

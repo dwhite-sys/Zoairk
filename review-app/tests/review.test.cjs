@@ -32,8 +32,17 @@ test('allows explicit no-op examples and optional reasoning', () => {
   assert.equal(R.parseFile(JSON.stringify(e)).entries[0].example.reasoning, '');
 });
 test('rejects oversized inputs and oversized batches', () => {
-  assert.throws(() => R.parseFile(' '.repeat(R.MAX_BYTES) + '{}'), /10 MB/);
+  assert.throws(() => R.parseFile(' '.repeat(R.MAX_BYTES) + '{}'), /64 MB/);
   assert.throws(() => R.parseFile(JSON.stringify(Array(10001).fill({}))), /10,000/);
+});
+test('a 5000-example review session over 10 MB preserves annotations and decisions', () => {
+  const entries = Array.from({length:5000}, (_,i) => ({example:{...examples[i % examples.length],query:'Scale candidate '+i,reasoning:'annotation '.repeat(400)},decision:i % 2 ? 'approve':'deny',reason:'AI review scale fixture',reviewedAt:'2026-11-14T12:00:00.000Z'}));
+  const text = R.session(entries);
+  assert.ok(Buffer.byteLength(text) > 10 * 1024 * 1024);
+  const parsed = R.parseFile(text);
+  assert.equal(parsed.entries.length,5000);
+  assert.deepEqual(parsed.entries[4999],entries[4999]);
+  assert.deepEqual(R.counts(parsed.entries),{total:5000,approved:2500,denied:2500,pending:0});
 });
 test('repeated imports deduplicate without replacing existing human labels', () => {
   const entries = R.decide(batch(), 0, 'approve', 'human verified');

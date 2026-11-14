@@ -4,7 +4,7 @@
   else root.ZoairkReview = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  const MAX_BYTES = 10 * 1024 * 1024;
+  const MAX_BYTES = 64 * 1024 * 1024;
   const MAX_EXAMPLES = 10000;
   const isObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
   function stable(value) {
@@ -47,7 +47,7 @@
   }
   function parseFile(text) {
     if (typeof text !== 'string' || !text.trim()) throw new Error('This file is empty. Choose a JSON file containing examples.');
-    if (new TextEncoder().encode(text).length > MAX_BYTES) throw new Error('Use a file smaller than 10 MB.');
+    if (new TextEncoder().encode(text).length > MAX_BYTES) throw new Error('Use a file smaller than 64 MB.');
     const clean = text.replace(/^\uFEFF/, '').trim();
     let value;
     try { value = JSON.parse(clean); }
