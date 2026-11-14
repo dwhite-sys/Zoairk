@@ -103,7 +103,7 @@
     },
     {
      "name": "Joe",
-     "profile": "Joe, a nervous shopkeeper who watches everything from his shop window. Easily startled, polite, worried about fire and damage. He sells health potions (three silver each) and keeps one under the counter.",
+     "profile": "Joe, a nervous shopkeeper who watches everything from his shop window. Easily startled, polite, worried about fire and damage. He sells health potions (one gold coin each; a customer who hands him a gold coin gets a potion) and keeps one under the counter.",
      "inventory": [
       {
        "name": "health potion",
@@ -180,7 +180,10 @@
       {
        "name": "coin",
        "aliases": [
-        "gold coin"
+        "gold coin",
+        "gold",
+        "money",
+        "payment"
        ],
        "templates": [
         "throwable"
