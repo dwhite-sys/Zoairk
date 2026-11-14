@@ -43,6 +43,9 @@ Open **http://127.0.0.1:8765/** in a browser (http://127.0.0.1:8000/ also works)
 
 ### Hosting it for others (one link, nothing to install for players)
 
+**Full step-by-step guide: [docs/HOSTING.md](docs/HOSTING.md)** — what the server and the client are, LAN vs
+domain vs tunnel, running it as a service, and the play-log sync.
+
 The game server serves the web page and the game on **one port** (8765 by default), so a single address is
 all players need, on a phone or a computer.
 
@@ -82,6 +85,8 @@ To take it down, stop `server.py`. Restarting starts every lobby fresh, and open
 Every turn is logged to `logs/<date>.jsonl`: lobby, player, room, what they typed, every reply (narration, each
 NPC's decision and confidence), turn time, errors, and whether "Nothing happens" came back. Joins, leaves and
 world events (fires burning out) are logged too. `logs/` is git-ignored because it holds player names and inputs.
+Every 10 minutes the server pushes an **anonymized** copy (names replaced by stable IDs like `player-3fa2c1`) to the
+`play-logs` branch, so the whole team can review real play; see [docs/HOSTING.md](docs/HOSTING.md#4-play-logs-free-play-testing).
 
 ```sh
 python3 tools/log_report.py                  # turns, success rate, errors, timing, NPC decisions

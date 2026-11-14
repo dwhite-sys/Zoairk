@@ -35,6 +35,7 @@ MAX_LOBBIES = int(os.environ.get("ZOAIRK_MAX_LOBBIES", 20))
 MAX_PLAYERS = int(os.environ.get("ZOAIRK_MAX_PLAYERS", 8))         # per lobby
 # Interaction log: one JSON line per turn and per world event, for reviewing what works and what doesn't.
 LOG_DIR = os.environ.get("ZOAIRK_LOG_DIR", os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs"))
+LOG_SYNC_MINUTES = float(os.environ.get("ZOAIRK_LOG_SYNC_MINUTES", 10))   # push anonymized logs to git; 0 = off
 WEB_DIR = os.path.join(ROOT, "web")
 
 
@@ -148,6 +149,21 @@ def summarize_replies(replies):
         elif r.get("type") == "switch_scene":
             out.append({"role": "scene_change", "text": r.get("scene")})
     return out
+
+
+async def log_sync():
+    """Every LOG_SYNC_MINUTES, push anonymized logs to the repo's play-logs branch (tools/sync_logs.py)."""
+    if LOG_SYNC_MINUTES <= 0:
+        return
+    import sys
+    script = os.path.join(ROOT, "tools", "sync_logs.py")
+    while True:
+        await asyncio.sleep(LOG_SYNC_MINUTES * 60)
+        proc = await asyncio.create_subprocess_exec(sys.executable, script, stdout=asyncio.subprocess.PIPE,
+                                                    stderr=asyncio.subprocess.STDOUT,
+                                                    env={**os.environ, "ZOAIRK_LOG_DIR": LOG_DIR})
+        out, _ = await proc.communicate()
+        print(f"[server] log sync: {out.decode().strip()[:200]}", flush=True)
 
 
 async def world_clock():
@@ -288,6 +304,7 @@ def start_http_server():
 async def main():
     lobby_for("main")                     # the default lobby exists from the start
     asyncio.create_task(world_clock())
+    asyncio.create_task(log_sync())
     start_http_server()
     async with websockets.serve(play, HOST, WS_PORT, process_request=process_request):
         print(f"[server] web page  http://{HOST}:{HTTP_PORT}", flush=True)
