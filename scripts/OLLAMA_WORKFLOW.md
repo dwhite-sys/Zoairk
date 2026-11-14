@@ -1,0 +1,36 @@
+# One-batch Ollama → Git → local review → Git workflow
+
+The generator runs only when invoked; it does not loop, train, or approve anything. It uses the configured Ollama OpenAI-compatible endpoint, defaults to `deepseek-v4.1-flash:cloud`, and generates at most 20 pending candidates. A `:cloud` model can consume the user's Ollama cloud allowance.
+
+From the repository root, with a clean working tree:
+
+1. `git pull --ff-only origin main`.
+2. Check `curl http://localhost:11434/v1/models`. No credentials are committed. If needed, provide `OLLAMA_API_KEY` through the environment.
+3. Select the next unused numbered filename and run:
+
+```sh
+python3 scripts/generate_review_batch.py \
+  --base-url http://localhost:11434/v1 \
+  --model deepseek-v4.1-flash:cloud \
+  --output data/review/07-examples.json \
+  --raw-output /tmp/zoairk-generation-07-response.json
+```
+
+The example number above is illustrative: increment it for later batches. Existing output files are never replaced. Inspect failures and the raw response before retrying; do not quietly repair candidate semantics or retry indefinitely. Tools are attached from approved records, and shape/duplicates/source-clue presence are checked before writing. These checks do not establish semantic correctness. Provenance/usage goes in `data/generation/`, outside the served batch directory.
+
+4. Commit only the generator/rules, batch, and provenance you intend to share; push before reviewing. Another clone should pull before loading the batch. This keeps candidate ingestion in Git, rather than hiding it in a browser upload.
+5. For isolated local review of that batch, start the existing server with a new, untracked runtime state directory. Seed its `state.json` from the latest committed `data/review/exports/zoairk-review-session.json` so older decisions are preserved. Example environment:
+
+```sh
+EXAMPLES_FILE="$PWD/data/review/07-examples.json" \
+REVIEW_DATA_DIR=/tmp/zoairk-review-07 \
+EXPORT_DIR="$PWD/data/review/exports" \
+PORT=3018 node review-app/scripts/serve.cjs
+```
+
+Create `/tmp/zoairk-review-07` and copy the committed review session to `/tmp/zoairk-review-07/state.json` BEFORE starting the server. Never overwrite an existing state directory. Use a fresh browser origin/port or inspect the queue for stale browser records before reviewing. Open the app in the in-app browser. Review each candidate's input, reasoning and ordered calls. Use notes beginning `AI review (Codex):` for AI decisions; never represent them as human approvals. Deny questionable examples with a concrete correction note. Do not change old decisions.
+
+6. Reload and verify no pending examples from the new batch remain, and the old decisions/notes are unchanged. The server writes all three canonical exports into the repo. Check their diffs; then commit and push the saved decisions. If the remote changed during review, pull/reconcile without dropping either reviewer's work; do not force-push or overwrite unrelated decisions.
+7. The hosted machine can pull the candidates and committed review data. Its running shared state lives separately; the hosted agent must merge the committed session through the app's normal session-import flow if it needs the decisions immediately. A Git pull alone does not necessarily replace an already-running server's state file. Do not reset that state.
+
+Keep source batches immutable. Approved training exports exclude denied records and strip review fields. The classifier export retains approval/denial notes. The app's current export naming does not distinguish human from AI approvals, so retain the session/notes for provenance and any later audit. Generate the next 20 only after completing the current review, or when the user explicitly asks for additional batches.

@@ -38,3 +38,7 @@ These commands are a starting point; this repository contains a small seed datas
 Use the native local format to retain `reasoning`: the current local chat-format converter does not copy assistant reasoning into that field.
 
 References: [Cactus](https://github.com/cactus-compute/cactus), [fine-tuning guide](https://cactuscompute.com/blog/finetuning-needle), and [local renderer](https://github.com/cactus-compute/cactus/blob/main/cactus/model/finetune.py).
+
+## Generating and reviewing new batches
+
+See [the Ollama workflow](scripts/OLLAMA_WORKFLOW.md) for generating up to 20 pending candidates at a time, committing them through Git, reviewing them in the local webapp, and committing the saved decisions. AI review notes remain distinct from human review notes.

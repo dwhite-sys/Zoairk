@@ -1,0 +1,18 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "created_at": "2026-11-14T13:53:31.418482+00:00",
+  "count": 20,
+  "status": "pending_review_at_generation",
+  "batch_path": "data/review/07-examples.json",
+  "sha256": "13b71a4474a49e2f9fbbe57f8abdf9eff36ac1f25ebb73eba8b276920c7f083c",
+  "rules_sha256": "1623c43e23786c5688ebbd1b896a45a67f213b1ee4c2cf116b80a4cea08569e1",
+  "usage": {
+    "prompt_tokens": 5251,
+    "completion_tokens": 19053,
+    "total_tokens": 24304,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "seed_source": "data/review/exports/zoairk-review-session.json"
+}
