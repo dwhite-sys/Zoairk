@@ -32,7 +32,7 @@ def test_dropped_item_shows_in_room_and_npc_uses_carried_weapon():
     inventory.take(w, inv, w.find("match"))
     g.handle("go north", player="Drew"); g._enter("Drew")
     inventory.drop(w, inv, w.find("match"))
-    assert "a match" in g.describe().split("You also see:")[1]
+    assert "a match lie on the ground nearby" in g.describe() or "match" in g.describe().split(".")[-2]
     g._enter("Drew"); jerry = g.world.scenes["front_lawn"].npcs[0]
     g.locations["Drew"] = "front_lawn"; g._enter("Drew")
     ev = g._attack("Jerry", "Drew", "hammer", {}, ["Drew"], npc_weapon=True)

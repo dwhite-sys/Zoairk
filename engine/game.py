@@ -150,8 +150,12 @@ class Game:
                 notes.append(f"{n.label} is {combat.status(n.hp)}.")
         loose = [o.properties.name for o in s.objects
                  if o.properties.name.lower() not in s.description.lower()]
-        if loose:
-            notes.append("You also see: " + ", ".join(f"a {x}" for x in loose) + ".")
+        if loose:                                  # natural phrasing for things lying around (team feedback)
+            items = [f"a {x}" for x in loose]
+            listed = items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
+            verb = "lies" if len(items) == 1 else "lie"
+            where = "on the ground nearby" if len(items) < 3 else "scattered about"
+            notes.append(f"{listed[0].upper() + listed[1:]} {verb} {where}.")
         return " ".join([s.description, *notes])
 
     def _scene(self) -> dict:
