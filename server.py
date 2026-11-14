@@ -19,7 +19,7 @@ import threading
 
 import websockets
 
-HOST = "127.0.0.1"
+HOST = os.environ.get("ZOAIRK_HOST", "127.0.0.1")   # 0.0.0.0 lets other machines on the network join
 WS_PORT = int(os.environ.get("ZOAIRK_WS_PORT", 8765))
 HTTP_PORT = int(os.environ.get("ZOAIRK_HTTP_PORT", 8000))
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -134,6 +134,14 @@ async def main():
     start_http_server()
     async with websockets.serve(play, HOST, WS_PORT):
         print(f"[server] web page  http://{HOST}:{HTTP_PORT}", flush=True)
+        if HOST == "0.0.0.0":
+            import socket
+            try:
+                with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+                    s.connect(("8.8.8.8", 80)); lan = s.getsockname()[0]
+                print(f"[server] others on this network: http://{lan}:{HTTP_PORT}", flush=True)
+            except OSError:
+                pass
         print(f"[server] websocket ws://{HOST}:{WS_PORT}", flush=True)
         await asyncio.Future()  # run forever
 
