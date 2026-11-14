@@ -222,8 +222,9 @@ class Game:
             self.player_hp[player] = combat.MAX_HP
             self.locations[player] = self.start
             self._enter(player)
-            for n in w.current.npcs:              # NPCs keep their memories: they know you died
-                n.remember(w.turn, "action", f"{player} has come back to life and returned.")
+            for n in w.current.npcs:              # NPCs keep their memories: they saw you die
+                n.remember(w.turn, "action", f"{player}, who was killed here earlier and lay dead, has impossibly "
+                                             f"come back to life and is standing here again.")
             w.save()
             return [{**self._scene(), "private": True},
                     _msg("system", "You wake up with a gasp, whole again.", private=True),
@@ -311,6 +312,9 @@ class Game:
                 ev = self._attack(d.npc, d.attack, weapon, present, players_here, npc_weapon=True)
                 if ev.ok:
                     out.append(_msg("narrator", "⚔ " + ev.message, effects=["hit"], hit=ev.target))
+                    killed = " and killed them" if "now dead" in ev.message else ""
+                    for n in npcs:            # every NPC here remembers the fight, including who died
+                        n.remember(w.turn, "action", f"{d.npc} attacked {ev.target}{killed}. {ev.message}")
         w.save()
         players_here = [p for p, loc in self.locations.items() if loc == w.current.name]
         return out + [self.status(p) for p in players_here]
