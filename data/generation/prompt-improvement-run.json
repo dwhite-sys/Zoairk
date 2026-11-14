@@ -39,5 +39,146 @@
       "entered": 0,
       "handling": "Preserved raw response locally; no candidate file entered; retry entire batch after prompt refinement."
     }
-  ]
+  ],
+  "status": "complete",
+  "batches": [
+    {
+      "batch": 27,
+      "count": 20,
+      "approve": 19,
+      "deny": 1,
+      "prompt": "generation-v2",
+      "rules_sha256": "ce1dc2b7e48d63d8ace7c2a78c50d84afbbe7113f84b7f4c29491efc06efef9a",
+      "feedback_reviewed_count": 500,
+      "usage": {
+        "prompt_tokens": 21065,
+        "completion_tokens": 15688,
+        "total_tokens": 36753,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "batch": 28,
+      "count": 20,
+      "approve": 18,
+      "deny": 2,
+      "prompt": "generation-v2",
+      "rules_sha256": "ce1dc2b7e48d63d8ace7c2a78c50d84afbbe7113f84b7f4c29491efc06efef9a",
+      "feedback_reviewed_count": 500,
+      "usage": {
+        "prompt_tokens": 21508,
+        "completion_tokens": 19001,
+        "total_tokens": 40509,
+        "prompt_tokens_details": {
+          "cached_tokens": 1920
+        }
+      }
+    },
+    {
+      "batch": 29,
+      "count": 20,
+      "approve": 19,
+      "deny": 1,
+      "prompt": "generation-v3",
+      "rules_sha256": "9b1de25fe9fb4ba389193e0e9d8d5a2206c0c704d7636c207c986281d51ae54c",
+      "feedback_reviewed_count": 540,
+      "usage": {
+        "prompt_tokens": 22819,
+        "completion_tokens": 19235,
+        "total_tokens": 42054,
+        "prompt_tokens_details": {
+          "cached_tokens": 2176
+        }
+      }
+    },
+    {
+      "batch": 30,
+      "count": 20,
+      "approve": 20,
+      "deny": 0,
+      "prompt": "generation-v3",
+      "rules_sha256": "9b1de25fe9fb4ba389193e0e9d8d5a2206c0c704d7636c207c986281d51ae54c",
+      "feedback_reviewed_count": 540,
+      "usage": {
+        "prompt_tokens": 22923,
+        "completion_tokens": 13598,
+        "total_tokens": 36521,
+        "prompt_tokens_details": {
+          "cached_tokens": 2176
+        }
+      }
+    },
+    {
+      "batch": 31,
+      "count": 20,
+      "approve": 19,
+      "deny": 1,
+      "prompt": "generation-v3",
+      "rules_sha256": "9b1de25fe9fb4ba389193e0e9d8d5a2206c0c704d7636c207c986281d51ae54c",
+      "feedback_reviewed_count": 540,
+      "usage": {
+        "prompt_tokens": 22419,
+        "completion_tokens": 19931,
+        "total_tokens": 42350,
+        "prompt_tokens_details": {
+          "cached_tokens": 1920
+        }
+      }
+    },
+    {
+      "batch": 32,
+      "count": 50,
+      "approve": 45,
+      "deny": 5,
+      "prompt": "generation-v5",
+      "rules_sha256": "ca95828219f7572e3acffbf3b6a77f1df833db18c9535eee67baa4f69418602a",
+      "feedback_reviewed_count": 600,
+      "usage": {
+        "prompt_tokens": 24866,
+        "completion_tokens": 29736,
+        "total_tokens": 54602,
+        "prompt_tokens_details": {
+          "cached_tokens": 2176
+        }
+      }
+    },
+    {
+      "batch": 33,
+      "count": 50,
+      "approve": 43,
+      "deny": 7,
+      "prompt": "generation-v6",
+      "rules_sha256": "efbab2b64421ea763e8980a59a16e570e4420f715b4da1892ca2868c8da9f037",
+      "feedback_reviewed_count": 650,
+      "usage": {
+        "prompt_tokens": 26782,
+        "completion_tokens": 22655,
+        "total_tokens": 49437,
+        "prompt_tokens_details": {
+          "cached_tokens": 2304
+        }
+      }
+    }
+  ],
+  "new_counts": {
+    "approve": 183,
+    "deny": 17
+  },
+  "new_approval_rate": 0.915,
+  "total_counts": {
+    "approve": 605,
+    "deny": 95
+  },
+  "new_tool_mix": {
+    "enter_command": 65,
+    "check": 60,
+    "check/enter_command": 75
+  },
+  "new_mean_calls": 2.205,
+  "verification": "700 unique reviewed candidates, 500 prior entries unchanged, exports match decisions; no denied examples in Needle export.",
+  "reviewer": "AI review (Codex); prior human decisions preserved.",
+  "final_rules_sha256": "475108d68a1de210cee222bfd7f4ecdf694b75fc34c8de6dbe4e799a92290876",
+  "final_refinement_status": "Added final ownership/ambiguity/count feedback after batch 33; not yet tested by generation."
 }
