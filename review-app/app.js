@@ -1,9 +1,11 @@
-/* The review app is deliberately static: imported examples never go to a server. */
+/* Review decisions are mirrored to the server so progress survives a browser and
+   is shared across devices; imported example files themselves are never uploaded. */
 (function () {
   'use strict';
   const R = window.ZoairkReview;
   const $ = id => document.getElementById(id);
   let entries = [], selected = 0, filter = 'pending', busy = true, database = null;
+  let clientId = null, serverSaved = false, syncedFromServer = 0;
   const history = [];
   function notice(message, error = false) {
     $('notice').textContent = message;
@@ -43,7 +45,7 @@
       button.setAttribute('aria-pressed', String(button.dataset.filter === filter));
       button.disabled = busy;
     });
-    $('save-status').textContent = busy ? 'Saving…' : database ? 'Saved in this browser' : 'Temporary session — export before leaving';
+    $('save-status').textContent = busy ? 'Saving…' : database ? (serverSaved ? 'Saved on the server' : 'Saved in this browser') : 'Temporary session — export before leaving';
     $('approve').disabled = busy;
     $('deny').disabled = busy;
     $('clear-decision').disabled = busy;
@@ -91,6 +93,57 @@
       request.onerror = () => reject(request.error);
     });
     if (saved) entries = R.parseFile(saved).entries;
+    clientId = await loadClientId();
+    await mergeServer();
+    // Catch up work done while the server was unreachable. Only for a browser
+    // with its own saved session, so a first-time visitor never republishes
+    // somebody else's decisions as their own.
+    if (saved && entries.length) await persist(entries);
+  }
+  async function loadClientId() {
+    const existing = await new Promise((resolve, reject) => {
+      const request = database.transaction('workspace').objectStore('workspace').get('client');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    if (typeof existing === 'string' && existing) return existing;
+    const created = (self.crypto && self.crypto.randomUUID ? self.crypto.randomUUID() : `${Date.now()}${Math.random().toString(16).slice(2)}`)
+      .replace(/[^A-Za-z0-9_-]/g, '')
+      .slice(0, 64);
+    await new Promise((resolve, reject) => {
+      const transaction = database.transaction('workspace', 'readwrite');
+      transaction.objectStore('workspace').put(created, 'client');
+      transaction.oncomplete = resolve;
+      transaction.onerror = () => reject(transaction.error);
+    });
+    return created;
+  }
+  // Decisions live in this browser's IndexedDB and are mirrored to the server, so
+  // a fresh browser, a phone, or a reloaded profile picks up the shared progress.
+  async function mergeServer() {
+    if (!clientId) return;
+    try {
+      const response = await fetch(`api/session?client=${encodeURIComponent(clientId)}`, { headers: { accept: 'application/json' } });
+      if (!response.ok) return;
+      // A successful read means the server is reachable and holds this state.
+      serverSaved = true;
+      const remote = JSON.parse(await response.text());
+      if (!remote || !Array.isArray(remote.entries) || !remote.entries.length) return;
+      const merged = R.mergeEntries(entries, R.parseFile(JSON.stringify(remote)).entries);
+      const restored = merged.added + merged.restored;
+      if (!restored) return;
+      await persist(merged.entries);
+      entries = merged.entries;
+      syncedFromServer = restored;
+      notice(`Restored ${restored} example${restored === 1 ? '' : 's'} from server progress.`);
+    } catch { /* offline: the local copy stays authoritative */ }
+  }
+  async function syncServer(candidate) {
+    if (!clientId) return;
+    try {
+      const response = await fetch(`api/session?client=${encodeURIComponent(clientId)}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: R.session(candidate) });
+      serverSaved = response.ok;
+    } catch { serverSaved = false; }
   }
   async function persist(candidate) {
     if (!database) return;
@@ -101,6 +154,7 @@
       transaction.onerror = () => reject(transaction.error || new Error('Could not save this review.'));
       transaction.onabort = () => reject(transaction.error || new Error('Saving was interrupted.'));
     });
+    await syncServer(candidate);
   }
   async function task(action) {
     if (busy) return;
@@ -204,7 +258,7 @@
   document.addEventListener('click', event => { if (!$('export-menu').contains(event.target)) $('export-menu').open = false; });
   window.addEventListener('beforeunload', event => { if (entries.length && !database) { event.preventDefault(); event.returnValue = ''; } });
   (async () => {
-    try { await openStorage(); if (entries.length) notice('Welcome back. Your review progress has been restored.'); }
+    try { await openStorage(); if (entries.length && !syncedFromServer) notice('Welcome back. Your review progress has been restored.'); }
     catch (error) { database = null; notice('Could not restore local storage. You can still review, but export a session before leaving. ' + error.message, true); }
     finally { busy = false; render(); }
   })();

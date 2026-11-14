@@ -1,7 +1,9 @@
 # Zoairk example review
 
 
-Import `examples.json`, review the **reasoning and ordered tool calls**, and approve or deny each example. The interface adapts to desktop and mobile browsers. No model/API credentials or backend service are needed; reviews stay in the current browser's IndexedDB.
+Import `examples.json`, review the **reasoning and ordered tool calls**, and approve or deny each example. The interface adapts to desktop and mobile browsers. No model/API credentials are needed.
+
+Decisions are written to the browser's IndexedDB **and** mirrored to the small Node server in `scripts/serve.cjs`, which keeps one snapshot per browser under `REVIEW_DATA_DIR` (default `~/.local/share/zoairk-review`). That means a reload, another browser, or another device on the same deployment picks up the progress already made. The example files themselves are never uploaded — only the review session, which contains the examples you have already imported plus your decisions.
 
 ### Run
 
@@ -14,13 +16,26 @@ npm start
 
 Open http://localhost:3000. No dependency install is required to run the app. To use a phone on the same Wi-Fi, run `npm run start:lan` and open the printed LAN URL on the phone. Allow private-network access if Windows Firewall asks. School/guest Wi-Fi may block connections between devices; use a shared hotspot or host these static files on an HTTPS site in that case. A phone cannot reach this PC through its own `localhost`.
 
-To serve the app under a path prefix rather than at the site root, set `APP_PREFIX`. A reverse proxy such as `cloudflared` forwards the full request path without stripping it, so the app has to serve its own prefix:
+To serve the app under a path prefix rather than at the site root, set `APP_PREFIX`.
 
 ```sh
 APP_PREFIX=/needle-training PORT=3000 npm start
 ```
 
 That serves `/needle-training/` and redirects the bare `/needle-training` to the trailing slash, so the page's relative asset paths resolve. Leave `APP_PREFIX` unset to serve from the root, which is the default.
+
+### Where reviews are stored
+
+Each browser gets an id in IndexedDB and posts its whole session to `POST <prefix>/api/session?client=<id>`, which is validated with the same rules the importer uses and written to `REVIEW_DATA_DIR` / `<id>.json` (temp file plus rename, so a crash cannot leave a half-written snapshot). `GET` on the same route returns every browser's snapshot merged, and the page applies it on load; a browser's own snapshot wins where the same example has conflicting decisions, so local edits and undo always stick. Work done while the server is unreachable stays in IndexedDB and is pushed on the next successful load.
+
+```sh
+ls ~/.local/share/zoairk-review      # one snapshot per browser
+```
+
+Two known limits, both real:
+
+- **No authentication.** Anyone who can reach the URL can read the merged session and post their own, so put Cloudflare Access (or similar) in front of it if the dataset is sensitive.
+- **Last writer wins per browser.** Two people deciding differently on the same example each keep their own choice; there is no conflict resolution beyond that. This is shared progress for one reviewer across devices, not a collaborative editor.
 
 ### Review and export
 

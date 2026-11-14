@@ -4,6 +4,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const os = require('node:os');
 const root = path.resolve(__dirname, '..');
+const R = require(path.join(root, 'review.js'));
 const files = new Map([
   ['/', ['index.html', 'text/html; charset=utf-8']],
   ['/index.html', ['index.html', 'text/html; charset=utf-8']],
@@ -12,6 +13,7 @@ const files = new Map([
   ['/app.js', ['app.js', 'application/javascript; charset=utf-8']],
   ['/examples.json', ['examples.json', 'application/json; charset=utf-8']]
 ]);
+const MAX_BODY = 10 * 1024 * 1024;
 
 function normalizePrefix(value) {
   if (!value) return '';
@@ -21,18 +23,88 @@ function normalizePrefix(value) {
   return prefixed.replace(/\/+$/, '');
 }
 
+// Review sessions are kept outside the repository so a clone stays clean.
+function dataDir() {
+  return process.env.REVIEW_DATA_DIR || path.join(os.homedir(), '.local', 'share', 'zoairk-review');
+}
+function validClient(value) {
+  return typeof value === 'string' && /^[A-Za-z0-9_-]{8,64}$/.test(value);
+}
+function json(res, status, payload) {
+  const body = JSON.stringify(payload);
+  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(body) });
+  res.end(body);
+}
+async function readBody(req) {
+  const chunks = [];
+  let size = 0;
+  for await (const chunk of req) {
+    size += chunk.length;
+    if (size > MAX_BODY) throw new Error('Request body is too large.');
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks).toString('utf8');
+}
+async function readSnapshots() {
+  let names = [];
+  try { names = await fs.readdir(dataDir()); } catch { return []; }
+  const snapshots = [];
+  for (const name of names) {
+    if (!name.endsWith('.json')) continue;
+    try {
+      const snapshot = JSON.parse(await fs.readFile(path.join(dataDir(), name), 'utf8'));
+      if (snapshot && typeof snapshot.client === 'string' && Array.isArray(snapshot.entries)) snapshots.push(snapshot);
+    } catch { /* ignore a foreign or half-written file */ }
+  }
+  return snapshots.sort((a, b) => String(a.savedAt).localeCompare(String(b.savedAt)));
+}
+async function mergeFor(client) {
+  const snapshots = await readSnapshots();
+  const own = snapshots.filter(s => s.client === client).reverse();
+  const others = snapshots.filter(s => s.client !== client).reverse();
+  let entries = [];
+  // Newest first, with this browser's own snapshot ahead of every other one:
+  // mergeEntries lets an existing decision win, and local edits (including
+  // undo) have to survive a refetch.
+  for (const snapshot of [...own, ...others]) {
+    try { entries = R.mergeEntries(entries, snapshot.entries).entries; } catch { /* skip an oversized snapshot */ }
+  }
+  return { format: 'zoairk-review-session', version: 1, entries };
+}
+async function handleSession(req, res, url) {
+  const client = url.searchParams.get('client') || '';
+  if (!validClient(client)) { json(res, 400, { error: 'A valid client id is required.' }); return; }
+  if (req.method === 'POST') {
+    let parsed;
+    try { parsed = R.parseFile(await readBody(req)); }
+    catch (error) { json(res, 400, { error: error.message }); return; }
+    if (!parsed.session) { json(res, 400, { error: 'Send a review session file.' }); return; }
+    const snapshot = { client, savedAt: new Date().toISOString(), entries: parsed.entries };
+    const target = path.join(dataDir(), `${client}.json`);
+    const temp = `${target}.${process.pid}.tmp`;
+    try {
+      await fs.mkdir(dataDir(), { recursive: true });
+      await fs.writeFile(temp, JSON.stringify(snapshot));
+      await fs.rename(temp, target);
+    } catch (error) { json(res, 500, { error: 'Could not save the review session.' }); return; }
+    json(res, 200, { saved: snapshot.entries.length, savedAt: snapshot.savedAt });
+    return;
+  }
+  if (!['GET', 'HEAD'].includes(req.method)) { json(res, 405, { error: 'Method not allowed.' }); return; }
+  json(res, 200, await mergeFor(client));
+}
+
 function createServer({ prefix = normalizePrefix(process.env.APP_PREFIX) } = {}) {
   return http.createServer(async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'no-referrer');
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'");
-    if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405, { Allow: 'GET, HEAD' }); res.end('Method not allowed'); return; }
-    let route = req.url.split('?')[0];
+    const url = new URL(req.url, 'http://localhost');
+    let route = url.pathname;
     if (prefix) {
       if (route === prefix) {
-        const query = req.url.slice(route.length);
-        res.writeHead(308, { Location: `${prefix}/${query}` });
+        res.writeHead(308, { Location: `${prefix}/${url.search}` });
         res.end();
         return;
       }
@@ -43,6 +115,8 @@ function createServer({ prefix = normalizePrefix(process.env.APP_PREFIX) } = {})
       }
       route = route.slice(prefix.length);
     }
+    if (route === '/api/session') { await handleSession(req, res, url); return; }
+    if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405, { Allow: 'GET, HEAD' }); res.end('Method not allowed'); return; }
     const file = files.get(route);
     if (!file) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); res.end('Not found'); return; }
     try {
@@ -52,7 +126,7 @@ function createServer({ prefix = normalizePrefix(process.env.APP_PREFIX) } = {})
     } catch { res.writeHead(500); res.end('Could not read application asset.'); }
   });
 }
-module.exports = { createServer, normalizePrefix };
+module.exports = { createServer, normalizePrefix, dataDir };
 if (require.main === module) {
   const args = process.argv.slice(2);
   const hostIndex = args.indexOf('--host');
@@ -65,9 +139,9 @@ if (require.main === module) {
     const actualPort = server.address().port;
     const prefix = normalizePrefix(process.env.APP_PREFIX);
     console.log(`Zoairk review: http://localhost:${actualPort}${prefix}/`);
+    console.log(`Review sessions: ${dataDir()}`);
     if (host === '0.0.0.0') {
       for (const list of Object.values(os.networkInterfaces())) for (const net of list || []) if (net.family === 'IPv4' && !net.internal) console.log(`Same Wi-Fi / LAN: http://${net.address}:${actualPort}`);
-      console.log('Only static app assets are served. Reviews stay in each browser.');
     }
   });
 }
