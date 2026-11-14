@@ -1,0 +1,23 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:38:11.634283+00:00",
+  "count": 50,
+  "variation_focus": "50 unique examples across a rope makers shop, abandoned bathhouse, windmill granary, orchard packing shed, roadside smithy, watch station and cave dock. Approximately 15 do-only, 15 check-only, 20 mixed with 1\u20134 calls each. Varied syntax, some reverse order and ownership resolution. Prior-query list is banned: previous attempt accidentally repeated campfire/kettle and barrel/cart/tailgate queries. Check novelty, preserve exact annotation format and temporal cues.",
+  "status": "pending_review_at_generation",
+  "max_tokens": 55000,
+  "batch_path": "data/review/32-examples.json",
+  "sha256": "ba1677094791c51345174dfac74287751e12f0be71ef02eabf8c6ac09645ee6b",
+  "rules_sha256": "ca95828219f7572e3acffbf3b6a77f1df833db18c9535eee67baa4f69418602a",
+  "feedback_session_sha256": "3e76f2e5549e13b10adc7faf6c7b185ce3e8621033fa512ce785a2ff2b85a6ef",
+  "feedback_reviewed_count": 600,
+  "usage": {
+    "prompt_tokens": 24866,
+    "completion_tokens": 29736,
+    "total_tokens": 54602,
+    "prompt_tokens_details": {
+      "cached_tokens": 2176
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}
