@@ -65,7 +65,9 @@ def main():
         p.error('Generate 1–20 at a time; review each batch before generating more.')
     if a.output.exists():
         raise SystemExit('Output exists; refusing to replace a previous batch.')
-    session = json.loads((ROOT/'data/review/exports/zoairk-review-session.json').read_text())
+    session_path = ROOT/'data/review/exports/zoairk-review-session.json'
+    session_text = session_path.read_text()
+    session = json.loads(session_text)
     approved = [e['example'] for e in session['entries'] if e['decision'] == 'approve']
     tools = approved[-1]['tools']
     # Diverse seed selection; no labels are transferred to generated records.
@@ -122,7 +124,9 @@ def main():
               'batch_path':str(a.output.resolve().relative_to(ROOT)),
               'sha256':hashlib.sha256(content.encode()).hexdigest(),
               'rules_sha256':hashlib.sha256(rules.encode()).hexdigest(),
-              'usage':result.get('usage'), 'seed_source':'data/review/exports/zoairk-review-session.json'}
+              'feedback_session_sha256':hashlib.sha256(session_text.encode()).hexdigest(),
+              'feedback_reviewed_count':sum(e['decision'] in ('approve','deny') for e in session['entries']),
+              'usage':result.get('usage'), 'seed_source':str(session_path)}
     with meta.open('x') as f:
         f.write(json.dumps(metadata,indent=2)+'\n')
     print(json.dumps(metadata,indent=2))
