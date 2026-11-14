@@ -1,0 +1,243 @@
+{
+ "name": "Zoairk demo",
+ "start_scene": "front_lawn",
+ "scenes": {
+  "front_lawn": {
+   "description": "You stand on the overgrown front lawn of an old white house at the edge of a small village. A battered mailbox leans by the path. Across the lane, smoke curls from Jerry the blacksmith's open-air forge, where he hammers at his anvil, and Joe watches nervously from the window of his little shop next door.",
+   "exits": {
+    "north": "house"
+   },
+   "objects": [
+    {
+     "name": "mailbox",
+     "aliases": [
+      "box",
+      "post box"
+     ],
+     "templates": [
+      "openable",
+      "flammable"
+     ],
+     "description": "A dented tin mailbox on a wooden post.",
+     "weight": 60,
+     "container": true,
+     "contents": [
+      {
+       "name": "leaflet",
+       "aliases": [
+        "flyer",
+        "paper",
+        "note"
+       ],
+       "templates": [
+        "readable",
+        "flammable"
+       ],
+       "description": "A folded leaflet.",
+       "text": "WELCOME TO ZOAIRK! Everything you do here is remembered.",
+       "weight": 0.1
+      }
+     ]
+    },
+    {
+     "name": "match",
+     "aliases": [
+      "matchstick",
+      "matches"
+     ],
+     "templates": [
+      "igniter"
+     ],
+     "description": "A single wooden match.",
+     "weight": 0.1
+    },
+    {
+     "name": "rock",
+     "aliases": [
+      "stone"
+     ],
+     "templates": [
+      "throwable"
+     ],
+     "description": "A fist-sized rock.",
+     "weight": 3,
+     "damage": [
+      2,
+      4
+     ]
+    },
+    {
+     "name": "window",
+     "aliases": [
+      "shop window",
+      "glass"
+     ],
+     "templates": [
+      "fragile"
+     ],
+     "description": "Joe's shop window.",
+     "weight": 100
+    }
+   ],
+   "npcs": [
+    {
+     "name": "Jerry",
+     "profile": "Jerry, a grumpy, proud village blacksmith. Short-tempered, protective of his tools, secretly kind. Speaks bluntly. His elderly mother Martha lives in the old house; he would do anything for her.",
+     "inventory": [
+      {
+       "name": "hammer",
+       "aliases": [
+        "smithing hammer"
+       ],
+       "templates": [
+        "throwable"
+       ],
+       "weight": 4,
+       "description": "Jerry's heavy smithing hammer.",
+       "damage": [
+        3,
+        6
+       ]
+      }
+     ]
+    },
+    {
+     "name": "Joe",
+     "profile": "Joe, a nervous shopkeeper who watches everything from his shop window. Easily startled, polite, worried about fire and damage. He sells health potions (one gold coin each; a customer who hands him a gold coin gets a potion) and keeps one under the counter.",
+     "inventory": [
+      {
+       "name": "health potion",
+       "aliases": [
+        "potion",
+        "healing potion",
+        "red potion"
+       ],
+       "templates": [],
+       "weight": 0.5,
+       "heal": 5,
+       "description": "A small corked bottle of red liquid. Joe sells them for three silver."
+      }
+     ]
+    }
+   ]
+  },
+  "house": {
+   "description": "A dusty front hall. A guard dozes on a chair by a stack of old books, beside a marble statue and an iron-banded chest. An old woman in a shawl rocks in a creaking chair by the cold hearth, watching every move you make.",
+   "exits": {
+    "south": "front_lawn"
+   },
+   "objects": [
+    {
+     "name": "book",
+     "aliases": [
+      "old book",
+      "books"
+     ],
+     "templates": [
+      "readable",
+      "flammable"
+     ],
+     "description": "A crumbling book.",
+     "text": "The pages describe a lighthouse far to the east.",
+     "weight": 2
+    },
+    {
+     "name": "vase",
+     "aliases": [
+      "pot"
+     ],
+     "templates": [
+      "fragile"
+     ],
+     "description": "A blue porcelain vase.",
+     "weight": 4
+    },
+    {
+     "name": "statue",
+     "aliases": [
+      "marble statue"
+     ],
+     "templates": [
+      "breakable"
+     ],
+     "weight": 500,
+     "description": "A life-size marble statue of a stern old knight."
+    },
+    {
+     "name": "chest",
+     "aliases": [
+      "wooden chest",
+      "trunk"
+     ],
+     "templates": [
+      "openable",
+      "flammable"
+     ],
+     "weight": 80,
+     "container": true,
+     "description": "An iron-banded wooden chest at the foot of the stairs.",
+     "contents": [
+      {
+       "name": "coin",
+       "aliases": [
+        "gold coin",
+        "gold",
+        "money",
+        "payment"
+       ],
+       "templates": [
+        "throwable"
+       ],
+       "weight": 0.1,
+       "description": "A heavy gold coin stamped with a lighthouse."
+      },
+      {
+       "name": "sword",
+       "aliases": [
+        "blade",
+        "longsword",
+        "old sword"
+       ],
+       "templates": [],
+       "weight": 5,
+       "damage": [
+        4,
+        7
+       ],
+       "description": "An old but well-kept longsword, its edge still keen."
+      }
+     ]
+    }
+   ],
+   "npcs": [
+    {
+     "name": "Theo",
+     "profile": "Theo, a sleepy house guard. Slow to wake, gruff when disturbed, loyal to the owner of the house.",
+     "title": "the guard"
+    },
+    {
+     "name": "Martha",
+     "title": "the old woman",
+     "profile": "Martha, Jerry the blacksmith's elderly mother. Half-mad, fiercely territorial, sharp-tongued, and far tougher than she looks. This is HER house: anyone who touches, takes, opens, breaks or burns her things gets a furious tongue-lashing and, if they keep at it or take something, a whack with her rolling pin. She dotes on her son Jerry and takes any insult to him personally.",
+     "inventory": [
+      {
+       "name": "rolling pin",
+       "aliases": [
+        "pin"
+       ],
+       "templates": [
+        "throwable"
+       ],
+       "weight": 1.5,
+       "damage": [
+        2,
+        4
+       ],
+       "description": "A worn wooden rolling pin, dented from use."
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

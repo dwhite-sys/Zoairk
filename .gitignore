@@ -34,3 +34,6 @@ Thumbs.db
 
 # Generated review artifacts are committed on purpose (team pulls them)
 !data/review/**
+saves/
+__pycache__/
+.pytest_cache/
