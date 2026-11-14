@@ -7912,9 +7912,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:40:52.818Z"
     },
     {
       "example": {
@@ -7995,9 +7995,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:40:57.786Z"
     },
     {
       "example": {
@@ -8078,9 +8078,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:41:02.080Z"
     },
     {
       "example": {
@@ -8169,9 +8169,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:41:11.538Z"
     },
     {
       "example": {
@@ -8260,9 +8260,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:41:16.765Z"
     },
     {
       "example": {
@@ -8351,9 +8351,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:41:22.381Z"
     },
     {
       "example": {
@@ -8442,9 +8442,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "approve",
+      "reason": "AI review (Codex): approved.",
+      "reviewedAt": "2026-11-14T13:41:30.065Z"
     }
   ]
 }
