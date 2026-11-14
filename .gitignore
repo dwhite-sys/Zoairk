@@ -31,3 +31,6 @@ checkpoints/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Generated review artifacts are committed on purpose (team pulls them)
+!data/review/**
