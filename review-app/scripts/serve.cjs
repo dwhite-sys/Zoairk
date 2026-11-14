@@ -32,6 +32,29 @@ function dataDir() {
 function examplesFile() {
   return process.env.EXAMPLES_FILE ? path.resolve(process.env.EXAMPLES_FILE) : path.join(root, 'examples.json');
 }
+// Every .json/.jsonl file in EXAMPLES_DIR is served as one dataset, so dropping
+// in a new batch adds to the queue and never drops examples added earlier.
+function datasetDir() {
+  return process.env.EXAMPLES_DIR ? path.resolve(process.env.EXAMPLES_DIR) : null;
+}
+async function readDataset() {
+  const dir = datasetDir();
+  if (!dir) {
+    const file = examplesFile();
+    const parsed = R.parseFile(await fs.readFile(file, 'utf8'));
+    return { examples: parsed.entries.map(entry => entry.example), source: file };
+  }
+  const names = (await fs.readdir(dir)).filter(name => /\.(json|jsonl)$/i.test(name)).sort();
+  if (!names.length) throw new Error(`No .json or .jsonl files in ${dir}.`);
+  let entries = [];
+  for (const name of names) {
+    const parsed = R.parseFile(await fs.readFile(path.join(dir, name), 'utf8'));
+    // mergeEntries deduplicates, so the same example appearing in two batches
+    // is served once.
+    entries = R.mergeEntries(entries, parsed.entries).entries;
+  }
+  return { examples: entries.map(entry => entry.example), source: `${dir} (${names.length} file${names.length === 1 ? '' : 's'})` };
+}
 function validClient(value) {
   return typeof value === 'string' && /^[A-Za-z0-9_-]{8,64}$/.test(value);
 }
@@ -78,16 +101,12 @@ async function mergeFor(client) {
 }
 async function handleExamples(req, res) {
   if (!['GET', 'HEAD'].includes(req.method)) { json(res, 405, { error: 'Method not allowed.' }); return; }
-  const file = examplesFile();
-  let content;
-  try { content = await fs.readFile(file); }
-  catch { json(res, 500, { error: `Could not read ${file}. Point EXAMPLES_FILE at a readable dataset.` }); return; }
-  // Refuse to serve a dataset the importer would reject, so a bad file fails
-  // here with a clear message instead of in every reviewer's browser.
-  try { R.parseFile(content.toString('utf8')); }
-  catch (error) { json(res, 500, { error: `Dataset rejected: ${error.message}` }); return; }
-  res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': content.length });
-  res.end(req.method === 'HEAD' ? undefined : content);
+  let dataset;
+  try { dataset = await readDataset(); }
+  catch (error) { json(res, 500, { error: `Could not load the dataset: ${error.message}` }); return; }
+  const body = Buffer.from(JSON.stringify(dataset.examples), 'utf8');
+  res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': body.length, 'X-Zoairk-Dataset': dataset.source });
+  res.end(req.method === 'HEAD' ? undefined : body);
 }
 async function handleSession(req, res, url) {
   const client = url.searchParams.get('client') || '';

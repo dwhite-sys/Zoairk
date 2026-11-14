@@ -54,8 +54,7 @@ test('serves the dataset named by EXAMPLES_FILE and rejects a bad one', async ()
     const jsonl = path.join(dir, 'mine.jsonl');
     await fs.writeFile(jsonl, source.slice(0, 2).map(item => JSON.stringify(item)).join('\n'));
     process.env.EXAMPLES_FILE = jsonl;
-    const jsonlBody = await (await fetch(`${origin}/examples.json`)).text();
-    assert.equal(jsonlBody.trim().split('\n').length, 2);
+    assert.equal((await (await fetch(`${origin}/examples.json`)).json()).length, 2);
 
     // A dataset the importer would reject fails loudly here instead of in every browser.
     const broken = path.join(dir, 'broken.json');
@@ -63,7 +62,7 @@ test('serves the dataset named by EXAMPLES_FILE and rejects a bad one', async ()
     process.env.EXAMPLES_FILE = broken;
     const rejected = await fetch(`${origin}/examples.json`);
     assert.equal(rejected.status, 500);
-    assert.match((await rejected.json()).error, /Dataset rejected/);
+    assert.match((await rejected.json()).error, /Could not load the dataset/);
 
     process.env.EXAMPLES_FILE = path.join(dir, 'missing.json');
     assert.equal((await fetch(`${origin}/examples.json`)).status, 500);
@@ -71,6 +70,43 @@ test('serves the dataset named by EXAMPLES_FILE and rejects a bad one', async ()
     api.closeAllConnections();
     await new Promise(resolve => api.close(resolve));
     if (previous === undefined) delete process.env.EXAMPLES_FILE; else process.env.EXAMPLES_FILE = previous;
+    await fs.rm(dir, { recursive: true, force: true });
+  }
+});
+test('EXAMPLES_DIR serves the union of every batch, keeping older ones', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'zoairk-batches-'));
+  const previousFile = process.env.EXAMPLES_FILE;
+  const previousDir = process.env.EXAMPLES_DIR;
+  delete process.env.EXAMPLES_FILE;
+  process.env.EXAMPLES_DIR = dir;
+  const api = createServer();
+  await new Promise(resolve => api.listen(0, '127.0.0.1', resolve));
+  const origin = 'http://127.0.0.1:' + api.address().port;
+  try {
+    const source = JSON.parse(await fs.readFile(path.join(__dirname, '..', 'examples.json'), 'utf8'));
+    assert.equal((await fetch(`${origin}/examples.json`)).status, 500);
+
+    await fs.writeFile(path.join(dir, '01-first.json'), JSON.stringify(source.slice(0, 2)));
+    assert.equal((await (await fetch(`${origin}/examples.json`)).json()).length, 2);
+
+    // A later batch adds to the queue; the first batch is still served.
+    await fs.writeFile(path.join(dir, '02-second.jsonl'), source.slice(2, 4).map(item => JSON.stringify(item)).join('\n'));
+    const both = await (await fetch(`${origin}/examples.json`)).json();
+    assert.equal(both.length, 4);
+    assert.deepEqual(both.map(item => item.query), source.slice(0, 4).map(item => item.query));
+
+    // An example repeated across batches is served once.
+    await fs.writeFile(path.join(dir, '03-repeat.json'), JSON.stringify(source.slice(0, 1)));
+    assert.equal((await (await fetch(`${origin}/examples.json`)).json()).length, 4);
+
+    // A broken batch fails loudly rather than silently shrinking the dataset.
+    await fs.writeFile(path.join(dir, '04-broken.json'), '{"nope":true}');
+    assert.equal((await fetch(`${origin}/examples.json`)).status, 500);
+  } finally {
+    api.closeAllConnections();
+    await new Promise(resolve => api.close(resolve));
+    if (previousFile === undefined) delete process.env.EXAMPLES_FILE; else process.env.EXAMPLES_FILE = previousFile;
+    if (previousDir === undefined) delete process.env.EXAMPLES_DIR; else process.env.EXAMPLES_DIR = previousDir;
     await fs.rm(dir, { recursive: true, force: true });
   }
 });
