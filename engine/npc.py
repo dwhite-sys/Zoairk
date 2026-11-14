@@ -23,7 +23,8 @@ DECIDE_SYS = ("Call npc_decide exactly once. You decide how one NPC in a text ad
               "confidence is 0-1: how strongly this NPC wants to respond. "
               "If the NPC hands over an item it carries in this response (because the player asked for it, paid, "
               "or threatened them and the NPC gives in), you MUST set give to that item's exact name; an item is "
-              "only handed over if give is set.")
+              "only handed over if give is set. A player holding a weapon who threatens a timid or unarmed NPC "
+              "is frightening: such an NPC usually gives in and hands over what is demanded.")
 ENGAGE_SYS = ("You are playing an NPC in a text adventure. Stay in character. Reply with 1-3 sentences: what the NPC "
               "says (in quotes) and/or does. No narration of the player's actions, no meta commentary.")
 

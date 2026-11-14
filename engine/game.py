@@ -147,6 +147,14 @@ class Game:
             return Event("give", False, obj.properties.name, other, {}, f"There is no {other or 'one'} here to give it to.")
         return inventory.give(inv, obj, npc)
 
+    def _armed(self, player: str) -> str:
+        """What the acting player visibly holds, so NPCs can weigh a threat (team feedback)."""
+        held = self.inventories.get(player, [])
+        weapons = [o.properties.name for o in held if getattr(o, "damage", None)]
+        if weapons:
+            return f" ({player} is armed, holding: {', '.join(weapons)}.)"
+        return ""
+
     def examine(self, name: str, player: str) -> str:
         """Close look at one object or person here; never changes state."""
         w = self.world
@@ -320,7 +328,7 @@ class Game:
         npcs = w.current.npcs
         if SPEECH.search(text):                          # quotes mark speech: no parse, straight to memory
             w.turn += 1
-            event_text = f"{player} says: {text}"
+            event_text = f"{player} says: {text}{self._armed(player)}"
             for n in npcs:
                 n.remember(w.turn, "speech", event_text)
             spoken = " ".join(re.findall(r"[\"“]([^\"”]+)[\"”]", text)) or text
@@ -389,7 +397,7 @@ class Game:
                             w.current.objects.append(o)
                             events.append(Event("drop", True, o.properties.name, None, {}, f"The {o.properties.name} lands on the ground."))
             prose = narrator.narrate(events, w.current.description)
-            event_text = f"{player}: {text}. Result: {prose}"
+            event_text = f"{player}: {text}. Result: {prose}{self._armed(player)}"
             for n in npcs:
                 n.remember(w.turn, "action", event_text)
             hit = next((e.target for e in events if e.action == "attack" and e.ok), None)
