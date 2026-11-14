@@ -60,15 +60,22 @@ def test_websocket_intro_and_reply(server):
             assert intro["type"] in ("switch_scene", "message")
             await recv_json(ws)  # stub intro has two messages
 
+            async def narrator_reply():
+                # Multiplayer: join lines and the player echo arrive before the narrator's reply.
+                while True:
+                    m = await recv_json(ws)
+                    if m.get("role") == "narrator":
+                        return m
+
             await ws.send(json.dumps({"type": "send_message", "text": "hello"}))
-            reply = await recv_json(ws)
+            reply = await narrator_reply()
             assert reply["type"] == "message"
             assert "hello" in reply["text"]
 
             # Malformed input is ignored and the connection stays usable.
             await ws.send("not json")
             await ws.send(json.dumps({"type": "send_message", "text": "again"}))
-            assert "again" in (await recv_json(ws))["text"]
+            assert "again" in (await narrator_reply())["text"]
 
     asyncio.run(session())
 
