@@ -405,9 +405,9 @@
           }
         ]
       },
-      "decision": "approve",
-      "reason": "Approved because the user asks hypothetically and explicitly says neither action is being done yet, so both calls should be checks; both use instrument none with the correct take/idol then close/chest order.",
-      "reviewedAt": "2026-11-14T11:16:00.241Z"
+      "decision": null,
+      "reason": "",
+      "reviewedAt": null
     },
     {
       "example": {
@@ -496,9 +496,9 @@
           }
         ]
       },
-      "decision": "approve",
-      "reason": "Approved because the entire sequence is explicitly hypothetical, so all three calls should use check; the fields match and preserve the order: none:sheathe:sword, none:drop:shield, then none:climb:ladder.",
-      "reviewedAt": "2026-11-14T11:16:17.089Z"
+      "decision": null,
+      "reason": "",
+      "reviewedAt": null
     },
     {
       "example": {
