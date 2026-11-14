@@ -114,7 +114,18 @@ document.addEventListener("keydown", (event) => {
 });
 renderInventory([]);
 
+let worldId = null;
 function showMessage(msg) {
+  if (msg.type === "world") {
+    // A new server start means a fresh world: clear the old log and stats.
+    if (worldId !== null && worldId !== msg.id) {
+      log.innerHTML = "";
+      showStatus({ hp: 10, max: 10, inventory: [] });
+      addText("system", "The world has been reset.");
+    }
+    worldId = msg.id;
+    return;
+  }
   if (msg.type === "status") { showStatus(msg); return; }
   if (msg.type === "switch_scene") {
     // The header shows only the room; the description is a grey event in the log (team feedback).

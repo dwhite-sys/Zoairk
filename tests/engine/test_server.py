@@ -56,6 +56,8 @@ def test_websocket_intro_and_reply(server):
 
     async def session():
         async with websockets.connect(f"ws://127.0.0.1:{ws_port}") as ws:
+            hello = await recv_json(ws)
+            assert hello["type"] == "world" and hello["id"]  # world id lets clients reset on restart
             intro = await recv_json(ws)
             assert intro["type"] in ("switch_scene", "message")
             await recv_json(ws)  # stub intro has two messages

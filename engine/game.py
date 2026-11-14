@@ -262,7 +262,7 @@ class Game:
 
     def intro(self, player: str = "The player") -> list[dict]:
         self._enter(player)
-        return [self._scene(), _msg("scene", self.describe())]
+        return [self._scene(), _msg("scene", self.describe()), self.status(player)]
 
     def handle(self, text: str, player: str = "The player") -> list[dict]:
         from . import interactions, narrator, npc, parser

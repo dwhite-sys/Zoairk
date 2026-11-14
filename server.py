@@ -16,6 +16,7 @@ import http.server
 import json
 import os
 import threading
+import uuid
 
 import websockets
 
@@ -57,6 +58,7 @@ async def send_all(ws, messages):
 
 
 GAME = None                 # the one shared world
+WORLD_ID = uuid.uuid4().hex  # changes on every server start, so clients know the world was reset
 CURRENT_ACTOR = None        # the player whose turn is being broadcast (always sees their own turn)
 PLAYERS: dict = {}          # websocket -> player name
 QUEUE: asyncio.Queue | None = None
@@ -141,6 +143,7 @@ async def play(ws):
     loop = asyncio.get_running_loop()
     name = player_name(ws)
     PLAYERS[ws] = name
+    await ws.send(json.dumps({"type": "world", "id": WORLD_ID}))
     await send_all(ws, await loop.run_in_executor(None, functools.partial(GAME.intro, name)))
     await broadcast([{"type": "message", "role": "system", "text": f"{name} joined."}])
     try:
