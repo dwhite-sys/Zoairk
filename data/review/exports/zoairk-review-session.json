@@ -405,9 +405,9 @@
           }
         ]
       },
-      "decision": null,
-      "reason": "",
-      "reviewedAt": null
+      "decision": "deny",
+      "reason": "Denied because the tool calls and “and then” order are correct, but the reasoning applies “Would I be able to” and the hypothetical cue as broad sequence-level scope. This does not follow the desired explicit, stepwise syntax pattern for each action.",
+      "reviewedAt": "2026-11-14T11:22:22.269Z"
     },
     {
       "example": {
