@@ -60,7 +60,11 @@
       "throwable"
      ],
      "description": "A fist-sized rock.",
-     "weight": 3
+     "weight": 3,
+     "damage": [
+      2,
+      4
+     ]
     },
     {
      "name": "window",
@@ -89,7 +93,11 @@
         "throwable"
        ],
        "weight": 4,
-       "description": "Jerry's heavy smithing hammer."
+       "description": "Jerry's heavy smithing hammer.",
+       "damage": [
+        3,
+        6
+       ]
       }
      ]
     },
@@ -165,6 +173,21 @@
        ],
        "weight": 0.1,
        "description": "A heavy gold coin stamped with a lighthouse."
+      },
+      {
+       "name": "sword",
+       "aliases": [
+        "blade",
+        "longsword",
+        "old sword"
+       ],
+       "templates": [],
+       "weight": 5,
+       "damage": [
+        4,
+        7
+       ],
+       "description": "An old but well-kept longsword, its edge still keen."
       }
      ]
     }

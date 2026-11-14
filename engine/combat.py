@@ -14,11 +14,13 @@ def status(hp: int) -> str:
     return "dead" if hp <= 0 else ("injured" if hp < MAX_HP else "alive")
 
 
-def strike(attacker: str, target: str, hp: dict[str, int], weapon: str | None = None) -> dict:
+def strike(attacker: str, target: str, hp: dict[str, int], weapon: str | None = None,
+           damage: tuple[int, int] | None = None) -> dict:
     """Apply one attack to `hp[target]`; returns an event dict for narration."""
     if hp.get(target, MAX_HP) <= 0:
         return {"ok": False, "message": f"{target} is already dead."}
-    dmg = random.randint(3, 5) if weapon else random.randint(1, 3)
+    lo, hi = damage or ((3, 5) if weapon else (1, 3))     # a weapon's own range, else generic
+    dmg = random.randint(lo, hi)
     hp[target] = max(0, hp.get(target, MAX_HP) - dmg)
     with_w = f" with the {weapon}" if weapon else ""
     return {"ok": True, "attacker": attacker, "target": target, "damage": dmg, "hp": hp[target],

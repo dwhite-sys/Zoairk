@@ -67,6 +67,8 @@ class World:
         obj.properties.weight = o.get("weight", 5)
         if "text" in o:
             obj.text = o["text"]
+        if o.get("damage"):
+            obj.damage = tuple(o["damage"])          # weapon damage range
         if o.get("container"):
             obj.contents = [self._make(c) for c in o.get("contents", [])]
         self.aliases[id(obj)] = [_norm(o["name"])] + [_norm(a) for a in o.get("aliases", [])]

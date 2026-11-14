@@ -157,7 +157,11 @@ class Game:
             return Event("attack", False, target, weapon, {}, f"{target} is not here.")
         if weapon and not npc_weapon and self.world.find(weapon) is None:   # players need it in hand/room
             weapon = None
-        r = combat.strike(attacker, name, hp, weapon)
+        wobj = None
+        if weapon:
+            wobj = self.world.find(weapon) if not npc_weapon else next(
+                (i for n in self.world.current.npcs for i in n.inventory if i.properties.name == weapon), None)
+        r = combat.strike(attacker, name, hp, weapon, getattr(wobj, "damage", None))
         if not r["ok"]:
             return Event("attack", False, name, weapon, {}, r["message"])
         by_name = {n.name.lower(): n for n in npcs_by_lower.values()}
@@ -288,6 +292,15 @@ class Game:
                     if box is not None and hasattr(box, "contents"):
                         inside = ", ".join(f"a {o.properties.name}" for o in box.contents) or "nothing"
                         e.message += f" Inside the {e.target}: {inside}."
+            if re.search(r"\b(throw|threw|hurl|toss|chuck|lob|fling)\b", text, re.I):
+                inv = self.inventories[player]
+                for c in fights + rest:               # whatever was thrown lands in the room
+                    for nm in (c.get("instrument"), c.get("target")):
+                        o = w.find(nm) if nm else None
+                        if o is not None and o in inv:
+                            inv.remove(o)
+                            w.current.objects.append(o)
+                            events.append(Event("drop", True, o.properties.name, None, {}, f"The {o.properties.name} lands on the ground."))
             prose = narrator.narrate(events, w.current.description)
             event_text = f"{player}: {text}. Result: {prose}"
             for n in npcs:

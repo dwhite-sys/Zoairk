@@ -53,3 +53,17 @@ def test_loot_dead_npc():
     ev = g._loot("Drew", "Jerry's body", npcs)
     assert ev.ok and "hammer" in ev.message and jerry.inventory == []
     assert [o.properties.name for o in g.inventories["Drew"]] == ["hammer"]
+
+
+def test_weapon_damage_ranges_and_sword_in_chest():
+    import random
+    from engine import inventory
+    g = Game("worlds/demo.json"); g.intro("Drew"); g.handle("go north", player="Drew"); g._enter("Drew")
+    w = g.world
+    chest = w.find("chest"); chest.states.open = True
+    sword = w.find("sword")
+    assert sword is not None and sword.damage == (4, 7)
+    assert inventory.take(w, g.inventories["Drew"], sword, chest).ok
+    random.seed(3)
+    dmgs = {combat.strike("Drew", "X", {"X": 100}, "sword", sword.damage)["damage"] for _ in range(50)}
+    assert min(dmgs) >= 4 and max(dmgs) <= 7
