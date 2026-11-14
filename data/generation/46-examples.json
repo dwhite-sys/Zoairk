@@ -1,0 +1,25 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T15:25:34.429855+00:00",
+  "count": 100,
+  "variation_focus": "100-candidate scale trial: exactly30 committed-only,30 feasibility-only,40 mixed. Spread across enchanted greenhouse, overgrown castle garden, dry dock, hill fort, underground bakery, quarry camp and ruined observatory. Vary sentence structures, verbs, tool positions and temporal reversals; include1\u20135 actions, exact markers, resolved owners and direct objects, no conditional follow-through. Use I will/Using/With/After/Before and natural short declarations, not just noun-swapped stock sentences. Final triples, extraction triples and arguments must agree.",
+  "status": "pending_review_at_generation",
+  "requested_count": 100,
+  "count_deviation": null,
+  "max_tokens": 65536,
+  "batch_path": "data/review/46-examples.json",
+  "sha256": "e12b1f45705d8126c39161c190d15d89dd451721012c40f3bb06f377a192bced",
+  "rules_sha256": "b21957a060b68db5ab47e133b807b46ed9e801b0cccdeac633ae330be29c1fe1",
+  "feedback_session_sha256": "9451bccd491a5596de97cb2a9dcedcbb3a1fd841d144d10363f5eb0097264f23",
+  "feedback_reviewed_count": 1299,
+  "usage": {
+    "prompt_tokens": 48438,
+    "completion_tokens": 47360,
+    "total_tokens": 95798,
+    "prompt_tokens_details": {
+      "cached_tokens": 3456
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}
