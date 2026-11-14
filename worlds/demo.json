@@ -3,7 +3,7 @@
  "start_scene": "front_lawn",
  "scenes": {
   "front_lawn": {
-   "description": "You stand on the overgrown front lawn of an old white house. A battered mailbox leans by the path. Jerry, the village blacksmith, is hammering at a portable anvil by the gate, and Joe watches nervously from the window of his little shop across the lane.",
+   "description": "You stand on the overgrown front lawn of an old white house at the edge of a small village. A battered mailbox leans by the path. Across the lane, smoke curls from Jerry the blacksmith's open-air forge, where he hammers at his anvil, and Joe watches nervously from the window of his little shop next door.",
    "exits": {
     "north": "house"
    },
