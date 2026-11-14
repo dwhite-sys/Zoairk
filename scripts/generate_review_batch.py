@@ -60,9 +60,10 @@ def main():
     p.add_argument('--output', type=Path, required=True)
     p.add_argument('--raw-output', type=Path, required=True, help='Scratch file outside data/review; preserves rejected responses.')
     p.add_argument('--timeout', type=int, default=600)
+    p.add_argument('--accept-short-batch', action='store_true', help='Keep all complete candidates if a normally finished response contains fewer than requested; record the deviation.')
     a = p.parse_args()
-    if not 1 <= a.count <= 50:
-        p.error('Generate 1–50 at a time; review each batch before generating more.')
+    if not 1 <= a.count <= 100:
+        p.error('Generate 1–100 at a time; review each batch before generating more.')
     if a.output.exists():
         raise SystemExit('Output exists; refusing to replace a previous batch.')
     session_path = ROOT/'data/review/exports/zoairk-review-session.json'
@@ -86,7 +87,7 @@ def main():
     notes = [{'query': e['example']['query'], 'review_note': e['reason']}
              for e in session['entries'] if e['decision']=='deny' and e['reason']]
     rules = (ROOT/'scripts/generation_rules.md').read_text()
-    max_tokens = max(22000, a.count * 1100)
+    max_tokens = min(65536, max(22000, a.count * 1100))
     payload = {'model':a.model, 'stream':False, 'temperature':0.8, 'max_tokens':max_tokens,
                'reasoning_effort':a.reasoning_effort,
                'messages':[{'role':'system','content':rules}, {'role':'user','content':json.dumps({
@@ -110,7 +111,10 @@ def main():
     text = choice['message']['content'].strip()
     if text.startswith('```json\n') and text.endswith('```'):
         text=text[len('```json\n'):-3].strip()
-    rows=validate(json.loads(text),a.count,tools,{' '.join(q.lower().split()) for q in prior_queries})
+    decoded = json.loads(text)
+    actual_count = len(decoded) if isinstance(decoded, list) else 0
+    expected_count = actual_count if a.accept_short_batch and 0 < actual_count < a.count else a.count
+    rows=validate(decoded,expected_count,tools,{' '.join(q.lower().split()) for q in prior_queries})
     content=json.dumps(rows,ensure_ascii=False,indent=2)+'\n'
     # Check with the same validator the webapp uses, before writing a batch.
     checker="const fs=require('node:fs'); const R=require('./review-app/review.js'); R.parseFile(fs.readFileSync(0,'utf8'));"
@@ -122,6 +126,8 @@ def main():
     meta.parent.mkdir(parents=True,exist_ok=True)
     metadata={'model':a.model,'reasoning_effort':a.reasoning_effort,'created_at':datetime.now(timezone.utc).isoformat(),
               'count':len(rows),'variation_focus':a.focus,'status':'pending_review_at_generation',
+              'requested_count':a.count,
+              'count_deviation':None if len(rows)==a.count else f'Returned {len(rows)} complete candidates; retained all unchanged under --accept-short-batch.',
               'max_tokens':max_tokens,
               'batch_path':str(a.output.resolve().relative_to(ROOT)),
               'sha256':hashlib.sha256(content.encode()).hexdigest(),

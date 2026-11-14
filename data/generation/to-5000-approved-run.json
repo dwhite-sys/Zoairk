@@ -16,5 +16,15 @@
       "entered": 49,
       "handling": "All complete candidates retained without semantic edits; original raw response preserved."
     }
+  ],
+  "latest_checkpoint": {
+    "reviewed": 1299,
+    "approved": 1176,
+    "denied": 123,
+    "new_approved": 295,
+    "new_reviewed": 299
+  },
+  "additional_stale_remote_commits": [
+    "6855278 (1049 reviews reset to pending; authoritative runtime and subsequent session imports restored complete labels)"
   ]
 }
