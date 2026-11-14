@@ -87,11 +87,57 @@ async function handleSession(req, res, url) {
       await fs.writeFile(temp, JSON.stringify(snapshot));
       await fs.rename(temp, target);
     } catch (error) { json(res, 500, { error: 'Could not save the review session.' }); return; }
-    json(res, 200, { saved: snapshot.entries.length, savedAt: snapshot.savedAt });
+    const written = await materialize();
+    json(res, 200, { saved: snapshot.entries.length, savedAt: snapshot.savedAt, exports: written });
     return;
   }
   if (!['GET', 'HEAD'].includes(req.method)) { json(res, 405, { error: 'Method not allowed.' }); return; }
   json(res, 200, await mergeFor(client));
+}
+// Union of every browser's snapshot, newest first: the exports describe the
+// dataset as a whole rather than one reviewer's view.
+async function mergeAll() {
+  const snapshots = (await readSnapshots()).reverse();
+  let entries = [];
+  for (const snapshot of snapshots) {
+    try { entries = R.mergeEntries(entries, snapshot.entries).entries; } catch { /* skip an oversized snapshot */ }
+  }
+  return entries;
+}
+const exportRoutes = new Map([
+  ['/api/exports/needle.jsonl', ['needle-approved.jsonl', 'application/x-ndjson', entries => R.needle(entries)]],
+  ['/api/exports/classifier.jsonl', ['classifier-labeled.jsonl', 'application/x-ndjson', entries => R.classifier(entries)]],
+  ['/api/exports/session.json', ['zoairk-review-session.json', 'application/json', entries => R.session(entries)]]
+]);
+async function handleExport(req, res, format) {
+  if (!['GET', 'HEAD'].includes(req.method)) { json(res, 405, { error: 'Method not allowed.' }); return; }
+  const [filename, type, build] = format;
+  let body;
+  try { body = build(await mergeAll()); }
+  catch { json(res, 500, { error: 'Could not build the export.' }); return; }
+  const buffer = Buffer.from(body, 'utf8');
+  res.writeHead(200, {
+    'Content-Type': `${type}; charset=utf-8`,
+    'Content-Length': buffer.length,
+    'Content-Disposition': `attachment; filename="${filename}"`
+  });
+  res.end(req.method === 'HEAD' ? undefined : buffer);
+}
+// Every accepted session rewrites the dataset files, so what sits on disk is
+// always current and can be copied off without opening a browser.
+async function materialize() {
+  const entries = await mergeAll();
+  const dir = path.join(dataDir(), 'exports');
+  try {
+    await fs.mkdir(dir, { recursive: true });
+    for (const [filename, , build] of exportRoutes.values()) {
+      const target = path.join(dir, filename);
+      const temp = `${target}.${process.pid}.tmp`;
+      await fs.writeFile(temp, build(entries));
+      await fs.rename(temp, target);
+    }
+    return { directory: dir, approved: entries.filter(e => e.decision === 'approve').length, denied: entries.filter(e => e.decision === 'deny').length };
+  } catch { return null; }
 }
 
 function createServer({ prefix = normalizePrefix(process.env.APP_PREFIX) } = {}) {
@@ -116,6 +162,7 @@ function createServer({ prefix = normalizePrefix(process.env.APP_PREFIX) } = {})
       route = route.slice(prefix.length);
     }
     if (route === '/api/session') { await handleSession(req, res, url); return; }
+    if (exportRoutes.has(route)) { await handleExport(req, res, exportRoutes.get(route)); return; }
     if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405, { Allow: 'GET, HEAD' }); res.end('Method not allowed'); return; }
     const file = files.get(route);
     if (!file) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); res.end('Not found'); return; }

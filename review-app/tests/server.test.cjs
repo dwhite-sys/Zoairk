@@ -109,6 +109,50 @@ test('stores review sessions and serves them back to another browser', async () 
     await fs.rm(dir, { recursive: true, force: true });
   }
 });
+test('every accepted session rewrites the dataset files on disk', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'zoairk-review-'));
+  const previous = process.env.REVIEW_DATA_DIR;
+  process.env.REVIEW_DATA_DIR = dir;
+  const api = createServer();
+  await new Promise(resolve => api.listen(0, '127.0.0.1', resolve));
+  const origin = 'http://127.0.0.1:' + api.address().port;
+  const client = 'clientexporttest01';
+  const read = name => fs.readFile(path.join(dir, 'exports', name), 'utf8');
+  try {
+    const entries = R.parseFile(await fs.readFile(path.join(__dirname, '..', 'examples.json'), 'utf8')).entries;
+    const decided = R.decide(R.decide(entries, 0, 'approve'), 1, 'deny', 'nope');
+    const posted = await (await fetch(`${origin}/api/session?client=${client}`, {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: R.session(decided)
+    })).json();
+    assert.equal(posted.exports.approved, 1);
+    assert.equal(posted.exports.denied, 1);
+
+    // Approved-only for Needle, both labels for the classifier.
+    assert.equal((await read('needle-approved.jsonl')).trim().split('\n').length, 1);
+    assert.equal((await read('classifier-labeled.jsonl')).trim().split('\n').length, 2);
+    assert.equal(JSON.parse((await read('classifier-labeled.jsonl')).trim().split('\n')[1]).review_reason, 'nope');
+    assert.equal(R.parseFile(await read('zoairk-review-session.json')).entries.length, entries.length);
+
+    // Undo must remove the row, not leave a stale approval behind.
+    await fetch(`${origin}/api/session?client=${client}`, {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: R.session(R.decide(R.decide(decided, 0, null), 1, null))
+    });
+    assert.equal((await read('needle-approved.jsonl')).trim(), '');
+    assert.equal((await read('classifier-labeled.jsonl')).trim(), '');
+
+    // The HTTP exports serve the same merged content.
+    const exported = await fetch(`${origin}/api/exports/needle.jsonl`);
+    assert.equal(exported.status, 200);
+    assert.match(exported.headers.get('content-disposition'), /needle-approved\.jsonl/);
+    assert.equal(await exported.text(), await read('needle-approved.jsonl'));
+    assert.equal((await fetch(`${origin}/api/exports/classifier.jsonl`, { method: 'POST' })).status, 405);
+  } finally {
+    api.closeAllConnections();
+    await new Promise(resolve => api.close(resolve));
+    if (previous === undefined) delete process.env.REVIEW_DATA_DIR; else process.env.REVIEW_DATA_DIR = previous;
+    await fs.rm(dir, { recursive: true, force: true });
+  }
+});
 test('rejects bad sessions and client ids without writing anything', async () => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'zoairk-review-'));
   const previous = process.env.REVIEW_DATA_DIR;
