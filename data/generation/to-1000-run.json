@@ -7,5 +7,22 @@
   "additional_candidates": 300,
   "first_batch": 34,
   "method": "Adaptive system prompts plus accumulated denial feedback; AI review via local webapp, immutable candidate batches and Git checkpoints. Acceptance rate measures annotation review, not trained model accuracy.",
-  "generation_failures": []
+  "generation_failures": [
+    {
+      "attempt": "35-first",
+      "requested": 50,
+      "returned": 50,
+      "reason": "Example 7: [Finally] absent from literal query (case mismatch or invented clue)",
+      "usage": {
+        "prompt_tokens": 28596,
+        "completion_tokens": 29186,
+        "total_tokens": 57782,
+        "prompt_tokens_details": {
+          "cached_tokens": 2560
+        }
+      },
+      "entered": 0,
+      "handling": "Entire response excluded before ingestion; retry without semantic repairs."
+    }
+  ]
 }
