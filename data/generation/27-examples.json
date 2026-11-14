@@ -1,0 +1,22 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:29:35.705662+00:00",
+  "count": 20,
+  "variation_focus": "Campsite, river ferry and ruined mill. Vary syntax, include compact mixed queries with actions before questions as well as explicit independent actions after checks. Preserve full annotation contract.",
+  "status": "pending_review_at_generation",
+  "batch_path": "data/review/27-examples.json",
+  "sha256": "e0391d99de0a6c7e18739ac7012ac022e39a0ac42ebac97c7849cc8c7938d467",
+  "rules_sha256": "ce1dc2b7e48d63d8ace7c2a78c50d84afbbe7113f84b7f4c29491efc06efef9a",
+  "feedback_session_sha256": "e9377cc61028391b3a7e547d76c0bc55f6ede939ed00d9951c21dc31cc82a49c",
+  "feedback_reviewed_count": 500,
+  "usage": {
+    "prompt_tokens": 21065,
+    "completion_tokens": 15688,
+    "total_tokens": 36753,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}

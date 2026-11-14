@@ -1,0 +1,15 @@
+{
+  "baseline_commit": "0c4cc36528fbc703a625ecef2e512acde2ee40db",
+  "baseline_total": 500,
+  "baseline_approved": 422,
+  "baseline_denied": 78,
+  "baseline_generated_window": "batches 07\u201326",
+  "baseline_generated_counts": {
+    "approve": 329,
+    "deny": 71
+  },
+  "target_additional_reviewed": 200,
+  "first_new_batch": 27,
+  "method": "Adaptive prompts and saved denial feedback; AI-reviewed observational comparison, not a controlled trial. Preserve every entered candidate and record any generation failures separately. No weight updates.",
+  "initial_rules_sha256": "ce1dc2b7e48d63d8ace7c2a78c50d84afbbe7113f84b7f4c29491efc06efef9a"
+}
