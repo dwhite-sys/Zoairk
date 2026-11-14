@@ -7,6 +7,7 @@ import socket
 import subprocess
 import sys
 import time
+import urllib.error
 import urllib.request
 
 import pytest
@@ -34,7 +35,7 @@ def wait_for_port(port, timeout=10):
 @pytest.fixture(scope="module")
 def server():
     ws_port, http_port = free_port(), free_port()
-    env = dict(os.environ, ZOAIRK_STUB="1",
+    env = dict(os.environ, ZOAIRK_STUB="1", ZOAIRK_MIN_TURN_GAP="0",
                ZOAIRK_WS_PORT=str(ws_port), ZOAIRK_HTTP_PORT=str(http_port))
     proc = subprocess.Popen([sys.executable, "server.py"], cwd=ROOT, env=env,
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -89,3 +90,42 @@ def test_http_serves_page(server):
         body = resp.read().decode()
     assert "<title>Zoairk</title>" in body
     assert "app.js" in body
+
+
+def test_single_port_serves_page_and_game(server):
+    ws_port, _ = server
+    with urllib.request.urlopen(f"http://127.0.0.1:{ws_port}/") as resp:   # same port as the game
+        assert resp.status == 200 and "app.js" in resp.read().decode()
+    with pytest.raises(urllib.error.HTTPError):
+        urllib.request.urlopen(f"http://127.0.0.1:{ws_port}/../server.py")
+
+
+@pytest.fixture(scope="module")
+def limited_server():
+    ws_port, http_port = free_port(), free_port()
+    env = dict(os.environ, ZOAIRK_STUB="1", ZOAIRK_MIN_TURN_GAP="30",
+               ZOAIRK_WS_PORT=str(ws_port), ZOAIRK_HTTP_PORT=str(http_port))
+    proc = subprocess.Popen([sys.executable, "server.py"], cwd=ROOT, env=env,
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    try:
+        wait_for_port(ws_port)
+        yield ws_port
+    finally:
+        proc.terminate()
+        proc.wait(timeout=5)
+
+
+def test_rate_limit_slows_spam(limited_server):
+    async def session():
+        async with websockets.connect(f"ws://127.0.0.1:{limited_server}/?lobby=spam") as ws:
+            await ws.send(json.dumps({"type": "send_message", "text": "one"}))
+            await ws.send(json.dumps({"type": "send_message", "text": "two"}))
+            seen = []
+            try:
+                while True:
+                    seen.append(await recv_json(ws))
+            except (asyncio.TimeoutError, TimeoutError):
+                pass
+            texts = " ".join(m.get("text", "") for m in seen)
+            assert "Slow down" in texts and "said: one" in texts and "said: two" not in texts
+    asyncio.run(session())

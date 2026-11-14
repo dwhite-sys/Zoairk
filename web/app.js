@@ -26,7 +26,15 @@ function lobbyName() {
   return lobby.toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 24) || "main";
 }
 const MY_LOBBY = lobbyName();
-const WS_URL = `ws://${location.hostname || "127.0.0.1"}:8765/?name=${encodeURIComponent(MY_NAME)}&lobby=${encodeURIComponent(MY_LOBBY)}`;
+// Same origin when the page comes from the game server itself (single-port / hosted, https -> wss);
+// the classic two-port setup (page on :8000) talks to :8765. ?server=host:port points at any server.
+const QS = `?name=${encodeURIComponent(MY_NAME)}&lobby=${encodeURIComponent(MY_LOBBY)}`;
+const SERVER = new URLSearchParams(location.search).get("server");
+const WS_URL = SERVER
+  ? `${SERVER.startsWith("ws") ? SERVER : (location.protocol === "https:" ? "wss://" : "ws://") + SERVER}/${QS}`
+  : location.port === "8000" || location.protocol === "file:"
+    ? `ws://${location.hostname || "127.0.0.1"}:8765/${QS}`
+    : `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/${QS}`;
 
 const log = document.getElementById("log");
 const form = document.getElementById("input-form");

@@ -15,7 +15,9 @@ import asyncio
 import functools
 import http.server
 import json
+import mimetypes
 import os
+import time
 import threading
 import uuid
 
@@ -25,6 +27,11 @@ HOST = os.environ.get("ZOAIRK_HOST", "127.0.0.1")   # 0.0.0.0 lets other machine
 WS_PORT = int(os.environ.get("ZOAIRK_WS_PORT", 8765))
 HTTP_PORT = int(os.environ.get("ZOAIRK_HTTP_PORT", 8000))
 ROOT = os.path.dirname(os.path.abspath(__file__))
+# Abuse limits for a hosted server (every turn spends model calls).
+MIN_TURN_GAP = float(os.environ.get("ZOAIRK_MIN_TURN_GAP", 2.0))   # seconds between one player's turns
+MAX_PENDING = int(os.environ.get("ZOAIRK_MAX_PENDING", 12))        # queued turns per lobby
+MAX_LOBBIES = int(os.environ.get("ZOAIRK_MAX_LOBBIES", 20))
+MAX_PLAYERS = int(os.environ.get("ZOAIRK_MAX_PLAYERS", 8))         # per lobby
 WEB_DIR = os.path.join(ROOT, "web")
 
 
@@ -171,8 +178,16 @@ def lobby_name(ws) -> str:
 async def play(ws):
     """Join a lobby's shared world; every input goes through that lobby's FIFO queue."""
     loop = asyncio.get_running_loop()
-    lobby = lobby_for(lobby_name(ws))
+    wanted = lobby_name(ws)
+    if wanted not in LOBBIES and len(LOBBIES) >= MAX_LOBBIES:
+        await ws.send(json.dumps({"type": "message", "role": "system", "text": "The server is full of lobbies; join an existing one."}))
+        return
+    lobby = lobby_for(wanted)
+    if len(lobby.players) >= MAX_PLAYERS:
+        await ws.send(json.dumps({"type": "message", "role": "system", "text": f"Lobby {lobby.name} is full ({MAX_PLAYERS} players)."}))
+        return
     name = player_name(ws, lobby)
+    last_turn = 0.0
     lobby.players[ws] = name
     await ws.send(json.dumps({"type": "world", "id": lobby.world_id, "lobby": lobby.name}))
     await send_all(ws, await loop.run_in_executor(None, functools.partial(lobby.game.intro, name)))
@@ -186,11 +201,39 @@ async def play(ws):
             if data.get("type") != "send_message":
                 continue
             text = str(data.get("text", ""))
-            if text.strip():
-                await lobby.queue.put((name, text))
+            if not text.strip():
+                continue
+            now = time.monotonic()
+            if now - last_turn < MIN_TURN_GAP or lobby.queue.qsize() >= MAX_PENDING:
+                await ws.send(json.dumps({"type": "message", "role": "system", "private": True,
+                                          "text": "Slow down a moment, the world is still catching up."}))
+                continue
+            last_turn = now
+            await lobby.queue.put((name, text[:500]))
     finally:
         lobby.players.pop(ws, None)
         await broadcast(lobby, [{"type": "message", "role": "system", "text": f"{name} left."}])
+
+
+def process_request(connection, request):
+    """Single-port mode: plain HTTP requests get the web page, WebSocket upgrades get the game.
+
+    One port means one link (or one tunnel) is enough for players anywhere, phones included.
+    """
+    if request.headers.get("Upgrade", "").lower() == "websocket":
+        return None
+    from urllib.parse import unquote, urlparse
+    from websockets.datastructures import Headers
+    from websockets.http11 import Response
+    rel = unquote(urlparse(request.path).path).lstrip("/") or "index.html"
+    path = os.path.realpath(os.path.join(WEB_DIR, rel))
+    if not path.startswith(os.path.realpath(WEB_DIR) + os.sep) or not os.path.isfile(path):
+        return Response(404, "Not Found", Headers([("Content-Type", "text/plain")]), b"Not found")
+    with open(path, "rb") as fh:
+        body = fh.read()
+    ctype = mimetypes.guess_type(path)[0] or "application/octet-stream"
+    return Response(200, "OK", Headers([("Content-Type", ctype), ("Content-Length", str(len(body))),
+                                        ("Cache-Control", "no-cache")]), body)
 
 
 def start_http_server():
@@ -205,7 +248,7 @@ async def main():
     lobby_for("main")                     # the default lobby exists from the start
     asyncio.create_task(world_clock())
     start_http_server()
-    async with websockets.serve(play, HOST, WS_PORT):
+    async with websockets.serve(play, HOST, WS_PORT, process_request=process_request):
         print(f"[server] web page  http://{HOST}:{HTTP_PORT}", flush=True)
         if HOST == "0.0.0.0":
             import socket
@@ -216,6 +259,7 @@ async def main():
             except OSError:
                 pass
         print(f"[server] websocket ws://{HOST}:{WS_PORT}", flush=True)
+        print(f"[server] single-port (page + game, use this for hosting): http://{HOST}:{WS_PORT}", flush=True)
         await asyncio.Future()  # run forever
 
 
