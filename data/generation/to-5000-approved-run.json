@@ -18,13 +18,21 @@
     }
   ],
   "latest_checkpoint": {
-    "reviewed": 1299,
-    "approved": 1176,
-    "denied": 123,
-    "new_approved": 295,
-    "new_reviewed": 299
+    "reviewed": 1499,
+    "approved": 1369,
+    "denied": 130,
+    "new_reviewed": 499,
+    "new_approved": 488
   },
   "additional_stale_remote_commits": [
     "6855278 (1049 reviews reset to pending; authoritative runtime and subsequent session imports restored complete labels)"
-  ]
+  ],
+  "100_candidate_trial": {
+    "batch": 46,
+    "returned": 100,
+    "approved": 95,
+    "denied": 5,
+    "finish": "complete",
+    "tokens": 47360
+  }
 }
