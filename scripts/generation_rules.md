@@ -98,3 +98,10 @@ If a timber prop was wedged under a beam, the wedge must resolve to that timber 
 LEADING TOOLS ARE NOT TRAILING SOURCE TEXT
 For With the hand pick, I chip the crust, quote only chip the crust (or the full literal leading clause). Never quote chip the crust with the hand pick: those words in that order do not occur. The extraction can still set instrument hand pick from the leading phrase.
 Name the lighting object as instrument (brazier, lantern, candle), not the emitted light as if it were a separate inventory object. Always check that the query explicitly specifies use of a tool; earlier taking it does not authorize inferring it for a later action.
+
+SOURCE POSITION AND SOURCE CONTAINERS
+In a query beginning Before I A, I B, emit the literal [Before] clue BEFORE extracting A, not between the A and B extractions. Source clues retain their original positions; execution can reorder.
+Fill the lantern from the oil flask uses instrument none, action fill from oil flask, target lantern: from names a source. Fill the basin from the spring with the bucket uses instrument bucket because its tool use is explicit. Do not promote source containers to tools.
+When retrieving something from a container just unlocked, explicitly open the container between unlock and retrieval, including in hypothetical sequences.
+Keep every actual follow-up independent of the hypothetical action succeeding or moving the player or an object.
+Favor varied short D&D actions: manipulating dungeon mechanisms, preparing gear, navigating, combat moves, retrieving or securing objects. Avoid repetitive housekeeping and repeated question-first either-way sequences.

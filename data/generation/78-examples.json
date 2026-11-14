@@ -1,0 +1,27 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T16:18:42.749408+00:00",
+  "count": 100,
+  "variation_focus": "Desert waystation, ancient stone observatory, caravan repair yard and oasis water gate.30do30check40mixed, varied1-5 actions; hypothetical chains properly scoped and independent real followups.",
+  "status": "pending_review_at_generation",
+  "requested_count": 100,
+  "response_count": 100,
+  "excluded_exact_duplicates": [],
+  "count_deviation": null,
+  "max_tokens": 65536,
+  "batch_path": "data/review/78-examples.json",
+  "sha256": "0b00414ebdf462c9c99b663e2f9b89fb8141447e6e34092e65dd2976461f78b8",
+  "rules_sha256": "fbe0a86f798bb21a5ca5fd8f929733d5286f6524fbc2a282490cdf1e19e0a588",
+  "feedback_session_sha256": "d6762700a5bb649d4145a170a70fcee2af3c4f712490abc5d56e883e34ddab8b",
+  "feedback_reviewed_count": 3691,
+  "usage": {
+    "prompt_tokens": 131928,
+    "completion_tokens": 43513,
+    "total_tokens": 175441,
+    "prompt_tokens_details": {
+      "cached_tokens": 4480
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}
