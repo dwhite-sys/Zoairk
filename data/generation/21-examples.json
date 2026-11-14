@@ -1,0 +1,20 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:14:58.113012+00:00",
+  "count": 20,
+  "variation_focus": "Treasury, coins, jewelry, locks and containers. Preserve named-item qualifiers and placement destinations. Mixed short questions and temporal reversals, at most 4 calls each, no inspection followed by result-dependent act.",
+  "status": "pending_review_at_generation",
+  "batch_path": "data/review/21-examples.json",
+  "sha256": "284f908cf0abd5fe0a535d47e8d39e4711f5909fab4de807e5dc0034fadec6b1",
+  "rules_sha256": "6566206d60e121f9db6b4475520601fa499f6f7994ab159ea8ca8e3f5cd4ab57",
+  "usage": {
+    "prompt_tokens": 13100,
+    "completion_tokens": 13991,
+    "total_tokens": 27091,
+    "prompt_tokens_details": {
+      "cached_tokens": 1152
+    }
+  },
+  "seed_source": "data/review/exports/zoairk-review-session.json"
+}

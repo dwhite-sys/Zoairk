@@ -1,0 +1,20 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:15:07.037731+00:00",
+  "count": 20,
+  "variation_focus": "Weapon handling, sparring yard and hostile creatures. Explicit melee/thrown weapons, taking cover and direct movement. No damage/outcome invented, no NPC response, no conditional continuation. Use less repetitive syntax.",
+  "status": "pending_review_at_generation",
+  "batch_path": "data/review/20-examples.json",
+  "sha256": "6055abf5f3c11527b0e2bbb8e6b718a667eaeb485a808387e2b380ab0ade4fcd",
+  "rules_sha256": "6566206d60e121f9db6b4475520601fa499f6f7994ab159ea8ca8e3f5cd4ab57",
+  "usage": {
+    "prompt_tokens": 13034,
+    "completion_tokens": 16502,
+    "total_tokens": 29536,
+    "prompt_tokens_details": {
+      "cached_tokens": 1152
+    }
+  },
+  "seed_source": "data/review/exports/zoairk-review-session.json"
+}
