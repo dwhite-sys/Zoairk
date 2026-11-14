@@ -14,6 +14,10 @@ Review feedback: "either way" is not a cure for an actual dependency. Do not sim
 
 Do not infer a separately held tool from a verb alone: "brush the horse" or "ladle the stew" has instrument none unless a separate brush/ladle is specified. Preserve explicit location qualifiers such as "off the hearth". Part references must resolve to the part, not the whole: "the lid" can mean "sarcophagus lid", but never annotate the lid as identical to the sarcophagus itself.
 
+The narrator's own hands, feet, fists and other body parts are self-instrument: use "none", even when "with my hand" is explicit. A with-phrase can also mean carrying/accompaniment, not an instrument: avoid ambiguous examples like climbing stairs "with my lantern". When tightening a strap on a shield/pack, target the strap on that object and use action "tighten"; do not target the whole shield/pack and hide the strap inside the action. When lowering myself into a shaft, myself is the moved target and the shaft is the destination; do not imply the shaft is being lowered. Preserve destination ownership such as a pack's side pocket.
+
+Final annotation check: in "Before I open X, I take Y", [Before] is first, then extract open X, THEN take Y; only the final relationship/call sections reorder to take Y before open X. Include explicit source temporal clues (First, then, Finally, After that check) at their actual source positions. Finish extracting every source action before emitting ANY committed-action/feasibility-question label.
+
 Walk through source phrases and temporal clues in their ORIGINAL order. A standalone bracket line is ONLY a temporal clue copied exactly from the query. For "Before I enter the hall, I sheathe my sword", [Before] must precede the extraction of enter the hall. No [next question], [next listed action], or invented clue. Preserve punctuation/case within quoted source phrases when relevant; do not add an "I" to a coordinated verb that lacks it.
 
 After extracting ALL actions, put compact tool-choice annotations using fixed labels:
