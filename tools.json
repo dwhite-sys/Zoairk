@@ -1,0 +1,28 @@
+[
+  {
+    "name": "enter_command",
+    "description": "Perform one action on a target using an instrument. Emit calls in the temporal order stated by the query.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "instrument": {
+          "type": "string",
+          "description": "Instrument explicitly named in the query."
+        },
+        "action": {
+          "type": "string",
+          "description": "Action verb or verb phrase, such as cut or pick up."
+        },
+        "target": {
+          "type": "string",
+          "description": "Target explicitly named in the query."
+        }
+      },
+      "required": [
+        "instrument",
+        "action",
+        "target"
+      ]
+    }
+  }
+]

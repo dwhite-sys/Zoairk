@@ -1,0 +1,50 @@
+{
+  "query": "I cut the rope with my knife, but before that, I unlock the door with my key",
+  "tools": [
+    {
+      "name": "enter_command",
+      "description": "Perform one action on a target using an instrument. Emit calls in the temporal order stated by the query.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "instrument": {
+            "type": "string",
+            "description": "Instrument explicitly named in the query."
+          },
+          "action": {
+            "type": "string",
+            "description": "Action verb or verb phrase, such as cut or pick up."
+          },
+          "target": {
+            "type": "string",
+            "description": "Target explicitly named in the query."
+          }
+        },
+        "required": [
+          "instrument",
+          "action",
+          "target"
+        ]
+      }
+    }
+  ],
+  "reasoning": "'cut the rope with my knife' -> action 'cut', target 'rope', instrument 'knife' -> (instrument:action:target) knife:cut:rope\n[but before]\n'unlock the door with my key' -> action 'unlock', target 'door', instrument 'key' -> (instrument:action:target) key:unlock:door\nkey:unlock:door [before] knife:cut:rope\nkey:unlock:door -> knife:cut:rope",
+  "answers": [
+    {
+      "name": "enter_command",
+      "arguments": {
+        "instrument": "key",
+        "action": "unlock",
+        "target": "door"
+      }
+    },
+    {
+      "name": "enter_command",
+      "arguments": {
+        "instrument": "knife",
+        "action": "cut",
+        "target": "rope"
+      }
+    }
+  ]
+}
