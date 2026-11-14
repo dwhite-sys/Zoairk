@@ -8,7 +8,9 @@ Each answer is {"name":"enter_command" or "check","arguments":{"instrument":"...
 
 Reasoning is an explicit compact parsing annotation in this exact style, not a narrative explanation:
 '<source action phrase>' -> action '<verb or verb phrase>', target '<target>', instrument '<instrument>' -> (instrument:action:target) instrument:action:target
-For a pronoun, optionally insert: 'it' refers to 'object' -> before action/target/instrument extraction.
+For a pronoun, optionally insert: 'it' refers to 'object' -> AFTER the source action phrase and BEFORE action/target/instrument extraction. Exact required order: 'rinse it in the trough' -> 'it' refers to 'bucket' -> action 'rinse in trough', target 'bucket', instrument 'none' -> (instrument:action:target) none:rinse in trough:bucket. NEVER begin this annotation with 'it/them' refers to; the source action phrase must come first.
+
+Review feedback: "either way" is not a cure for an actual dependency. Do not simulate opening a door and then actually lead an animal through that door, simulate clearing leaves and then actually dump the cleared leaves, or simulate carrying water somewhere and then actually use it at that destination. Choose a genuinely independent committed follow-up (drop a separate item, sheathe a weapon, ring a bell) when following a check. Do not overuse the same after-that-check template: vary syntax while retaining unambiguous scope.
 
 Walk through source phrases and temporal clues in their ORIGINAL order. A standalone bracket line is ONLY a temporal clue copied exactly from the query. For "Before I enter the hall, I sheathe my sword", [Before] must precede the extraction of enter the hall. No [next question], [next listed action], or invented clue. Preserve punctuation/case within quoted source phrases when relevant; do not add an "I" to a coordinated verb that lacks it.
 
