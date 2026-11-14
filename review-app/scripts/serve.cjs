@@ -138,7 +138,12 @@ async function handleSession(req, res) {
   const state = await loadState();
   // Additive: new examples join the shared workspace, existing decisions stay.
   const merged = R.mergeEntries(state.entries, parsed.entries);
-  state.entries = merged.entries;
+  // The dataset defines which examples exist: a batch that was replaced takes
+  // its examples with it, while decisions on examples still present survive.
+  const present = new Set();
+  try { for (const example of (await readDataset()).examples) present.add(R.stable(example)); }
+  catch { /* no usable dataset: keep whatever the client sent */ }
+  state.entries = present.size ? merged.entries.filter(entry => present.has(R.stable(entry.example))) : merged.entries;
   try { await saveState(state); } catch { json(res, 500, { error: 'Could not save the review session.' }); return; }
   json(res, 200, { added: merged.added, total: state.entries.length, exports: await materialize(state) });
 }

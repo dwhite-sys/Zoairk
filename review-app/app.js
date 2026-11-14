@@ -130,9 +130,10 @@
       if (!response.ok) return;
       serverSaved = true;
       const remote = JSON.parse(await response.text());
-      if (!remote || !Array.isArray(remote.entries) || !remote.entries.length) return;
-      const fresh = R.parseFile(JSON.stringify(remote)).entries;
-      if (!fresh.length) return;
+      if (!remote || !Array.isArray(remote.entries)) return;
+      // The shared workspace is the source of truth, including when it is
+      // empty: a local cache must not resurrect a batch that was replaced.
+      const fresh = remote.entries.length ? R.parseFile(JSON.stringify(remote)).entries : [];
       entries = fresh;
       await writeLocal(entries);
       syncedFromServer = fresh.length;
