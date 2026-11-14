@@ -1,0 +1,25 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T15:31:35.303639+00:00",
+  "count": 100,
+  "variation_focus": "Riverboat wreck, marsh shrine, reed village jetty and abandoned fishing weir.100 fantasy player-to-DM examples30do30check40mixed, varied1\u20135 action complexity with at least15 nonstandard declarations. Explicit instrument use when intended, self instrumentsnone, hypothetical sequences clearlyscoped, literal temporal cues and all symbolic triples/calls aligned.",
+  "status": "pending_review_at_generation",
+  "requested_count": 100,
+  "count_deviation": null,
+  "max_tokens": 65536,
+  "batch_path": "data/review/51-examples.json",
+  "sha256": "0fd06b52be6910c9ca1d5f964af6335661e4822e53d0520edd54e2cf55c3282b",
+  "rules_sha256": "9e286747402c4ab7526f35af3882dd9c0259aac9c0048258b42e6f2dfc3adac5",
+  "feedback_session_sha256": "4a28b923c5a55b9b41ec3f51f66c95db5590416d5c47bc9c80d7c34bdb17cd23",
+  "feedback_reviewed_count": 1499,
+  "usage": {
+    "prompt_tokens": 54982,
+    "completion_tokens": 39896,
+    "total_tokens": 94878,
+    "prompt_tokens_details": {
+      "cached_tokens": 3712
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}

@@ -1,0 +1,25 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T15:32:01.645354+00:00",
+  "count": 100,
+  "variation_focus": "Castle siege supply line, quartermaster tent, gatehouse and wagon repair camp.100 examples30do30check40mixed. At least15 use opening Using/With or I will/Let me/After/Before syntax. Physical adventure operations, giving objects to NPCs without speech, securing equipment, traversals, tools and clear sources/destinations.1\u20135 actions, unambiguous temporal scope and independent actual followups.",
+  "status": "pending_review_at_generation",
+  "requested_count": 100,
+  "count_deviation": null,
+  "max_tokens": 65536,
+  "batch_path": "data/review/49-examples.json",
+  "sha256": "3a7522f65b925dd4df7a945057b7ebd2f83f93a65ab4cb7f066528874a45e9d2",
+  "rules_sha256": "9e286747402c4ab7526f35af3882dd9c0259aac9c0048258b42e6f2dfc3adac5",
+  "feedback_session_sha256": "4a28b923c5a55b9b41ec3f51f66c95db5590416d5c47bc9c80d7c34bdb17cd23",
+  "feedback_reviewed_count": 1499,
+  "usage": {
+    "prompt_tokens": 55026,
+    "completion_tokens": 48392,
+    "total_tokens": 103418,
+    "prompt_tokens_details": {
+      "cached_tokens": 3456
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}
