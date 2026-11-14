@@ -2,6 +2,8 @@
 
 The generator runs only when invoked; it does not loop, train, or approve anything. It uses the configured Ollama OpenAI-compatible endpoint, defaults to `deepseek-v4.1-flash:cloud`, and generates at most 20 pending candidates. A `:cloud` model can consume the user's Ollama cloud allowance.
 
+Feedback is part of every request: the generator rereads the committed review session, sends every saved denial note with its query, and includes approved style examples plus `generation_rules.md` as the system prompt. Commit/pull the latest review exports before the next batch so newly denied examples are visible. Fold recurring failure modes into the rules file. This is prompt feedback, not a model-weight update; do not call it fine-tuning. The reviewer should also read the same rules and denial notes before approving a later batch.
+
 From the repository root, with a clean working tree:
 
 1. `git pull --ff-only origin main`.
@@ -19,10 +21,10 @@ python3 scripts/generate_review_batch.py \
 The example number above is illustrative: increment it for later batches. Existing output files are never replaced. Inspect failures and the raw response before retrying; do not quietly repair candidate semantics or retry indefinitely. Tools are attached from approved records, and shape/duplicates/source-clue presence are checked before writing. These checks do not establish semantic correctness. Provenance/usage goes in `data/generation/`, outside the served batch directory.
 
 4. Commit only the generator/rules, batch, and provenance you intend to share; push before reviewing. Another clone should pull before loading the batch. This keeps candidate ingestion in Git, rather than hiding it in a browser upload.
-5. For isolated local review of that batch, start the existing server with a new, untracked runtime state directory. Seed its `state.json` from the latest committed `data/review/exports/zoairk-review-session.json` so older decisions are preserved. Example environment:
+5. For local review, start the existing server with a new, untracked runtime state directory. Seed its `state.json` from the latest committed `data/review/exports/zoairk-review-session.json` so older decisions are preserved. Serve ALL numbered batches using `EXAMPLES_DIR`: the server prunes saved records absent from the served dataset on session sync. Serving only the new batch would drop older decisions from the canonical exports. Example environment:
 
 ```sh
-EXAMPLES_FILE="$PWD/data/review/07-examples.json" \
+EXAMPLES_DIR="$PWD/data/review" \
 REVIEW_DATA_DIR=/tmp/zoairk-review-07 \
 EXPORT_DIR="$PWD/data/review/exports" \
 PORT=3018 node review-app/scripts/serve.cjs
