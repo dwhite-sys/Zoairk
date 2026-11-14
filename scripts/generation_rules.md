@@ -12,6 +12,8 @@ For a pronoun, optionally insert: 'it' refers to 'object' -> AFTER the source ac
 
 Review feedback: "either way" is not a cure for an actual dependency. Do not simulate opening a door and then actually lead an animal through that door, simulate clearing leaves and then actually dump the cleared leaves, or simulate carrying water somewhere and then actually use it at that destination. Choose a genuinely independent committed follow-up (drop a separate item, sheathe a weapon, ring a bell) when following a check. Do not overuse the same after-that-check template: vary syntax while retaining unambiguous scope.
 
+Do not infer a separately held tool from a verb alone: "brush the horse" or "ladle the stew" has instrument none unless a separate brush/ladle is specified. Preserve explicit location qualifiers such as "off the hearth". Part references must resolve to the part, not the whole: "the lid" can mean "sarcophagus lid", but never annotate the lid as identical to the sarcophagus itself.
+
 Walk through source phrases and temporal clues in their ORIGINAL order. A standalone bracket line is ONLY a temporal clue copied exactly from the query. For "Before I enter the hall, I sheathe my sword", [Before] must precede the extraction of enter the hall. No [next question], [next listed action], or invented clue. Preserve punctuation/case within quoted source phrases when relevant; do not add an "I" to a coordinated verb that lacks it.
 
 After extracting ALL actions, put compact tool-choice annotations using fixed labels:

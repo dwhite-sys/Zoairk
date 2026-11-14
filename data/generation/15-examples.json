@@ -1,0 +1,20 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:09:07.681641+00:00",
+  "count": 20,
+  "variation_focus": "Library and archive actions; use after, before, once and finally, pronouns and explicit placement destinations, not just swapping nouns in seed templates.",
+  "status": "pending_review_at_generation",
+  "batch_path": "data/review/15-examples.json",
+  "sha256": "f3da745b80512eda927be465cd31933cc2c7d7286129c95a71ecea6bed0338ce",
+  "rules_sha256": "47c9a916a0679aec24ed507be6de73059a8b8667f7dce75f63e5b62d492d6353",
+  "usage": {
+    "prompt_tokens": 9848,
+    "completion_tokens": 16461,
+    "total_tokens": 26309,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    }
+  },
+  "seed_source": "data/review/exports/zoairk-review-session.json"
+}

@@ -1,0 +1,20 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:09:15.594371+00:00",
+  "count": 20,
+  "variation_focus": "Forge and armory actions; introduce concise conversational phrasing, 1-4 steps, clear checks mixed with truly independent commitments; enforce source-phrase-before-pronoun annotation.",
+  "status": "pending_review_at_generation",
+  "batch_path": "data/review/14-examples.json",
+  "sha256": "b91e623a19d8981651b038b4ceb141294e0c4257ab44efc00a5f94d882d9fd66",
+  "rules_sha256": "47c9a916a0679aec24ed507be6de73059a8b8667f7dce75f63e5b62d492d6353",
+  "usage": {
+    "prompt_tokens": 9857,
+    "completion_tokens": 19244,
+    "total_tokens": 29101,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024
+    }
+  },
+  "seed_source": "data/review/exports/zoairk-review-session.json"
+}

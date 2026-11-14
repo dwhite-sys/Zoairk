@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 import hashlib
 import json
 import os
+import random
 from pathlib import Path
 import subprocess
 import urllib.request
@@ -68,8 +69,15 @@ def main():
     approved = [e['example'] for e in session['entries'] if e['decision'] == 'approve']
     tools = approved[-1]['tools']
     # Diverse seed selection; no labels are transferred to generated records.
-    choices = [0, min(2,len(approved)-1), min(8,len(approved)-1), len(approved)//2, len(approved)-2, len(approved)-1]
-    seeds = [{k: approved[i][k] for k in ('query','reasoning','answers')} for i in dict.fromkeys(choices)]
+    rng = random.Random(a.output.stem)
+    groups = {}
+    for row in approved:
+        kind = tuple(sorted({answer['name'] for answer in row['answers']}))
+        groups.setdefault(kind, []).append(row)
+    selected = []
+    for group in groups.values():
+        selected.extend(rng.sample(group, min(2, len(group))))
+    seeds = [{k: row[k] for k in ('query','reasoning','answers')} for row in selected]
     prior_queries = []
     for batch in sorted((ROOT/'data/review').glob('*-examples.json')):
         prior_queries.extend(r['query'] for r in json.loads(batch.read_text()))
