@@ -1,0 +1,22 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:29:44.674881+00:00",
+  "count": 20,
+  "variation_focus": "Ruined library, shrine and apothecary. Different sentence structures and real objects, body self instruments, pronoun/part ownership, direct objects versus destinations. Maintain 6 do, 6 check, 8 mixed balance.",
+  "status": "pending_review_at_generation",
+  "batch_path": "data/review/28-examples.json",
+  "sha256": "97a7bc3f5214a6eee85fe1bb3c968bdff19f2d69a2ea1aba1cdf31806a0a2824",
+  "rules_sha256": "ce1dc2b7e48d63d8ace7c2a78c50d84afbbe7113f84b7f4c29491efc06efef9a",
+  "feedback_session_sha256": "e9377cc61028391b3a7e547d76c0bc55f6ede939ed00d9951c21dc31cc82a49c",
+  "feedback_reviewed_count": 500,
+  "usage": {
+    "prompt_tokens": 21508,
+    "completion_tokens": 19001,
+    "total_tokens": 40509,
+    "prompt_tokens_details": {
+      "cached_tokens": 1920
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}
