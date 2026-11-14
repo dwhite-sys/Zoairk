@@ -24,5 +24,127 @@
       "entered": 0,
       "handling": "Entire response excluded before ingestion; retry without semantic repairs."
     }
-  ]
+  ],
+  "status": "complete",
+  "batches": [
+    {
+      "batch": 34,
+      "count": 50,
+      "approve": 48,
+      "deny": 2,
+      "prompt": "generation-v7",
+      "rules_sha256": "475108d68a1de210cee222bfd7f4ecdf694b75fc34c8de6dbe4e799a92290876",
+      "feedback_reviewed_count": 700,
+      "usage": {
+        "prompt_tokens": 28671,
+        "completion_tokens": 24491,
+        "total_tokens": 53162,
+        "prompt_tokens_details": {
+          "cached_tokens": 2816
+        }
+      }
+    },
+    {
+      "batch": 35,
+      "count": 50,
+      "approve": 49,
+      "deny": 1,
+      "prompt": "generation-v7",
+      "rules_sha256": "475108d68a1de210cee222bfd7f4ecdf694b75fc34c8de6dbe4e799a92290876",
+      "feedback_reviewed_count": 700,
+      "usage": {
+        "prompt_tokens": 29897,
+        "completion_tokens": 26113,
+        "total_tokens": 56010,
+        "prompt_tokens_details": {
+          "cached_tokens": 2816
+        }
+      }
+    },
+    {
+      "batch": 36,
+      "count": 50,
+      "approve": 37,
+      "deny": 13,
+      "prompt": "generation-v8",
+      "rules_sha256": "e64a83a7e518681cd6512122f5940389ef0b27fca274a1670ef30c7996aa1226",
+      "feedback_reviewed_count": 750,
+      "usage": {
+        "prompt_tokens": 31255,
+        "completion_tokens": 34730,
+        "total_tokens": 65985,
+        "prompt_tokens_details": {
+          "cached_tokens": 2944
+        }
+      }
+    },
+    {
+      "batch": 37,
+      "count": 50,
+      "approve": 46,
+      "deny": 4,
+      "prompt": "generation-v8",
+      "rules_sha256": "e64a83a7e518681cd6512122f5940389ef0b27fca274a1670ef30c7996aa1226",
+      "feedback_reviewed_count": 750,
+      "usage": {
+        "prompt_tokens": 31376,
+        "completion_tokens": 29072,
+        "total_tokens": 60448,
+        "prompt_tokens_details": {
+          "cached_tokens": 2816
+        }
+      }
+    },
+    {
+      "batch": 38,
+      "count": 50,
+      "approve": 50,
+      "deny": 0,
+      "prompt": "generation-v9",
+      "rules_sha256": "ec899d388bfa525d16830f02eb7a22923278ad254d0b544cef5db69ce0937f5e",
+      "feedback_reviewed_count": 900,
+      "usage": {
+        "prompt_tokens": 35699,
+        "completion_tokens": 31554,
+        "total_tokens": 67253,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "batch": 39,
+      "count": 50,
+      "approve": 46,
+      "deny": 4,
+      "prompt": "generation-v9",
+      "rules_sha256": "ec899d388bfa525d16830f02eb7a22923278ad254d0b544cef5db69ce0937f5e",
+      "feedback_reviewed_count": 900,
+      "usage": {
+        "prompt_tokens": 35726,
+        "completion_tokens": 31754,
+        "total_tokens": 67480,
+        "prompt_tokens_details": {
+          "cached_tokens": 3328
+        }
+      }
+    }
+  ],
+  "new_counts": {
+    "approve": 276,
+    "deny": 24
+  },
+  "total_counts": {
+    "approve": 881,
+    "deny": 119
+  },
+  "approval_rate": 0.92,
+  "new_tool_mix": {
+    "enter_command": 90,
+    "check": 90,
+    "check/enter_command": 120
+  },
+  "new_mean_calls": 2.21,
+  "verification": "Exactly 1000 unique reviewed candidates; prior 700 entries unchanged; classifier notes/labels and Needle export match session.",
+  "reviewer": "AI review (Codex); existing human decisions retained."
 }
