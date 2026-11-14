@@ -54,6 +54,8 @@ def main():
     p.add_argument('--base-url', default='http://localhost:11434/v1')
     p.add_argument('--model', default='deepseek-v4.1-flash:cloud')
     p.add_argument('--count', type=int, default=20)
+    p.add_argument('--reasoning-effort', choices=('low', 'medium', 'high'), default='low')
+    p.add_argument('--focus', default='', help='Optional setting/variation emphasis for this batch.')
     p.add_argument('--output', type=Path, required=True)
     p.add_argument('--raw-output', type=Path, required=True, help='Scratch file outside data/review; preserves rejected responses.')
     p.add_argument('--timeout', type=int, default=600)
@@ -75,8 +77,10 @@ def main():
              for e in session['entries'] if e['decision']=='deny' and e['reason']]
     rules = (ROOT/'scripts/generation_rules.md').read_text()
     payload = {'model':a.model, 'stream':False, 'temperature':0.8, 'max_tokens':22000,
+               'reasoning_effort':a.reasoning_effort,
                'messages':[{'role':'system','content':rules}, {'role':'user','content':json.dumps({
                    'task':f'Generate exactly {a.count} NEW candidates as a JSON array. They are pending review, not approved.',
+                   'batch_tag':a.output.stem, 'variation_focus':a.focus,
                    'tools':tools, 'approved_style_examples':seeds,
                    'previous_denial_notes_to_avoid':notes,
                    'do_not_repeat_queries':prior_queries},ensure_ascii=False)}]}
@@ -105,8 +109,8 @@ def main():
         f.write(content)
     meta=ROOT/'data/generation'/ (a.output.stem+'.json')
     meta.parent.mkdir(parents=True,exist_ok=True)
-    metadata={'model':a.model,'created_at':datetime.now(timezone.utc).isoformat(),
-              'count':len(rows),'status':'pending_review_at_generation',
+    metadata={'model':a.model,'reasoning_effort':a.reasoning_effort,'created_at':datetime.now(timezone.utc).isoformat(),
+              'count':len(rows),'variation_focus':a.focus,'status':'pending_review_at_generation',
               'batch_path':str(a.output.resolve().relative_to(ROOT)),
               'sha256':hashlib.sha256(content.encode()).hexdigest(),
               'rules_sha256':hashlib.sha256(rules.encode()).hexdigest(),

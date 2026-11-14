@@ -1,0 +1,20 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:03:44.262702+00:00",
+  "count": 20,
+  "variation_focus": "Varied dungeon workshop and storage actions; preserve explicit destinations and materials; use some before, after, and inserted middle-step constructions.",
+  "status": "pending_review_at_generation",
+  "batch_path": "data/review/09-examples.json",
+  "sha256": "65e443da5896fad55f4c5388446711812aa7f847de35d28c735f364dbef10980",
+  "rules_sha256": "bf5fc4c51883392ccfd92050e418070cea08aa5e29db82fb8207f91ad830f3cb",
+  "usage": {
+    "prompt_tokens": 6009,
+    "completion_tokens": 15710,
+    "total_tokens": 21719,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "seed_source": "data/review/exports/zoairk-review-session.json"
+}
