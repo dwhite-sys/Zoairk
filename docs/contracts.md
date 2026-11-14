@@ -46,5 +46,9 @@ Each piece is built against these. If one must change, change it here first and 
 Game state (object states + NPC memory) saves to `saves/<world>.json` after every turn.
 
 ## Turn loop (`engine/game.py`, integration)
+NPCs run on **player time, not real time** (decided 13:26): every player input gives each NPC in the
+scene exactly one turn (nothing / express / engage); NPCs never act on a timer, so they never spam. In
+multiplayer the FIFO queue gives each queued input its own NPC round.
+
 input → blank/gibberish? stop (no turn) → quoted? speech to memory → else `parse` → handlers →
 `Event`s → `narrate` → message → `gauge` over scene NPCs → express/engage messages → save.
