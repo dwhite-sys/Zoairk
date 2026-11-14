@@ -9,12 +9,12 @@
 - Quotation marks identify speech; players need not name a recipient. Exact recipient behavior needs team agreement.
 - Blank/whitespace-only input and gibberish do nothing: no turn, world-state, or NPC-memory changes; await valid input.
 - AI proposes actions and narration; the state machine validates actions and owns world truth. Persist NPC memory and object/NPC state.
-- Immediate scope: responsive browser app to import examples.json, manually approve/deny, and export Needle/classifier datasets. Reasoning is first-class output, visible alongside calls and preserved in both exports.
-- Done: seed dataset (10 examples, 25 calls); standalone review-app/ webapp, local persistence, undo, duplicate checks, session transfer, and dataset downloads.
-- Missing: game engine, trained models, model evaluation, automatic generation/review, and background training. These are outside the current webapp request.
-- Run: cd review-app then npm start, then http://localhost:3000; npm run start:lan prints phone-accessible URLs for the same network. Node 18+; no runtime dependencies or Python needed for review.
-- Test: from review-app/, npm test; npm ci then npm run test:e2e (installed Edge). Tests cover logic, HTTP integration, desktop/mobile browser flows, errors, repeated imports, persistence, reasoning, and exports.
-- Next: use the review app to curate examples; separately agree model training and game-engine work. Browser state is per device; import/export sessions for transfer.
+- Immediate scope: frontend-app/ start menu, nested area/scene/NPC/object/player editor, and WebSocket-driven play terminal. The team authorized this game frontend directly.
+- Done: review-app/ dataset review tool; frontend-app/ menu, owned entities, exits, stats placeholders, backstory, validated world commit, streaming terminal, and protocol tests.
+- Missing: actual backend engine, trained models, evaluation, and confirmed world schema/object states. Frontend tests use an explicitly labeled protocol fixture, not real gameplay.
+- Run: cd frontend-app then npm start (http://localhost:3001). Backend defaults to ws://localhost:8000/ws and can be changed in the header. review-app runs separately on port 3000.
+- Test: from frontend-app/, npm ci then npm run test:all (installed Edge). Covers ownership logic, HTTP/WebSocket integration, and desktop/mobile flows; open and use it manually too.
+- Next: confirm the world payload and state vocabulary with the backend team, integrate the real engine, and run the judge demo against it. See frontend-app/README.md for the protocol.
 - Event rules: Devpost https://ihack-2026.devpost.com; web access failed during setup, so additional restrictions remain unverified.
 
 ## Working rules
@@ -28,4 +28,4 @@
 - Report broken or skipped work before reporting what works.
 - After each step, explain in a few sentences what was built, why, and one concept the team can explain to a judge.
 - On "demo check", run the full demo like a judge, fix failures, and supply a five-line demo script.
-- The team authorized the review webapp directly. Keep this scope; ask before adding automatic training or game features.
+- Keep work within the requested frontend and existing review tool; ask before adding automatic training or unrequested game features.

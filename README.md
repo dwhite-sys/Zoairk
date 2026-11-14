@@ -1,5 +1,16 @@
 # Zoairk
 
+## Game frontend
+
+The game menu, world builder, and WebSocket adventure terminal live in [`frontend-app/`](frontend-app/).
+
+```sh
+cd frontend-app
+npm start
+```
+
+Open http://localhost:3001. The backend runs separately; configure its WebSocket URL in the header. See the [frontend README](frontend-app/README.md) for the hierarchical world format, streaming protocol, and tests.
+
 ## Example review webapp
 
 The standalone browser review app lives in [`review-app/`](review-app/). It imports JSON examples, displays reasoning and ordered tool calls, and exports approved Needle examples and labeled classifier data.

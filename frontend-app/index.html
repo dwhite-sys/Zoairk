@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#121713">
+  <title>Zoairk</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="world.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="wordmark" href="#/">ZOAIRK</a>
+    <details id="connection-settings" class="connection-settings">
+      <summary><span id="connection-dot" class="connection-dot"></span><span id="ws-status">Backend disconnected</span></summary>
+      <form id="connection-form"><label for="ws-url">Backend WebSocket URL</label><input id="ws-url" type="url" spellcheck="false" required><button type="submit">Connect</button><p id="connection-message" role="status">Connect your game engine to commit or play.</p></form>
+    </details>
+  </header>
+  <main>
+    <section id="view-home" class="home-view" aria-labelledby="home-title">
+      <h1 id="home-title">Welcome to Zoairk.</h1>
+      <p>Create a world. Or step into one.</p>
+      <div class="start-menu"><a href="#/create" class="menu-button"><span>Create a game</span><small>Build your area, scenes, and characters.</small></a><a href="#/play" class="menu-button"><span>Play a game</span><small>Enter the story, one command at a time.</small></a></div>
+    </section>
+    <section id="view-create" hidden aria-labelledby="create-title">
+      <div class="page-heading"><div><a href="#/" class="back-link">← Main menu</a><h1 id="create-title">Create a game</h1></div><details class="json-panel"><summary>World JSON</summary><pre id="json-preview">{}</pre></details></div>
+      <form id="world-form" novalidate>
+        <section class="area-editor" aria-label="Area">
+          <h2>Area</h2>
+          <label for="area-name">Area name</label><input id="area-name" name="area-name" type="text" placeholder="e.g. The Hollow Coast" required>
+          <label for="area-description">Description</label><textarea id="area-description" placeholder="Describe the area that contains your scenes."></textarea>
+          <div id="scenes" class="entity-list"></div>
+          <button type="button" id="add-scene" class="secondary">+ Add scene</button>
+        </section>
+        <section class="player-section" aria-label="Player character"><div id="player-editor"></div><button id="create-player" type="button" class="secondary">+ Create player</button></section>
+        <section class="commit-section"><button id="commit-world" type="submit" class="primary">Commit world</button><p id="upload-status" class="status" role="status">Your world will be sent to the connected game engine.</p></section>
+      </form>
+    </section>
+    <section id="view-play" hidden aria-labelledby="play-title">
+      <div class="page-heading"><div><a href="#/" class="back-link">← Main menu</a><h1 id="play-title">Play a game</h1></div></div>
+      <div class="terminal-container"><div id="terminal-output" class="terminal-output" role="log" aria-label="Adventure output" aria-live="polite"><p class="msg system">Connect to your game engine to begin.</p></div><form id="terminal-form" class="terminal-input-row"><label for="command-input" aria-label="Command">&gt;</label><input id="command-input" type="text" aria-label="Command" placeholder="What do you do?" autocomplete="off"><button type="submit">Send</button></form></div>
+      <p id="play-status" class="status" role="status">Output comes from the connected backend.</p>
+    </section>
+  </main>
+</body>
+</html>
