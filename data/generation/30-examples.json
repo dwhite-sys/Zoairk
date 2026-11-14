@@ -1,0 +1,22 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:32:17.181514+00:00",
+  "count": 20,
+  "variation_focus": "Dwarven workshop and underground waterworks: maintain diverse syntax and 6/6/8 balance, precise moved objects, tools, locations and part ownership.",
+  "status": "pending_review_at_generation",
+  "batch_path": "data/review/30-examples.json",
+  "sha256": "a14a5caabacb32e3b4ce2203d812b7b56f3c010ce81b2f67e70db36d93017f25",
+  "rules_sha256": "9b1de25fe9fb4ba389193e0e9d8d5a2206c0c704d7636c207c986281d51ae54c",
+  "feedback_session_sha256": "9944b96da273c448d38bfff9ce17d51c45f5b548f5d6708f947eaab459670c2c",
+  "feedback_reviewed_count": 540,
+  "usage": {
+    "prompt_tokens": 22923,
+    "completion_tokens": 13598,
+    "total_tokens": 36521,
+    "prompt_tokens_details": {
+      "cached_tokens": 2176
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}

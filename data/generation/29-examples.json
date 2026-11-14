@@ -1,0 +1,22 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:32:35.463203+00:00",
+  "count": 20,
+  "variation_focus": "Fortress armory, stables and courtyard: varied sentence structures, clear sources/destinations, 1\u20134 actions, before clauses and self instruments.",
+  "status": "pending_review_at_generation",
+  "batch_path": "data/review/29-examples.json",
+  "sha256": "2723b80db8dbf6c87847bf54940e3a442443f029885ba8758886d5c27ecc495a",
+  "rules_sha256": "9b1de25fe9fb4ba389193e0e9d8d5a2206c0c704d7636c207c986281d51ae54c",
+  "feedback_session_sha256": "9944b96da273c448d38bfff9ce17d51c45f5b548f5d6708f947eaab459670c2c",
+  "feedback_reviewed_count": 540,
+  "usage": {
+    "prompt_tokens": 22819,
+    "completion_tokens": 19235,
+    "total_tokens": 42054,
+    "prompt_tokens_details": {
+      "cached_tokens": 2176
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}
