@@ -79,6 +79,7 @@ class Game:
         self.locations: dict[str, str] = {}      # player -> scene name (each player moves on their own)
         self.player_hp: dict[str, int] = {}      # player -> health (combat)
         self.inventories: dict[str, list] = {}   # player -> carried GameObjects
+        self.dropped_by: dict[str, list] = {}    # dead player -> what they dropped where they fell
 
     def _enter(self, player: str) -> None:
         """Point the shared world at this player's own scene (and inventory) before handling input."""
@@ -299,6 +300,7 @@ class Game:
                 dropped = self.inventories.get(name, [])
                 where = self.world.scenes[self.locations.get(name, self.start)]
                 where.objects.extend(dropped)
+                self.dropped_by[name] = list(dropped)        # so "loot <player>" can find them later
                 if dropped:
                     r["message"] += f" {name}'s belongings fall to the ground: " + ", ".join(o.properties.name for o in dropped) + "."
                 self.inventories[name] = []
@@ -311,6 +313,20 @@ class Game:
         n = next((x for x in npcs if t in (x.name.lower(), (x.title or "").lower(),
                                             (x.title or "").lower().removeprefix("the "))), None)
         if n is None:
+            mate = next((p for p in self.locations if p.lower() == t and p != player), None)
+            if mate is not None and self.locations.get(mate) == self.world.current.name:
+                if self.player_hp.get(mate, 10) > 0:
+                    return Event("loot", False, mate, None, {}, f"{mate} is very much alive and won't let you.")
+                here = self.world.current.objects
+                got = [o for o in self.dropped_by.get(mate, []) if o in here]
+                for o in got:
+                    here.remove(o)
+                self.inventories[player].extend(got)
+                self.dropped_by[mate] = [o for o in self.dropped_by.get(mate, []) if o not in got]
+                if not got:
+                    return Event("loot", True, mate, None, {}, f"You search where {mate} fell but find nothing.")
+                return Event("loot", True, mate, None, {f"{mate}.looted": True},
+                             f"You search where {mate} fell and take: {', '.join(o.properties.name for o in got)}.")
             return Event("loot", False, target, None, {}, f"There is no {target} here to loot.")
         if n.hp > 0:
             return Event("loot", False, n.label, None, {}, f"{n.label} is very much alive and won't let you.")

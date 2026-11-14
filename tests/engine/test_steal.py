@@ -27,3 +27,16 @@ def test_steal_partial_item_name(monkeypatch):
     g = _game()
     e = g._steal("D", "potion", "Joe", g.world.current.npcs)
     assert e is not None and e.target == "health potion"
+
+
+def test_loot_dead_player_takes_what_they_dropped():
+    g = _game()
+    g.intro("Drew")
+    rock = g.world.find("rock")
+    g.world.current.objects.remove(rock)
+    g.inventories["Drew"].append(rock)
+    g.player_hp["Drew"] = 1
+    g._attack("Jerry", "Drew", None, {}, ["Drew"])
+    assert g.player_hp["Drew"] <= 0 and rock in g.world.current.objects
+    e = g._loot("D", "Drew", g.world.current.npcs)
+    assert e.ok and rock in g.inventories["D"] and rock not in g.world.current.objects
