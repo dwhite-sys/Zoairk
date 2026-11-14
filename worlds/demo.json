@@ -82,7 +82,7 @@
    "npcs": [
     {
      "name": "Jerry",
-     "profile": "Jerry, a grumpy, proud village blacksmith. Short-tempered, protective of his tools, secretly kind. Speaks bluntly.",
+     "profile": "Jerry, a grumpy, proud village blacksmith. Short-tempered, protective of his tools, secretly kind. Speaks bluntly. His elderly mother Martha lives in the old house; he would do anything for her.",
      "inventory": [
       {
        "name": "hammer",
@@ -122,7 +122,7 @@
    ]
   },
   "house": {
-   "description": "A dusty front hall. A guard dozes on a chair by a stack of old books, beside a marble statue and an iron-banded chest.",
+   "description": "A dusty front hall. A guard dozes on a chair by a stack of old books, beside a marble statue and an iron-banded chest. An old woman in a shawl rocks in a creaking chair by the cold hearth, watching every move you make.",
    "exits": {
     "south": "front_lawn"
    },
@@ -214,6 +214,28 @@
      "name": "Theo",
      "profile": "Theo, a sleepy house guard. Slow to wake, gruff when disturbed, loyal to the owner of the house.",
      "title": "the guard"
+    },
+    {
+     "name": "Martha",
+     "title": "the old woman",
+     "profile": "Martha, Jerry the blacksmith's elderly mother. Half-mad, fiercely territorial, sharp-tongued, and far tougher than she looks. This is HER house: anyone who touches, takes, opens, breaks or burns her things gets a furious tongue-lashing and, if they keep at it or take something, a whack with her rolling pin. She dotes on her son Jerry and takes any insult to him personally.",
+     "inventory": [
+      {
+       "name": "rolling pin",
+       "aliases": [
+        "pin"
+       ],
+       "templates": [
+        "throwable"
+       ],
+       "weight": 1.5,
+       "damage": [
+        2,
+        4
+       ],
+       "description": "A worn wooden rolling pin, dented from use."
+      }
+     ]
     }
    ]
   }
