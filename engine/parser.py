@@ -41,6 +41,7 @@ VERB_MAP = {
     "put": "put", "place": "put", "stash": "put", "store": "put", "insert": "put",
     "give": "give", "hand": "give", "offer": "give",
     "loot": "loot", "search": "loot", "rob": "loot", "frisk": "loot",
+    "drink": "drink", "quaff": "drink", "sip": "drink", "consume": "drink", "gulp": "drink",
 }
 
 

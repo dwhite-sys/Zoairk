@@ -37,3 +37,14 @@ def test_dropped_item_shows_in_room_and_npc_uses_carried_weapon():
     g.locations["Drew"] = "front_lawn"; g._enter("Drew")
     ev = g._attack("Jerry", "Drew", "hammer", {}, ["Drew"], npc_weapon=True)
     assert ev.ok and ev.instrument == "hammer" and 3 <= 10 - g.player_hp["Drew"] <= 5
+
+
+def test_health_potion_heals_and_is_used_up():
+    from engine import combat
+    g = Game("worlds/demo.json"); g.intro("Drew"); g._enter("Drew")
+    joe = g.world.current.npcs[1]
+    potion = next(i for i in joe.inventory if i.properties.name == "health potion")
+    joe.inventory.remove(potion); g.inventories["Drew"].append(potion)
+    g.player_hp["Drew"] = 4
+    ev = g._items("Drew", {"key": "drink", "target": "health potion", "instrument": ""}, g.world.current.npcs)
+    assert ev.ok and g.player_hp["Drew"] == 9 and potion not in g.inventories["Drew"]

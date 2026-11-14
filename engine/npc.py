@@ -13,13 +13,17 @@ TOOL = [{"type": "function", "function": {
     "name": "npc_decide", "description": "Record how this NPC responds to the latest event.",
     "parameters": {"type": "object", "properties": {
         "decision": {"type": "string", "enum": list(LABELS)},
+        "give": {"type": "string", "description": "Only with engage: the exact name of an item YOU carry that you hand to the player who just acted (e.g. because they paid, asked nicely, or threatened you), or empty."},
         "attack": {"type": "string", "description": "Only with engage: the exact name of someone present this NPC physically attacks, or empty. Only for real provocation (being attacked, threatened, or deeply wronged)."},
         "confidence": {"type": "number"},
         "expression": {"type": "string"}}, "required": ["decision", "confidence"]}}}]
 DECIDE_SYS = ("Call npc_decide exactly once. You decide how one NPC in a text adventure responds to the latest event. "
               "Choose: nothing (NPC not involved or it is not relevant to them), express (a short non-verbal reaction, body language only, NO spoken words or quotes, and NO attacks or physical contact with anyone; "
               "give it as 'expression' in third person), engage (the NPC speaks or acts). "
-              "confidence is 0-1: how strongly this NPC wants to respond.")
+              "confidence is 0-1: how strongly this NPC wants to respond. "
+              "If the NPC hands over an item it carries in this response (because the player asked for it, paid, "
+              "or threatened them and the NPC gives in), you MUST set give to that item's exact name; an item is "
+              "only handed over if give is set.")
 ENGAGE_SYS = ("You are playing an NPC in a text adventure. Stay in character. Reply with 1-3 sentences: what the NPC "
               "says (in quotes) and/or does. No narration of the player's actions, no meta commentary.")
 
@@ -56,7 +60,8 @@ def _decide_raw(npc: Npc, event_text: str) -> NpcDecision:
             raise ValueError(decision)
         conf = max(0.0, min(1.0, float(args.get("confidence", 0.0))))
         attack = str(args.get("attack") or "").strip() if decision == "engage" else ""
-        return NpcDecision(npc.name, decision, conf, str(args.get("expression") or ""), attack)
+        give = str(args.get("give") or "").strip() if decision == "engage" else ""
+        return NpcDecision(npc.name, decision, conf, str(args.get("expression") or ""), attack, give)
     except Exception:
         return NpcDecision(npc.name, "nothing", 0.0)
 

@@ -42,3 +42,4 @@ class NpcDecision:
     confidence: float
     expression: str = ""
     attack: str = ""          # engage only: someone present the NPC attacks
+    give: str = ""            # engage only: an item the NPC hands to the player who acted

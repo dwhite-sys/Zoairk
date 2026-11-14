@@ -13,7 +13,7 @@ LOOK = re.compile(r"^\s*(look|l|look around)\s*$", re.I)
 INV = re.compile(r"^\s*(i|inv|inventory|what am i (carrying|holding))\??\s*$", re.I)
 RESPAWN = re.compile(r"^\s*(respawn|revive|start over)\s*$", re.I)
 HEALTH = re.compile(r"^\s*(health|hp|status|how am i)\??\s*$", re.I)
-ITEM_VERBS = {"take", "drop", "put", "give", "loot"}
+ITEM_VERBS = {"take", "drop", "put", "give", "loot", "drink"}
 SPEECH = re.compile(r"[\"“”]")
 
 
@@ -112,6 +112,18 @@ class Game:
         key = c["key"]
         if key == "loot":
             return self._loot(player, c.get("target") or "", npcs)
+        if key == "drink":
+            if obj not in inv:
+                return Event("drink", False, obj.properties.name, None, {}, f"You need to be holding the {obj.properties.name}.")
+            heal = getattr(obj, "heal", 0)
+            if not heal:
+                return Event("drink", False, obj.properties.name, None, {}, f"You can't drink the {obj.properties.name}.")
+            before = self.player_hp.get(player, combat.MAX_HP)
+            self.player_hp[player] = min(combat.MAX_HP, before + heal)
+            inv.remove(obj)
+            return Event("drink", True, obj.properties.name, None, {f"{player}.hp": self.player_hp[player]},
+                         f"You drink the {obj.properties.name} and feel warmth spread through you: "
+                         f"health {before} -> {self.player_hp[player]}/{combat.MAX_HP}.")
         if key == "take":
             src = w.find(other) if other else None
             return inventory.take(w, inv, obj, src if src is not obj else None)
@@ -323,6 +335,22 @@ class Game:
             if d.decision in ("express", "engage") and text:
                 out.append(_msg("npc", text, npc=who.label, decision=d.decision,
                                 confidence=round(d.confidence, 2)))
+            if d.decision == "engage" and not d.give and who.inventory and re.search(
+                    r"take it|here,? take|it'?s yours|have it|hands? (it|you|over)|tosses (it|you)|gives? (it|you)", text or "", re.I):
+                for i in who.inventory:            # the reply clearly hands over an item it names: honour it
+                    names = [i.properties.name.lower()] + [a for a in self.world.aliases.get(id(i), [])]
+                    if any(nm and nm in (text or "").lower() for nm in names):
+                        d.give = i.properties.name
+                        break
+            if d.decision == "engage" and d.give:
+                item = next((i for i in who.inventory if i.properties.name.lower() == d.give.lower()), None)
+                if item is not None:
+                    who.inventory.remove(item)
+                    self.inventories[player].append(item)
+                    msg = f"{who.label} hands {player} the {item.properties.name}."
+                    out.append(_msg("narrator", msg))
+                    for n in npcs:
+                        n.remember(w.turn, "action", msg)
             if d.decision == "engage" and d.attack:
                 present = {n.name.lower(): n for n in npcs if n.hp > 0 and n.name != d.npc}
                 players_here = [p for p, loc in self.locations.items() if loc == w.current.name]

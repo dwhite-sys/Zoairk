@@ -67,6 +67,8 @@ class World:
         obj.properties.weight = o.get("weight", 5)
         if "text" in o:
             obj.text = o["text"]
+        if o.get("heal"):
+            obj.heal = int(o["heal"])               # drinking restores this much health
         if o.get("damage"):
             obj.damage = tuple(o["damage"])          # weapon damage range
         if o.get("container"):

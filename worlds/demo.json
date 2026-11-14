@@ -103,7 +103,21 @@
     },
     {
      "name": "Joe",
-     "profile": "Joe, a nervous shopkeeper who watches everything from his shop window. Easily startled, polite, worried about fire and damage."
+     "profile": "Joe, a nervous shopkeeper who watches everything from his shop window. Easily startled, polite, worried about fire and damage. He sells health potions (three silver each) and keeps one under the counter.",
+     "inventory": [
+      {
+       "name": "health potion",
+       "aliases": [
+        "potion",
+        "healing potion",
+        "red potion"
+       ],
+       "templates": [],
+       "weight": 0.5,
+       "heal": 5,
+       "description": "A small corked bottle of red liquid. Joe sells them for three silver."
+      }
+     ]
     }
    ]
   },
