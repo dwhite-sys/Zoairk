@@ -117,7 +117,7 @@ class World:
                 "npc_hp": {n.name: n.hp for s in self.scenes.values() for n in s.npcs}}
 
     def save(self, saves_dir: str | Path = "saves") -> Path:
-        out = Path(saves_dir) / f"{self.path.stem}.json"
+        out = Path(saves_dir) / f"{getattr(self, 'save_name', None) or self.path.stem}.json"
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(self.snapshot(), indent=1, default=str))
         return out

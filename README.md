@@ -15,7 +15,7 @@ pip install -r requirements.txt
 python3 server.py            # add ZOAIRK_HOST=0.0.0.0 to let others on your network join
 ```
 
-Open http://127.0.0.1:8000/?name=YourName. Open a second tab with another name to play together.
+Open http://127.0.0.1:8000/ and pick a name and a lobby. A new lobby name creates a fresh world with its own save; share the URL (`?lobby=<name>`) so others join the same one. Leaving the lobby blank joins `main`.
 
 **Try:** `open the mailbox` · `take the leaflet` · `read the leaflet` · `light the match and set the mailbox on fire` ·
 `"Hello, Jerry!"` · `punch Jerry` · `go north` · `open the chest` · `take the sword from the chest` ·

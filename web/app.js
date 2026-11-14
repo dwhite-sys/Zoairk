@@ -12,7 +12,21 @@ function playerName() {
   return name.slice(0, 24);
 }
 const MY_NAME = playerName();
-const WS_URL = `ws://${location.hostname || "127.0.0.1"}:8765/?name=${encodeURIComponent(MY_NAME)}`;
+
+// Lobbies: ?lobby= picks one; otherwise ask once. A new name creates a lobby with its own world.
+function lobbyName() {
+  const params = new URLSearchParams(location.search);
+  let lobby = (params.get("lobby") || "").trim();
+  if (!lobby) {
+    lobby = (prompt("Lobby to join or create (blank = main)?") || "").trim() || "main";
+    params.set("lobby", lobby);
+    params.set("name", MY_NAME);
+    history.replaceState(null, "", `${location.pathname}?${params}`);   // the URL is shareable
+  }
+  return lobby.toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 24) || "main";
+}
+const MY_LOBBY = lobbyName();
+const WS_URL = `ws://${location.hostname || "127.0.0.1"}:8765/?name=${encodeURIComponent(MY_NAME)}&lobby=${encodeURIComponent(MY_LOBBY)}`;
 
 const log = document.getElementById("log");
 const form = document.getElementById("input-form");
@@ -124,6 +138,8 @@ function showMessage(msg) {
       addText("system", "The world has been reset.");
     }
     worldId = msg.id;
+    if (msg.lobby) document.title = `Zoairk · ${msg.lobby}`;
+    if (msg.lobby) setStatus(`connected · lobby ${msg.lobby}`, true);
     return;
   }
   if (msg.type === "status") { showStatus(msg); return; }

@@ -4,7 +4,8 @@
     WebSocket: ws://127.0.0.1:8765   (protocol: docs/contracts.md section C4)
     Web page:  http://127.0.0.1:8000
 
-Asynchronous multiplayer: every connection shares ONE Game (one world). Player inputs go into a
+Lobbies: ?lobby=<name> joins (or creates) a named lobby with its own world and save; the default
+is "main". Within a lobby every connection shares ONE Game. Player inputs go into the lobby's
 FIFO queue and a single worker applies them in arrival order, so the state machine never sees two
 turns at once (board B4 "FIFO Queue"). Every result is broadcast to all players, tagged with who
 acted. Game.handle() makes slow LLM calls, so it runs in a worker thread.
@@ -57,23 +58,43 @@ async def send_all(ws, messages):
         await ws.send(json.dumps(message))
 
 
-GAME = None                 # the one shared world
-WORLD_ID = uuid.uuid4().hex  # changes on every server start, so clients know the world was reset
-CURRENT_ACTOR = None        # the player whose turn is being broadcast (always sees their own turn)
-PLAYERS: dict = {}          # websocket -> player name
-QUEUE: asyncio.Queue | None = None
+class Lobby:
+    """One named lobby: its own world, save file, FIFO queue, players and turn worker."""
+
+    def __init__(self, name: str):
+        self.name = name
+        self.game = make_game()
+        world = getattr(self.game, "world", None)
+        if world is not None:
+            world.save_name = f"lobby_{name}"      # each lobby keeps its own save
+        self.world_id = uuid.uuid4().hex           # changes when a lobby is (re)created, so clients reset
+        self.players: dict = {}                    # websocket -> player name
+        self.queue: asyncio.Queue = asyncio.Queue()
+        self.current_actor = None                  # the player whose turn is being broadcast
+        asyncio.create_task(turn_worker(self))
 
 
-async def broadcast(messages, scene=None):
-    """Deliver each message to the right players.
+LOBBIES: dict[str, Lobby] = {}
+
+
+def lobby_for(name: str) -> Lobby:
+    """Join the named lobby, creating it (a fresh world) the first time anyone uses the name."""
+    if name not in LOBBIES:
+        LOBBIES[name] = Lobby(name)
+        print(f"[server] created lobby {name!r}", flush=True)
+    return LOBBIES[name]
+
+
+async def broadcast(lobby, messages, scene=None):
+    """Deliver each message to the right players in this lobby.
 
     - switch_scene / private: only the player it belongs to;
     - to_scene: only players currently in that room (others_only skips the actor);
     - otherwise, with scene: players in that room plus the actor; without scene: everyone.
     """
-    locations = getattr(GAME, "locations", {})
-    for ws in list(PLAYERS):
-        me = PLAYERS[ws]
+    locations = getattr(lobby.game, "locations", {})
+    for ws in list(lobby.players):
+        me = lobby.players[ws]
         mine = []
         for m in messages:
             owner = m.get("player")
@@ -82,13 +103,13 @@ async def broadcast(messages, scene=None):
             if "to_scene" in m:
                 if locations.get(me) != m["to_scene"] or (m.get("others_only") and owner == me):
                     continue
-            elif scene is not None and locations.get(me, scene) != scene and me != CURRENT_ACTOR:
+            elif scene is not None and locations.get(me, scene) != scene and me != lobby.current_actor:
                 continue
             mine.append(m)
         try:
             await send_all(ws, mine)
         except websockets.ConnectionClosed:
-            PLAYERS.pop(ws, None)
+            lobby.players.pop(ws, None)
 
 
 async def world_clock():
@@ -96,56 +117,66 @@ async def world_clock():
     loop = asyncio.get_running_loop()
     while True:
         await asyncio.sleep(5)
-        tick = getattr(GAME, "tick", None)
-        if tick is None:
-            continue
-        try:
-            events = await loop.run_in_executor(None, tick, loop.time())
-        except Exception as exc:
-            print(f"[server] world clock failed: {exc!r}")
-            continue
-        if events:
-            await broadcast(events)
+        for lobby in list(LOBBIES.values()):
+            tick = getattr(lobby.game, "tick", None)
+            if tick is None:
+                continue
+            try:
+                events = await loop.run_in_executor(None, tick, loop.time())
+            except Exception as exc:
+                print(f"[server] world clock failed in {lobby.name!r}: {exc!r}")
+                continue
+            if events:
+                await broadcast(lobby, events)
 
 
-async def turn_worker():
-    """Apply queued inputs one at a time, in arrival order (FIFO)."""
+async def turn_worker(lobby):
+    """Apply one lobby's queued inputs one at a time, in arrival order (FIFO)."""
     loop = asyncio.get_running_loop()
+    game = lobby.game
     while True:
-        global CURRENT_ACTOR
-        name, text = await QUEUE.get()
-        CURRENT_ACTOR = name
-        here = getattr(GAME, "locations", {}).get(name)          # room where the turn happens
-        await broadcast([{"type": "message", "role": "player", "player": name, "text": text}], scene=here)
+        name, text = await lobby.queue.get()
+        lobby.current_actor = name
+        here = getattr(game, "locations", {}).get(name)          # room where the turn happens
+        await broadcast(lobby, [{"type": "message", "role": "player", "player": name, "text": text}], scene=here)
         try:
-            replies = await loop.run_in_executor(None, functools.partial(GAME.handle, text, player=name))
+            replies = await loop.run_in_executor(None, functools.partial(game.handle, text, player=name))
         except Exception as exc:  # keep everyone connected if one turn fails
             print(f"[server] game.handle failed: {exc!r}")
             replies = [{"type": "message", "role": "system", "text": "Something went wrong with that turn."}]
         for r in replies or []:
             r.setdefault("player", name)
         # Players in the room where it happened see it; a player who just moved sees their new room.
-        await broadcast(replies, scene=here)
-        QUEUE.task_done()
+        await broadcast(lobby, replies, scene=here)
+        lobby.queue.task_done()
 
 
-def player_name(ws) -> str:
+def _query(ws, key: str) -> str:
     try:
         from urllib.parse import parse_qs, urlparse
-        name = parse_qs(urlparse(ws.request.path).query).get("name", [""])[0].strip()[:24]
+        return parse_qs(urlparse(ws.request.path).query).get(key, [""])[0].strip()[:24]
     except Exception:
-        name = ""
-    return name or f"Player {len(PLAYERS) + 1}"
+        return ""
+
+
+def player_name(ws, lobby=None) -> str:
+    return _query(ws, "name") or f"Player {len(lobby.players) + 1 if lobby else 1}"
+
+
+def lobby_name(ws) -> str:
+    raw = _query(ws, "lobby").lower()
+    return "".join(c for c in raw if c.isalnum() or c in "-_") or "main"
 
 
 async def play(ws):
-    """Join the shared world; every input goes through the FIFO queue."""
+    """Join a lobby's shared world; every input goes through that lobby's FIFO queue."""
     loop = asyncio.get_running_loop()
-    name = player_name(ws)
-    PLAYERS[ws] = name
-    await ws.send(json.dumps({"type": "world", "id": WORLD_ID}))
-    await send_all(ws, await loop.run_in_executor(None, functools.partial(GAME.intro, name)))
-    await broadcast([{"type": "message", "role": "system", "text": f"{name} joined."}])
+    lobby = lobby_for(lobby_name(ws))
+    name = player_name(ws, lobby)
+    lobby.players[ws] = name
+    await ws.send(json.dumps({"type": "world", "id": lobby.world_id, "lobby": lobby.name}))
+    await send_all(ws, await loop.run_in_executor(None, functools.partial(lobby.game.intro, name)))
+    await broadcast(lobby, [{"type": "message", "role": "system", "text": f"{name} joined lobby {lobby.name}."}])
     try:
         async for raw in ws:
             try:
@@ -156,10 +187,10 @@ async def play(ws):
                 continue
             text = str(data.get("text", ""))
             if text.strip():
-                await QUEUE.put((name, text))
+                await lobby.queue.put((name, text))
     finally:
-        PLAYERS.pop(ws, None)
-        await broadcast([{"type": "message", "role": "system", "text": f"{name} left."}])
+        lobby.players.pop(ws, None)
+        await broadcast(lobby, [{"type": "message", "role": "system", "text": f"{name} left."}])
 
 
 def start_http_server():
@@ -171,10 +202,7 @@ def start_http_server():
 
 
 async def main():
-    global GAME, QUEUE
-    GAME = make_game()
-    QUEUE = asyncio.Queue()
-    asyncio.create_task(turn_worker())
+    lobby_for("main")                     # the default lobby exists from the start
     asyncio.create_task(world_clock())
     start_http_server()
     async with websockets.serve(play, HOST, WS_PORT):
