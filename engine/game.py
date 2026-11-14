@@ -13,6 +13,19 @@ SPEECH = re.compile(r"[\"“”]")
 
 
 STATE_WORDS = {"open": "open", "on_fire": "on fire", "broken": "broken"}
+QUOTED = re.compile(r"[\"“][^\"”]*[\"”]")
+
+
+def _reveal_or_mask(npc, text: str) -> str:
+    """An unknown NPC's name is revealed only when spoken aloud; otherwise narration uses its title."""
+    if npc.known or not npc.title or not text:
+        return text
+    if any(npc.name in q for q in QUOTED.findall(text)):
+        npc.known = True                       # introduced themselves: everyone here now knows
+        return text
+    title = npc.title
+    text = re.sub(rf"(^|[.!?]\s+|\*)({re.escape(npc.name)})\b", lambda m: m.group(1) + title[0].upper() + title[1:], text)
+    return re.sub(rf"\b{re.escape(npc.name)}\b", title, text)
 
 
 def _msg(role: str, text: str, **extra) -> dict:
@@ -51,7 +64,10 @@ class Game:
         """Resolve one attack through the state machine (combat.strike) and return an Event."""
         from .types import Event
         hp = {**{n.name: n.hp for n in npcs_by_lower.values()}, **{p: self.player_hp.get(p, 10) for p in players_here}}
-        name = next((k for k in hp if k.lower() == (target or "").strip().lower()), None)
+        t = (target or "").strip().lower()
+        if t in npcs_by_lower:                       # name or title ("the guard") of an NPC
+            t = npcs_by_lower[t].name.lower()
+        name = next((k for k in hp if k.lower() == t), None)
         if name is None:
             return Event("attack", False, target, weapon, {}, f"{target} is not here.")
         if weapon and self.world.find(weapon) is None:
@@ -59,8 +75,10 @@ class Game:
         r = combat.strike(attacker, name, hp, weapon)
         if not r["ok"]:
             return Event("attack", False, name, weapon, {}, r["message"])
-        if name.lower() in npcs_by_lower:
-            npcs_by_lower[name.lower()].hp = r["hp"]
+        by_name = {n.name.lower(): n for n in npcs_by_lower.values()}
+        if name.lower() in by_name:
+            by_name[name.lower()].hp = r["hp"]
+            r["message"] = r["message"].replace(name, by_name[name.lower()].label)
         else:
             self.player_hp[name] = r["hp"]
         return Event("attack", True, name, weapon, {f"{name}.hp": r["hp"], f"{name}.status": r["status"]}, r["message"])
@@ -107,7 +125,11 @@ class Game:
         else:
             here = [p for p, loc in self.locations.items() if loc == w.current.name and p != player]
             alive_npcs = {n.name.lower(): n for n in npcs if n.hp > 0}
-            w.people_here = [n.name for n in alive_npcs.values()] + here
+            for n in npcs:                               # "attack the guard" works before you know his name
+                if n.hp > 0 and n.title:
+                    alive_npcs[n.title.lower()] = n
+                    alive_npcs[n.title.lower().removeprefix("the ")] = n
+            w.people_here = [n.label for n in npcs if n.hp > 0] + here
             calls = parser.extract_calls(text, w)
             fights, rest = [], []
             for c in calls:
@@ -130,11 +152,12 @@ class Game:
             out = [_msg("narrator", prose)]
 
         for d in npc.gauge(npcs, event_text, turn=w.turn):   # gauge records memory and the engage reply
-            text = d.expression
+            who = next(n for n in npcs if n.name == d.npc)
+            text = _reveal_or_mask(who, d.expression)
             if d.decision == "express":                    # express is non-verbal: drop any quoted speech
                 text = re.sub(r"\s*[\"“][^\"”]*[\"”]\s*", " ", text or "").strip()
             if d.decision in ("express", "engage") and text:
-                out.append(_msg("npc", text, npc=d.npc, decision=d.decision,
+                out.append(_msg("npc", text, npc=who.label, decision=d.decision,
                                 confidence=round(d.confidence, 2)))
             if d.decision == "engage" and d.attack:
                 present = {n.name.lower(): n for n in npcs if n.hp > 0 and n.name != d.npc}

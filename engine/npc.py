@@ -32,9 +32,17 @@ def _remember(npc: Npc, kind: str, text: str, turn: int) -> None:
     npc.remember(turn, kind, text)
 
 
+def _secrecy(npc: Npc) -> str:
+    """Strangers do not know this NPC's name: never leak it in narration."""
+    if getattr(npc, "known", True):
+        return ""
+    return (f"The players do NOT know your name. In the expression text refer to yourself only as "
+            f"'{npc.title}', never as {npc.name}. You may reveal your name only by saying it aloud.\n")
+
+
 def _decide_raw(npc: Npc, event_text: str) -> NpcDecision:
     msg = chat([{"role": "system", "content": DECIDE_SYS},
-                {"role": "user", "content": f"NPC: {npc.profile}\nRecent memory:\n{_memory(npc)}\nEvent: {event_text}"}],
+                {"role": "user", "content": f"NPC: {npc.profile}\n{_secrecy(npc)}Recent memory:\n{_memory(npc)}\nEvent: {event_text}"}],
                tools=TOOL, temperature=0)
     try:
         args = msg["tool_calls"][0]["function"]["arguments"]
@@ -100,10 +108,10 @@ def gauge(npcs: list[Npc], event_text: str, turn: int = 0) -> list[NpcDecision]:
 def engage(npc: Npc, event_text: str, turn: int | None = 0) -> str:
     """The NPC's in-character reply. Records an engagement unless turn is None (gauge records it)."""
     msg = chat([{"role": "system", "content": ENGAGE_SYS},
-                {"role": "user", "content": f"You are: {npc.profile}\nYour recent memory:\n{_memory(npc)}\n"
+                {"role": "user", "content": f"You are: {npc.profile}\n{_secrecy(npc)}Your recent memory:\n{_memory(npc)}\n"
                                             f"What just happened: {event_text}\nYour response:"}],
                temperature=0.7)
-    reply = (msg.get("content") or "").strip() or f"{npc.name} glares in silence."
+    reply = (msg.get("content") or "").strip() or f"{npc.label} glares in silence."
     if turn is not None:
         _remember(npc, "engagement", reply, turn)
     return reply

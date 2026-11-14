@@ -17,6 +17,12 @@ class Npc:
     profile: str
     memory: list[dict] = field(default_factory=list)
     hp: int = 10
+    title: str = ""           # how strangers see this NPC, e.g. "the guard"
+    known: bool = True        # players know the name (named in the scene, or introduced)
+
+    @property
+    def label(self) -> str:
+        return self.name if self.known or not self.title else self.title
 
     def remember(self, turn: int, kind: str, text: str) -> None:
         self.memory.append({"turn": turn, "kind": kind, "text": text})
@@ -52,7 +58,9 @@ class World:
                     obj.text = o["text"]
                 self.aliases[id(obj)] = [_norm(o["name"])] + [_norm(a) for a in o.get("aliases", [])]
                 objs.append(obj)
-            npcs = [Npc(n["name"], n.get("profile", "")) for n in s.get("npcs", [])]
+            desc = s.get("description", "")
+            npcs = [Npc(n["name"], n.get("profile", ""), title=n.get("title", ""),
+                        known=not n.get("title") or n["name"] in desc) for n in s.get("npcs", [])]
             self.scenes[sname] = Scene(sname, s.get("description", ""), s.get("exits", {}), objs, npcs)
         self.current = self.scenes[doc["start_scene"]]
         self.turn = 0
