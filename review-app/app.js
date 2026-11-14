@@ -99,15 +99,18 @@
     // with its own saved session, so a first-time visitor never republishes
     // somebody else's decisions as their own.
     if (saved && entries.length) await persist(entries);
-    // Nobody should have to upload the dataset: when this browser has no
-    // workspace yet, start from whatever file the server is serving.
-    if (!saved && !entries.length) await loadServerDataset();
+    // Nobody should have to upload the dataset: every load merges whatever
+    // file the server is serving, so swapping that file reaches reviewers
+    // without touching their existing decisions.
+    await loadServerDataset();
   }
   async function loadServerDataset() {
     try {
       const response = await fetch('examples.json');
       if (!response.ok) return;
       const merged = R.mergeEntries(entries, R.parseFile(await response.text()).entries);
+      // mergeEntries keeps decisions already made, so swapping the dataset on
+      // the server adds the new examples without losing earlier reviews.
       if (!merged.added) return;
       await persist(merged.entries);
       entries = merged.entries;
