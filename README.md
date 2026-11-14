@@ -5,22 +5,69 @@ English, an authoritative state machine decides what actually happens, and every
 memory and personality: doing nothing, **expressing** (body language), or **engaging** (speaking, giving,
 or fighting back).
 
-## Play
+## Quick start
+
+You need **Python 3.10+**, **git**, and **Ollama** (https://ollama.com/download). The game uses
+DeepSeek V4.1 Flash, a cloud model served through your local Ollama, so you also need a free Ollama
+account (heavier use may need a paid Ollama plan).
 
 ```sh
-# 1. Model: DeepSeek V4.1 Flash through a local Ollama endpoint (signed in to Ollama)
+# 1. Get the code
+git clone https://github.com/dwhite-sys/Zoairk.git
+cd Zoairk
+
+# 2. Set up the model (one time)
+ollama signin                          # opens a browser to sign in to your Ollama account
 ollama pull deepseek-v4.1-flash:cloud
-# 2. Server (Python 3.10+)
+ollama serve                           # skip if the Ollama app is already running (it listens on 127.0.0.1:11434)
+
+# 3. Install and start the game server (in a second terminal, from the Zoairk folder)
+python3 -m venv .venv
+source .venv/bin/activate              # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-python3 server.py            # add ZOAIRK_HOST=0.0.0.0 to let others on your network join
+python3 server.py
 ```
 
-Open http://127.0.0.1:8000/ and pick a name and a lobby. A new lobby name creates a fresh world with its own save; share the URL (`?lobby=<name>`) so others join the same one. Leaving the lobby blank joins `main`.
+Open **http://127.0.0.1:8000/** in a browser. You are asked for your name, then for a lobby.
 
-**Try:** `open the mailbox` · `take the leaflet` · `read the leaflet` · `light the match and set the mailbox on fire` ·
-`"Hello, Jerry!"` · `punch Jerry` · `go north` · `open the chest` · `take the sword from the chest` ·
-`attack Jerry with the sword` · `"Joe, hand over that potion!"` · `drink the health potion` · `inventory` · `health` ·
-`respawn` · `look`
+### Lobbies and multiplayer
+
+- Type a lobby name to create it, or the name of an existing lobby to join it. Each lobby has its own
+  world and its own save. A blank lobby name joins `main`.
+- After you join, the address bar shows a link like `http://127.0.0.1:8000/?lobby=red&name=Ann`.
+  Share it (changing the name) so friends land in the same lobby.
+- To play together on one machine, open a second browser tab with a different name and the same lobby.
+- **To let others on your network join**, start the server with `ZOAIRK_HOST=0.0.0.0 python3 server.py`.
+  It prints the address to share, e.g. `http://192.168.1.20:8000/?lobby=red`.
+  Ports: 8000 (web page) and 8765 (game WebSocket); change them with `ZOAIRK_HTTP_PORT` and `ZOAIRK_WS_PORT`.
+
+### How to play
+
+Type what you want to do in plain English and press Enter.
+
+| You want to… | Type, for example |
+|---|---|
+| Look around / at something | `look` · `examine the mailbox` · `check Jerry` |
+| Act on the world | `open the mailbox` · `read the leaflet` · `light the match and set the mailbox on fire` |
+| Move | `north` · `go south` (or `n`, `s`, `e`, `w`) |
+| Pick up, drop, store, give | `take the rock` · `drop the rock` · `put the leaflet in the mailbox` · `give the coin to Joe` |
+| Talk (quotes = speech) | `"Hello, Jerry!"` · `"Joe, how much for a potion?"` |
+| Emote (asterisks) | `*I grimace and back away*` |
+| Fight | `punch Jerry` · `attack the guard with the sword` · `throw the rock at Joe` |
+| Threaten, steal, buy | `"Hand over that potion or else"` · `steal Jerry's hammer` · pay Joe the gold coin from the chest |
+| After a fight | `loot Jerry` (a dead NPC) · `loot Drew` (where a player fell) · `respawn` when you die |
+| Check yourself | `inventory` (or the 🎒 button) · `health` |
+
+Tips: the house to the north has a chest (a sword and a gold coin) and a sleepy guard. NPCs remember what you
+did to them, even after you leave and come back, and even after you die and respawn.
+
+### Troubleshooting
+
+- **"Something went wrong with that turn"** or no replies: make sure Ollama is running and signed in
+  (`ollama list` should show `deepseek-v4.1-flash:cloud`).
+- **Page loads but says "reconnecting…"**: the game server is not running; start `python3 server.py`.
+- **Restarting the server** starts fresh worlds; open pages reset themselves automatically.
+- Run the tests with `python3 -m pytest -q tests/engine` (no model needed for most tests).
 
 ## What it does
 
@@ -33,8 +80,12 @@ Open http://127.0.0.1:8000/ and pick a name and a lobby. A new lobby name create
 - **NPCs that remember.** Each NPC decides nothing / express / engage with a confidence (bias plus noise, so it
   feels alive). They remember who said and did what: leave and come back, and Jerry still knows you punched him,
   or that he killed you. Strangers are "the guard" until they tell you their name. NPCs can fight back with what
-  they carry and hand items over when threatened or paid.
-- **Asynchronous multiplayer.** One shared world, a FIFO queue of player inputs, per-player rooms (you see only
+  they carry, hand items over when threatened or paid, and decide for themselves whether to let a thief get
+  away with something. What they say matches what the game actually does.
+- **Role-play.** Speak in quotes, emote in asterisks (`*I grimace*`), examine anything, or act out free-form
+  moves at an NPC; they see it and react.
+- **Lobbies.** Create or join a named lobby; each has its own world and save.
+- **Asynchronous multiplayer.** Within a lobby, one shared world, a FIFO queue of player inputs, per-player rooms (you see only
   your room), arrival and departure notices. NPCs act on player time, one turn each per input.
 - **A world that moves on its own.** Fires burn out to ash after a random time even if nobody acts.
 - **Feels like a game.** Synthesized sound effects (no audio files), fire glow, hit shake for the player who was
