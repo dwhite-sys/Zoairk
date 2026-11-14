@@ -2,10 +2,13 @@
 from __future__ import annotations
 
 import json
+import os
 import urllib.request
 
-URL = "http://127.0.0.1:11434/api/chat"
-MODEL = "deepseek-v4.1-flash:cloud"
+# Point the game at any Ollama: OLLAMA_HOST=http://host:11434, ZOAIRK_MODEL=<model tag>.
+_HOST = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434")
+URL = (_HOST if _HOST.startswith("http") else f"http://{_HOST}").rstrip("/") + "/api/chat"
+MODEL = os.environ.get("ZOAIRK_MODEL", "deepseek-v4.1-flash:cloud")
 
 
 def chat(messages: list[dict], tools: list[dict] | None = None, timeout: float = 30,

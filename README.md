@@ -28,7 +28,7 @@ pip install -r requirements.txt
 python3 server.py
 ```
 
-Open **http://127.0.0.1:8000/** in a browser. You are asked for your name, then for a lobby.
+Open **http://127.0.0.1:8765/** in a browser (http://127.0.0.1:8000/ also works). You are asked for your name, then for a lobby.
 
 ### Lobbies and multiplayer
 
@@ -40,6 +40,42 @@ Open **http://127.0.0.1:8000/** in a browser. You are asked for your name, then 
 - **To let others on your network join**, start the server with `ZOAIRK_HOST=0.0.0.0 python3 server.py`.
   It prints the address to share, e.g. `http://192.168.1.20:8000/?lobby=red`.
   Ports: 8000 (web page) and 8765 (game WebSocket); change them with `ZOAIRK_HTTP_PORT` and `ZOAIRK_WS_PORT`.
+
+### Hosting it for others (one link, nothing to install for players)
+
+The game server serves the web page and the game on **one port** (8765 by default), so a single address is
+all players need, on a phone or a computer.
+
+```sh
+ZOAIRK_HOST=0.0.0.0 python3 server.py     # listen on all interfaces; players open http://<server-ip>:8765/
+```
+
+Put it behind your domain with any HTTPS reverse proxy that passes WebSocket upgrades. The page switches to
+`wss://` automatically when served over HTTPS. For example, with Caddy:
+
+```
+zoairk.example.com {
+    reverse_proxy 127.0.0.1:8765
+}
+```
+
+Or skip the proxy and use a tunnel: `cloudflared tunnel --url http://127.0.0.1:8765`, or
+`tailscale funnel 8765`.
+
+Every turn calls the model on the host's Ollama account, so the server has built-in limits. Set them with
+environment variables:
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `ZOAIRK_MIN_TURN_GAP` | `2` | seconds between one player's turns |
+| `ZOAIRK_MAX_PENDING` | `12` | queued turns per lobby |
+| `ZOAIRK_MAX_PLAYERS` | `8` | players per lobby |
+| `ZOAIRK_MAX_LOBBIES` | `20` | lobbies per server |
+| `OLLAMA_HOST` | `http://127.0.0.1:11434` | which Ollama to use |
+| `ZOAIRK_MODEL` | `deepseek-v4.1-flash:cloud` | which model to use |
+| `ZOAIRK_WS_PORT` / `ZOAIRK_HTTP_PORT` | `8765` / `8000` | ports (8000 is the older page-only port) |
+
+To take it down, stop `server.py`. Restarting starts every lobby fresh, and open pages reset themselves.
 
 ### How to play
 
