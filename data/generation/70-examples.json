@@ -1,0 +1,27 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T16:11:35.865003+00:00",
+  "count": 100,
+  "variation_focus": "Monastery infirmary and cliff rescue camp, glacier bridge and refuge vault.30do30check40mixed, varied1-5 actions, natural source order and supported execution order. Avoid repetitive housekeeping pairs.",
+  "status": "pending_review_at_generation",
+  "requested_count": 100,
+  "response_count": 100,
+  "excluded_exact_duplicates": [],
+  "count_deviation": null,
+  "max_tokens": 65536,
+  "batch_path": "data/review/70-examples.json",
+  "sha256": "364764a54db17d4a815d782f52b71cba314bd37b4a129f3dafa7f3ab6fba29ec",
+  "rules_sha256": "d7472e60918b00dd6a604d92422882be9f5ebe2662a9b69c1d26069fa4073861",
+  "feedback_session_sha256": "837c73dbeca5c2e5f4d4a6ecc6b4e77ffbb7f9ee43b74dfa3e3a7a1966214510",
+  "feedback_reviewed_count": 3291,
+  "usage": {
+    "prompt_tokens": 114470,
+    "completion_tokens": 40646,
+    "total_tokens": 155116,
+    "prompt_tokens_details": {
+      "cached_tokens": 4352
+    }
+  },
+  "seed_source": "/home/drew/Documents/Codex/2026-11-13/see/work/Zoairk/data/review/exports/zoairk-review-session.json"
+}
