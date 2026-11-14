@@ -1,0 +1,20 @@
+{
+  "model": "deepseek-v4.1-flash:cloud",
+  "reasoning_effort": "low",
+  "created_at": "2026-11-14T14:21:59.089898+00:00",
+  "count": 20,
+  "variation_focus": "Final batch: varied campsite, ruined library, fortress and caravan actions. Include clear single-action examples, reverse temporal order, self instruments and pronouns. Include every temporal clue separately, literal source cues, preserve direct objects and ownership. Avoid assuming simulated resource consumption.",
+  "status": "pending_review_at_generation",
+  "batch_path": "data/review/26-examples.json",
+  "sha256": "ef6284c5879fd25b9c34a1ea071d288a4f87fe348ad654f9657034633372a8c9",
+  "rules_sha256": "7936c2f91282b03b80332219381a00950f8a3f0591e6240fccaf55826141d246",
+  "usage": {
+    "prompt_tokens": 18707,
+    "completion_tokens": 15756,
+    "total_tokens": 34463,
+    "prompt_tokens_details": {
+      "cached_tokens": 1408
+    }
+  },
+  "seed_source": "data/review/exports/zoairk-review-session.json"
+}
