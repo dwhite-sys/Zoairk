@@ -2,6 +2,7 @@
 
     python3 tools/setup_domain.py --domain play.example.com
     python3 tools/setup_domain.py --domain play.example.com --check     # also check DNS points here
+    python3 tools/setup_domain.py --domain www.example.com/zoairk       # under a path on an existing site
 
 Writes:
   zoairk.env                      settings the server reads on start (public URL, port, listen address)
@@ -22,27 +23,42 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOMAIN_RE = re.compile(r"^(?=.{1,253}$)(?!-)([a-z0-9-]{1,63}(?<!-)\.)+[a-z]{2,63}$")
 
 
-def clean_domain(raw: str) -> str:
-    d = raw.strip().lower()
-    d = re.sub(r"^https?://", "", d).split("/")[0].split(":")[0]
-    if not DOMAIN_RE.match(d):
+def clean_domain(raw: str) -> tuple[str, str]:
+    """'https://Play.Example.com/zoairk/' -> ('play.example.com', '/zoairk'). The path is optional."""
+    d = re.sub(r"^https?://", "", raw.strip())
+    host, _, path = d.partition("/")
+    host = host.split(":")[0].lower()
+    if not DOMAIN_RE.match(host):
         raise ValueError(f"not a valid domain name: {raw!r} (use something like play.example.com)")
-    return d
+    path = "/" + path.strip("/") if path.strip("/") else ""
+    if path and not re.fullmatch(r"(/[A-Za-z0-9._~-]+)+", path):
+        raise ValueError(f"not a valid path: {path!r} (use something like /zoairk)")
+    return host, path
 
 
-def render(domain: str, port: int, user: str, root: str) -> dict[str, str]:
-    env = (f"# Written by tools/setup_domain.py for {domain}\n"
-           f"ZOAIRK_PUBLIC_URL=https://{domain}\n"
+def render(domain: str, port: int, user: str, root: str, path: str = "") -> dict[str, str]:
+    env = (f"# Written by tools/setup_domain.py for {domain}{path}\n"
+           f"ZOAIRK_PUBLIC_URL=https://{domain}{path}\n"
            f"ZOAIRK_HOST=127.0.0.1\n"
            f"ZOAIRK_WS_PORT={port}\n")
-    caddy = (f"{domain} {{\n"
-             f"    encode gzip\n"
-             f"    reverse_proxy 127.0.0.1:{port}\n"
-             f"}}\n")
+    if path:   # the game lives under a path of a site that may serve other things too
+        caddy = (f"{domain} {{\n"
+                 f"    encode gzip\n"
+                 f"    redir {path} {path}/\n"
+                 f"    handle_path {path}/* {{\n"
+                 f"        reverse_proxy 127.0.0.1:{port}\n"
+                 f"    }}\n"
+                 f"    # keep the rest of your site's directives (file_server, other handles) below\n"
+                 f"}}\n")
+    else:
+        caddy = (f"{domain} {{\n"
+                 f"    encode gzip\n"
+                 f"    reverse_proxy 127.0.0.1:{port}\n"
+                 f"}}\n")
     python = os.path.join(root, ".venv", "bin", "python")
     if not os.path.exists(python):
         python = sys.executable
-    service = (f"[Unit]\nDescription=Zoairk game server ({domain})\nAfter=network-online.target\n\n"
+    service = (f"[Unit]\nDescription=Zoairk game server ({domain}{path})\nAfter=network-online.target\n\n"
                f"[Service]\nUser={user}\nWorkingDirectory={root}\n"
                f"EnvironmentFile={os.path.join(root, 'zoairk.env')}\n"
                f"ExecStart={python} server.py\nRestart=on-failure\n\n"
@@ -67,11 +83,11 @@ def main() -> int:
     ap.add_argument("--check", action="store_true", help="look up the domain's DNS")
     a = ap.parse_args()
     try:
-        domain = clean_domain(a.domain)
+        domain, path = clean_domain(a.domain)
     except ValueError as exc:
         print(exc, file=sys.stderr)
         return 2
-    files = render(domain, a.port, a.user, ROOT)
+    files = render(domain, a.port, a.user, ROOT, path)
     out = os.path.join(ROOT, "deploy", domain)
     os.makedirs(out, exist_ok=True)
     with open(os.path.join(ROOT, "zoairk.env"), "w") as fh:
@@ -80,17 +96,20 @@ def main() -> int:
         with open(os.path.join(out, name), "w") as fh:
             fh.write(files[name])
     rel = os.path.relpath(out, ROOT)
-    print(f"""Zoairk is configured for https://{domain}
+    url = f"https://{domain}{path}/"
+    proxy_note = (f"\n    Your site already serves other pages at {domain}? Paste only the redir + handle_path lines into its\n"
+                  f"    existing Caddy (or nginx/Apache) config instead of replacing it.") if path else ""
+    print(f"""Zoairk is configured for {url}
 
 Wrote zoairk.env, {rel}/Caddyfile and {rel}/zoairk.service. Remaining steps on this server:
 
  1. DNS: at your domain registrar, add an A record for {domain} pointing to this server's public IP.
  2. Ports: allow inbound 80 and 443 (Caddy uses them to get the HTTPS certificate and serve players).
  3. HTTPS proxy:  sudo apt install caddy
-                  sudo cp {rel}/Caddyfile /etc/caddy/Caddyfile && sudo systemctl reload caddy
+                  sudo cp {rel}/Caddyfile /etc/caddy/Caddyfile && sudo systemctl reload caddy{proxy_note}
  4. Game server:  sudo cp {rel}/zoairk.service /etc/systemd/system/zoairk.service
                   sudo systemctl daemon-reload && sudo systemctl enable --now zoairk
- 5. Open https://{domain}/ and use 📱 Invite: the QR code now points at your domain.
+ 5. Open {url} and use 📱 Invite: the QR code now points there.
 
 To test before DNS is ready: python3 server.py, then open http://127.0.0.1:{a.port}/.
 To undo: delete zoairk.env (the server goes back to local-only).""")

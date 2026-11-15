@@ -29,12 +29,15 @@ const MY_LOBBY = lobbyName();
 // Same origin when the page comes from the game server itself (single-port / hosted, https -> wss);
 // the classic two-port setup (page on :8000) talks to :8765. ?server=host:port points at any server.
 const QS = `?name=${encodeURIComponent(MY_NAME)}&lobby=${encodeURIComponent(MY_LOBBY)}`;
+// The folder the page is served from ("" at the domain root, "/zoairk" behind a path such as
+// https://www.byui-ai-society.site/zoairk/), so the game and invite calls go through the same proxy path.
+const PAGE_DIR = location.pathname.replace(/\/[^/]*$/, "");
 const SERVER = new URLSearchParams(location.search).get("server");
 const WS_URL = SERVER
   ? `${SERVER.startsWith("ws") ? SERVER : (location.protocol === "https:" ? "wss://" : "ws://") + SERVER}/${QS}`
   : location.port === "8000" || location.protocol === "file:"
     ? `ws://${location.hostname || "127.0.0.1"}:8765/${QS}`
-    : `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/${QS}`;
+    : `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}${PAGE_DIR}/${QS}`;
 
 const log = document.getElementById("log");
 const form = document.getElementById("input-form");
@@ -275,7 +278,7 @@ function showRespawn(dead) {
 
 
 // Invite: a QR code (made by the server) for this lobby's link, so others can scan and join.
-const API_BASE = location.port === "8000" ? `http://${location.hostname || "127.0.0.1"}:8765` : location.origin;
+const API_BASE = location.port === "8000" ? `http://${location.hostname || "127.0.0.1"}:8765` : location.origin + PAGE_DIR;
 const inviteOverlay = document.getElementById("invite-overlay");
 const inviteUrl = document.getElementById("invite-url");
 const inviteWarn = document.getElementById("invite-warn");
@@ -283,7 +286,8 @@ async function openInvite() {
   inviteOverlay.hidden = false;
   document.getElementById("invite-qr").textContent = "making QR code…";
   try {
-    const res = await fetch(`${API_BASE}/invite?lobby=${encodeURIComponent(MY_LOBBY)}`);
+    const page = location.port === "8000" ? "" : location.origin + PAGE_DIR + "/";   // the address this page is really at
+    const res = await fetch(`${API_BASE}/invite?lobby=${encodeURIComponent(MY_LOBBY)}&page=${encodeURIComponent(page)}`);
     const data = await res.json();
     document.getElementById("invite-qr").innerHTML = data.svg || "";
     if (!data.svg) document.getElementById("invite-qr").textContent = "(QR code unavailable — share the link)";

@@ -21,6 +21,7 @@ import time
 from datetime import datetime, timezone
 import threading
 import uuid
+from urllib.parse import urlparse
 
 import websockets
 
@@ -287,7 +288,10 @@ async def play(ws):
         await broadcast(lobby, [{"type": "message", "role": "system", "text": f"{name} left."}])
 
 
-PUBLIC_URL = os.environ.get("ZOAIRK_PUBLIC_URL", "").rstrip("/")   # e.g. https://zoairk.your.domain
+PUBLIC_URL = os.environ.get("ZOAIRK_PUBLIC_URL", "").rstrip("/")   # e.g. https://zoairk.your.domain or .../zoairk
+# Path the game is served under behind a proxy (e.g. /zoairk). Taken from ZOAIRK_PUBLIC_URL unless set.
+_base = os.environ.get("ZOAIRK_BASE_PATH") or urlparse(PUBLIC_URL).path
+BASE_PATH = ("/" + _base.strip("/")) if _base.strip("/") else ""
 
 
 def lan_ip() -> str | None:
@@ -300,23 +304,34 @@ def lan_ip() -> str | None:
         return None
 
 
-def share_url(request, lobby: str) -> tuple[str, bool]:
+def _is_local(host: str) -> bool:
+    name = host.rsplit(":", 1)[0].strip("[]") if host.count(":") <= 1 else host.strip("[]")
+    return name in ("localhost", "127.0.0.1", "::1") or name.startswith("127.")
+
+
+def share_url(request, lobby: str, page: str = "") -> tuple[str, bool]:
     """The link other people can open for this lobby, and whether they can likely reach it.
 
-    ZOAIRK_PUBLIC_URL wins (a domain or tunnel). Otherwise use the address the browser used, unless that is
-    localhost, in which case use this machine's network address when the server listens on the network.
+    In order: ZOAIRK_PUBLIC_URL (a domain, tunnel, or domain/path); the page address the browser reports, which
+    keeps a proxy path like /zoairk/; the Host the request came in on; and finally, when the browser is on
+    localhost, this machine's network address if the server listens on the network.
     """
-    from urllib.parse import quote
-    base, reachable = PUBLIC_URL, True
-    if not base:
-        host = request.headers.get("X-Forwarded-Host") or request.headers.get("Host") or f"127.0.0.1:{WS_PORT}"
-        proto = request.headers.get("X-Forwarded-Proto", "http")
-        name = host.rsplit(":", 1)[0].strip("[]")
-        if name in ("localhost", "127.0.0.1", "::1") or name.startswith("127."):
-            ip = lan_ip() if HOST == "0.0.0.0" else None
-            host, reachable = (f"{ip}:{WS_PORT}", True) if ip else (host, False)
-        base = f"{proto}://{host}"
-    return f"{base}/?lobby={quote(lobby)}", reachable
+    from urllib.parse import quote, urlparse
+    q = f"?lobby={quote(lobby)}"
+    if PUBLIC_URL:
+        return f"{PUBLIC_URL}/{q}", True
+    p = urlparse(page) if page else None
+    if p and p.scheme in ("http", "https") and p.netloc and not _is_local(p.netloc):
+        return f"{p.scheme}://{p.netloc}{p.path.rstrip('/')}/{q}", True
+    host = request.headers.get("X-Forwarded-Host") or request.headers.get("Host") or f"127.0.0.1:{WS_PORT}"
+    proto = request.headers.get("X-Forwarded-Proto", "http")
+    prefix = (request.headers.get("X-Forwarded-Prefix") or "").rstrip("/")
+    if _is_local(host):
+        ip = lan_ip() if HOST == "0.0.0.0" else None
+        if not ip:
+            return f"{proto}://{host}{prefix}/{q}", False
+        host = f"{ip}:{WS_PORT}"
+    return f"{proto}://{host}{prefix}/{q}", True
 
 
 def invite_response(request):
@@ -326,7 +341,8 @@ def invite_response(request):
     from websockets.http11 import Response
     raw = parse_qs(urlparse(request.path).query).get("lobby", ["main"])[0].lower()
     lobby = "".join(c for c in raw if c.isalnum() or c in "-_")[:24] or "main"
-    url, reachable = share_url(request, lobby)
+    page = parse_qs(urlparse(request.path).query).get("page", [""])[0]
+    url, reachable = share_url(request, lobby, page)
     svg = None
     try:
         import io
@@ -351,9 +367,12 @@ def process_request(connection, request):
     from urllib.parse import unquote, urlparse
     from websockets.datastructures import Headers
     from websockets.http11 import Response
-    if urlparse(request.path).path == "/invite":
+    route = urlparse(request.path).path
+    if BASE_PATH and (route == BASE_PATH or route.startswith(BASE_PATH + "/")):
+        route = route[len(BASE_PATH):] or "/"          # proxy kept the /zoairk prefix: serve as if at the root
+    if route == "/invite":
         return invite_response(request)
-    rel = unquote(urlparse(request.path).path).lstrip("/") or "index.html"
+    rel = unquote(route).lstrip("/") or "index.html"
     path = os.path.realpath(os.path.join(WEB_DIR, rel))
     if not path.startswith(os.path.realpath(WEB_DIR) + os.sep) or not os.path.isfile(path):
         return Response(404, "Not Found", Headers([("Content-Type", "text/plain")]), b"Not found")

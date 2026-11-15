@@ -154,3 +154,46 @@ def test_share_url_rules(monkeypatch):
     monkeypatch.setattr(srv, "HOST", "0.0.0.0")
     monkeypatch.setattr(srv, "lan_ip", lambda: "10.0.0.5")
     assert srv.share_url(req("localhost:8765"), "red") == (f"http://10.0.0.5:{srv.WS_PORT}/?lobby=red", True)
+
+
+def test_share_url_keeps_proxy_path(monkeypatch):
+    """Drew's deployment: https://www.byui-ai-society.site/zoairk/ behind a proxy."""
+    import types
+    import server as srv
+    monkeypatch.setattr(srv, "PUBLIC_URL", "")
+    req = types.SimpleNamespace(headers={"Host": "127.0.0.1:8765"})          # what the proxy forwards
+    page = "https://www.byui-ai-society.site/zoairk/"
+    assert srv.share_url(req, "test4", page) == ("https://www.byui-ai-society.site/zoairk/?lobby=test4", True)
+    prefixed = types.SimpleNamespace(headers={"Host": "www.byui-ai-society.site", "X-Forwarded-Proto": "https",
+                                              "X-Forwarded-Prefix": "/zoairk"})
+    assert srv.share_url(prefixed, "a")[0] == "https://www.byui-ai-society.site/zoairk/?lobby=a"
+    monkeypatch.setattr(srv, "PUBLIC_URL", "https://www.byui-ai-society.site/zoairk")
+    assert srv.share_url(req, "b")[0] == "https://www.byui-ai-society.site/zoairk/?lobby=b"
+
+
+@pytest.fixture(scope="module")
+def prefixed_server():
+    ws_port, http_port = free_port(), free_port()
+    env = dict(os.environ, ZOAIRK_STUB="1", ZOAIRK_MIN_TURN_GAP="0", ZOAIRK_LOG_SYNC_MINUTES="0",
+               ZOAIRK_BASE_PATH="/zoairk", ZOAIRK_WS_PORT=str(ws_port), ZOAIRK_HTTP_PORT=str(http_port))
+    proc = subprocess.Popen([sys.executable, "server.py"], cwd=ROOT, env=env,
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    try:
+        wait_for_port(ws_port)
+        yield ws_port
+    finally:
+        proc.terminate()
+        proc.wait(timeout=5)
+
+
+def test_serves_under_prefix_whether_or_not_proxy_strips_it(prefixed_server):
+    for path in ("/zoairk/", "/zoairk/app.js", "/", "/app.js"):      # kept prefix, and stripped prefix
+        with urllib.request.urlopen(f"http://127.0.0.1:{prefixed_server}{path}") as resp:
+            assert resp.status == 200
+    with urllib.request.urlopen(f"http://127.0.0.1:{prefixed_server}/zoairk/invite?lobby=x") as resp:
+        assert json.loads(resp.read())["lobby"] == "x"
+
+    async def session():   # the game socket also answers on the prefixed path, like Drew's client uses
+        async with websockets.connect(f"ws://127.0.0.1:{prefixed_server}/zoairk/?lobby=p&name=Z") as ws:
+            assert (await recv_json(ws))["type"] == "world"
+    asyncio.run(session())
