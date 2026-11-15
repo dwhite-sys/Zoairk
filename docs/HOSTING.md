@@ -48,17 +48,39 @@ ZOAIRK_HOST=0.0.0.0 python3 server.py
 
 It prints the address to share, e.g. `http://192.168.1.20:8765/`. Players on the same network open it.
 
-**B. Your own domain with HTTPS** (recommended for the public). Run the server on the machine, then put a
-reverse proxy in front of port 8765. With Caddy (it gets the HTTPS certificate for you):
+**B. A domain of your choosing, with HTTPS** (recommended for the public). One command sets it up for any
+domain or subdomain you control:
 
-```
-zoairk.your.domain {
-    reverse_proxy 127.0.0.1:8765
-}
+```sh
+python3 tools/setup_domain.py --domain play.your-domain.com
 ```
 
-Point the domain's DNS at the machine. Players open `https://zoairk.your.domain/`. The page switches to a secure
-WebSocket (`wss://`) on its own.
+It writes `zoairk.env` (the server reads it on start: public URL, port, listen address), plus a ready-made
+`deploy/<domain>/Caddyfile` (HTTPS reverse proxy; Caddy gets the certificate itself) and
+`deploy/<domain>/zoairk.service` (keeps the server running). Then it prints the remaining steps:
+
+1. At your registrar, add an **A record** for the domain pointing to the server's public IP.
+2. Allow inbound ports 80 and 443.
+3. `sudo apt install caddy`, copy the Caddyfile to `/etc/caddy/Caddyfile`, `sudo systemctl reload caddy`.
+4. Copy the service file to `/etc/systemd/system/`, then `sudo systemctl enable --now zoairk`.
+
+**Under a path of a site you already run** (this is how the AI Society hosts it, at
+`https://www.byui-ai-society.site/zoairk/`):
+
+```sh
+python3 tools/setup_domain.py --domain www.byui-ai-society.site/zoairk
+```
+
+The Caddyfile it writes uses `handle_path /zoairk/*` (the proxy strips the path before passing requests to the
+game) and redirects `/zoairk` to `/zoairk/`. If the site already has a proxy config, paste just those lines into
+it. With nginx, use `location /zoairk/ { proxy_pass http://127.0.0.1:8765/; proxy_http_version 1.1;
+proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection "upgrade"; }`. The game works whether or not
+the proxy strips the path: the page connects through its own folder, and the server also understands
+`/zoairk/...` requests directly.
+
+Re-run with `--check` to see whether the domain's DNS points at the server yet. Players open
+`https://play.your-domain.com/`, and **📱 Invite** QR codes point there automatically. Each team can host on its
+own domain this way; nothing in the code names a domain. Delete `zoairk.env` to go back to local-only.
 
 **C. A tunnel, with no domain or open ports needed:**
 
@@ -129,7 +151,8 @@ are the next fixes. Set `ZOAIRK_LOG_SYNC_MINUTES=0` to turn the push off.
 | Variable | Default | Meaning |
 |---|---|---|
 | `ZOAIRK_HOST` | `127.0.0.1` | interface to listen on (`0.0.0.0` = whole network) |
-| `ZOAIRK_PUBLIC_URL` | (auto) | the address players use, e.g. `https://zoairk.your.domain`; used for invite links and QR codes |
+| `ZOAIRK_PUBLIC_URL` | (auto) | the address players use, e.g. `https://zoairk.your.domain` or `https://site/zoairk`; used for invite links and QR codes |
+| `ZOAIRK_BASE_PATH` | (from the public URL) | path the game sits under behind a proxy, e.g. `/zoairk` |
 | `ZOAIRK_WS_PORT` | `8765` | the one port for page + game |
 | `ZOAIRK_MIN_TURN_GAP` | `2` | seconds between one player's turns |
 | `ZOAIRK_MAX_PENDING` | `12` | queued turns per lobby |
