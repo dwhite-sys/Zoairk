@@ -44,6 +44,7 @@ Open **http://127.0.0.1:8765/** in a browser (http://127.0.0.1:8000/ also works)
 
 ### Hosting it for others (one link, nothing to install for players)
 
+**Host it on any domain you own:** `python3 tools/setup_domain.py --domain play.your-domain.com`.
 **Full step-by-step guide: [docs/HOSTING.md](docs/HOSTING.md)** — what the server and the client are, LAN vs
 domain vs tunnel, running it as a service, and the play-log sync.
 

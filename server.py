@@ -24,6 +24,21 @@ import uuid
 
 import websockets
 
+def _load_env_file(path):
+    """Settings from zoairk.env (written by tools/setup_domain.py); real environment variables win."""
+    try:
+        with open(path, encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, value = line.split("=", 1)
+                    os.environ.setdefault(key.strip(), value.strip().strip('"'))
+    except FileNotFoundError:
+        pass
+
+
+_load_env_file(os.environ.get("ZOAIRK_ENV_FILE", os.path.join(os.path.dirname(os.path.abspath(__file__)), "zoairk.env")))
+
 HOST = os.environ.get("ZOAIRK_HOST", "127.0.0.1")   # 0.0.0.0 lets other machines on the network join
 WS_PORT = int(os.environ.get("ZOAIRK_WS_PORT", 8765))
 HTTP_PORT = int(os.environ.get("ZOAIRK_HTTP_PORT", 8000))
