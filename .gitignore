@@ -40,3 +40,4 @@ __pycache__/
 
 # Play logs (player names and inputs; review locally)
 logs/
+.play-logs-worktree/
