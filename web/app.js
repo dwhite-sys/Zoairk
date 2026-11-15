@@ -272,3 +272,35 @@ function showRespawn(dead) {
   }
   btn.hidden = !dead;
 }
+
+
+// Invite: a QR code (made by the server) for this lobby's link, so others can scan and join.
+const API_BASE = location.port === "8000" ? `http://${location.hostname || "127.0.0.1"}:8765` : location.origin;
+const inviteOverlay = document.getElementById("invite-overlay");
+const inviteUrl = document.getElementById("invite-url");
+const inviteWarn = document.getElementById("invite-warn");
+async function openInvite() {
+  inviteOverlay.hidden = false;
+  document.getElementById("invite-qr").textContent = "making QR code…";
+  try {
+    const res = await fetch(`${API_BASE}/invite?lobby=${encodeURIComponent(MY_LOBBY)}`);
+    const data = await res.json();
+    document.getElementById("invite-qr").innerHTML = data.svg || "";
+    if (!data.svg) document.getElementById("invite-qr").textContent = "(QR code unavailable — share the link)";
+    inviteUrl.textContent = data.url;
+    inviteUrl.href = data.url;
+    inviteWarn.hidden = data.reachable;
+    inviteWarn.textContent = data.reachable ? "" :
+      "This link only works on this computer. Start the server with ZOAIRK_HOST=0.0.0.0 (same Wi-Fi) or set ZOAIRK_PUBLIC_URL (domain or tunnel) so others can join.";
+  } catch (err) {
+    document.getElementById("invite-qr").textContent = "Couldn't reach the server for an invite.";
+  }
+}
+document.getElementById("invite").addEventListener("click", openInvite);
+document.getElementById("invite-close").addEventListener("click", () => { inviteOverlay.hidden = true; });
+inviteOverlay.addEventListener("click", (event) => { if (event.target === inviteOverlay) inviteOverlay.hidden = true; });
+document.addEventListener("keydown", (event) => { if (event.key === "Escape") inviteOverlay.hidden = true; });
+document.getElementById("invite-copy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(inviteUrl.href); document.getElementById("invite-copy").textContent = "Copied"; }
+  catch (e) { document.getElementById("invite-copy").textContent = "Copy failed"; }
+});

@@ -252,3 +252,11 @@ body.fx-white { animation: white-flash 0.35s ease-out; }
 
 #respawn-btn { margin-left: 0.6rem; background: #7a2a1f; color: #fff; border: 0; border-radius: 6px; padding: 0.2rem 0.7rem; cursor: pointer; font: inherit; }
 #respawn-btn:hover { background: #a3392a; }
+
+.invite-panel { text-align: center; }
+.invite-qr svg { display: block; margin: 0 auto; width: min(200px, 60vw); height: auto; background: #fff; border-radius: 8px; }
+.invite-link a { color: inherit; }
+.invite-help { margin: 8px 0 4px; opacity: 0.8; }
+.invite-link { word-break: break-all; font-size: 0.9rem; }
+.invite-link button { margin-left: 6px; }
+.invite-warn { color: #e0a040; font-size: 0.85rem; }

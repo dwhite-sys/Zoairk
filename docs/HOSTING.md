@@ -129,6 +129,7 @@ are the next fixes. Set `ZOAIRK_LOG_SYNC_MINUTES=0` to turn the push off.
 | Variable | Default | Meaning |
 |---|---|---|
 | `ZOAIRK_HOST` | `127.0.0.1` | interface to listen on (`0.0.0.0` = whole network) |
+| `ZOAIRK_PUBLIC_URL` | (auto) | the address players use, e.g. `https://zoairk.your.domain`; used for invite links and QR codes |
 | `ZOAIRK_WS_PORT` | `8765` | the one port for page + game |
 | `ZOAIRK_MIN_TURN_GAP` | `2` | seconds between one player's turns |
 | `ZOAIRK_MAX_PENDING` | `12` | queued turns per lobby |
@@ -139,7 +140,19 @@ are the next fixes. Set `ZOAIRK_LOG_SYNC_MINUTES=0` to turn the push off.
 | `OLLAMA_HOST` | `http://127.0.0.1:11434` | which Ollama to use |
 | `ZOAIRK_MODEL` | `deepseek-v4.1-flash:cloud` | which model to use |
 
-## 6. Tell players
+## 6. Tell players: QR codes
+
+In the game, **📱 Invite** shows a QR code and link for the lobby you are in. Anyone who scans it with a phone
+camera lands in the same lobby and picks their own name. Put it on a screen at a booth, or share the link.
+
+The QR code has to point at an address other people can reach. The server picks it like this:
+
+1. `ZOAIRK_PUBLIC_URL`, if set. Set this when you use a domain or tunnel (option B or C).
+2. Otherwise, the address the host's browser is using, if it is not `localhost`.
+3. Otherwise, with `ZOAIRK_HOST=0.0.0.0`, this machine's network address (for same-Wi-Fi play).
+
+If none of those can work, the invite says the link only works on this computer and how to fix it.
+
 
 > Open **https://zoairk.your.domain/**, type a name, then a lobby name. Share the lobby link (`?lobby=…`) so
 > friends join the same world. Type anything: `look`, `open the mailbox`, `"Hello, Jerry!"`, `*I wave*`.

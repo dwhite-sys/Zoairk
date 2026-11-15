@@ -129,3 +129,28 @@ def test_rate_limit_slows_spam(limited_server):
             texts = " ".join(m.get("text", "") for m in seen)
             assert "Slow down" in texts and "said: one" in texts and "said: two" not in texts
     asyncio.run(session())
+
+
+def test_invite_returns_lobby_link_and_qr(server):
+    ws_port, _ = server
+    with urllib.request.urlopen(f"http://127.0.0.1:{ws_port}/invite?lobby=Red%20Team!") as resp:
+        data = json.loads(resp.read())
+        assert resp.headers["Access-Control-Allow-Origin"] == "*"
+    assert data["lobby"] == "redteam" and data["url"].endswith("/?lobby=redteam")
+    assert data["reachable"] is False            # bound to 127.0.0.1: only this computer can use it
+    assert data["svg"] is None or data["svg"].lstrip().startswith(("<?xml", "<svg"))
+
+
+def test_share_url_rules(monkeypatch):
+    import types
+    import server as srv
+    req = lambda host, **h: types.SimpleNamespace(headers={"Host": host, **h})
+    monkeypatch.setattr(srv, "PUBLIC_URL", "https://zoairk.example.com")
+    assert srv.share_url(req("127.0.0.1:8765"), "red") == ("https://zoairk.example.com/?lobby=red", True)
+    monkeypatch.setattr(srv, "PUBLIC_URL", "")
+    assert srv.share_url(req("192.168.1.20:8765"), "red") == ("http://192.168.1.20:8765/?lobby=red", True)
+    assert srv.share_url(req("x.trycloudflare.com", **{"X-Forwarded-Proto": "https"}), "a")[0] == \
+        "https://x.trycloudflare.com/?lobby=a"
+    monkeypatch.setattr(srv, "HOST", "0.0.0.0")
+    monkeypatch.setattr(srv, "lan_ip", lambda: "10.0.0.5")
+    assert srv.share_url(req("localhost:8765"), "red") == (f"http://10.0.0.5:{srv.WS_PORT}/?lobby=red", True)
