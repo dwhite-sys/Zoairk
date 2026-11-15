@@ -13,6 +13,7 @@
       <div class="scene-top">
         <h1 id="scene-name">Zoairk</h1>
         <span class="scene-controls">
+          <button id="invite" type="button" class="mute invite" aria-haspopup="dialog">📱 Invite</button>
           <button id="mute" type="button" class="mute" aria-label="Mute sound">🔊</button>
           <span id="status" class="status">connecting…</span>
         </span>
@@ -30,6 +31,16 @@
       <div class="inv-panel" role="dialog" aria-modal="true" aria-labelledby="inv-title">
         <div class="inv-head"><h2 id="inv-title">Inventory</h2><button id="inv-close" type="button" aria-label="Close inventory">✕</button></div>
         <ul id="inv-list" class="inv-list"></ul>
+      </div>
+    </div>
+
+    <div id="invite-overlay" class="inv-overlay" hidden>
+      <div class="inv-panel invite-panel" role="dialog" aria-modal="true" aria-labelledby="invite-title">
+        <div class="inv-head"><h2 id="invite-title">Invite to this lobby</h2><button id="invite-close" type="button" aria-label="Close invite">✕</button></div>
+        <div id="invite-qr" class="invite-qr"></div>
+        <p class="invite-help">Scan with a phone camera to join, or share the link:</p>
+        <p class="invite-link"><a id="invite-url" href="#" target="_blank" rel="noopener"></a> <button id="invite-copy" type="button">Copy</button></p>
+        <p id="invite-warn" class="invite-warn" hidden></p>
       </div>
     </div>
 

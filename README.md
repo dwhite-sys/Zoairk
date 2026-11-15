@@ -37,6 +37,7 @@ Open **http://127.0.0.1:8765/** in a browser (http://127.0.0.1:8000/ also works)
 - After you join, the address bar shows a link like `http://127.0.0.1:8000/?lobby=red&name=Ann`.
   Share it (changing the name) so friends land in the same lobby.
 - To play together on one machine, open a second browser tab with a different name and the same lobby.
+- **📱 Invite** (top of the game) shows a QR code for your lobby: others scan it with a phone to join.
 - **To let others on your network join**, start the server with `ZOAIRK_HOST=0.0.0.0 python3 server.py`.
   It prints the address to share, e.g. `http://192.168.1.20:8000/?lobby=red`.
   Ports: 8000 (web page) and 8765 (game WebSocket); change them with `ZOAIRK_HTTP_PORT` and `ZOAIRK_WS_PORT`.

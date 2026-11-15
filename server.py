@@ -272,6 +272,60 @@ async def play(ws):
         await broadcast(lobby, [{"type": "message", "role": "system", "text": f"{name} left."}])
 
 
+PUBLIC_URL = os.environ.get("ZOAIRK_PUBLIC_URL", "").rstrip("/")   # e.g. https://zoairk.your.domain
+
+
+def lan_ip() -> str | None:
+    import socket
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("8.8.8.8", 80))
+            return s.getsockname()[0]
+    except OSError:
+        return None
+
+
+def share_url(request, lobby: str) -> tuple[str, bool]:
+    """The link other people can open for this lobby, and whether they can likely reach it.
+
+    ZOAIRK_PUBLIC_URL wins (a domain or tunnel). Otherwise use the address the browser used, unless that is
+    localhost, in which case use this machine's network address when the server listens on the network.
+    """
+    from urllib.parse import quote
+    base, reachable = PUBLIC_URL, True
+    if not base:
+        host = request.headers.get("X-Forwarded-Host") or request.headers.get("Host") or f"127.0.0.1:{WS_PORT}"
+        proto = request.headers.get("X-Forwarded-Proto", "http")
+        name = host.rsplit(":", 1)[0].strip("[]")
+        if name in ("localhost", "127.0.0.1", "::1") or name.startswith("127."):
+            ip = lan_ip() if HOST == "0.0.0.0" else None
+            host, reachable = (f"{ip}:{WS_PORT}", True) if ip else (host, False)
+        base = f"{proto}://{host}"
+    return f"{base}/?lobby={quote(lobby)}", reachable
+
+
+def invite_response(request):
+    """GET /invite?lobby=x -> {url, reachable, svg}: a QR code people scan to join this lobby."""
+    from urllib.parse import parse_qs, urlparse
+    from websockets.datastructures import Headers
+    from websockets.http11 import Response
+    raw = parse_qs(urlparse(request.path).query).get("lobby", ["main"])[0].lower()
+    lobby = "".join(c for c in raw if c.isalnum() or c in "-_")[:24] or "main"
+    url, reachable = share_url(request, lobby)
+    svg = None
+    try:
+        import io
+        import segno
+        buf = io.BytesIO()
+        segno.make(url, error="m").save(buf, kind="svg", scale=6, border=2, dark="#111", light="#fff", xmldecl=False, omitsize=True)
+        svg = buf.getvalue().decode()
+    except Exception:                      # no QR library: the page still shows the link
+        pass
+    body = json.dumps({"url": url, "reachable": reachable, "lobby": lobby, "svg": svg}).encode()
+    return Response(200, "OK", Headers([("Content-Type", "application/json"), ("Content-Length", str(len(body))),
+                                        ("Access-Control-Allow-Origin", "*"), ("Cache-Control", "no-store")]), body)
+
+
 def process_request(connection, request):
     """Single-port mode: plain HTTP requests get the web page, WebSocket upgrades get the game.
 
@@ -282,6 +336,8 @@ def process_request(connection, request):
     from urllib.parse import unquote, urlparse
     from websockets.datastructures import Headers
     from websockets.http11 import Response
+    if urlparse(request.path).path == "/invite":
+        return invite_response(request)
     rel = unquote(urlparse(request.path).path).lstrip("/") or "index.html"
     path = os.path.realpath(os.path.join(WEB_DIR, rel))
     if not path.startswith(os.path.realpath(WEB_DIR) + os.sep) or not os.path.isfile(path):
